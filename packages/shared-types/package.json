@@ -1,0 +1,17 @@
+{
+  "name": "@krishnaos/shared-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript interfaces used by both apps/client and apps/server.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
