@@ -8,6 +8,8 @@
 - `apps/client/src/os/dock/Dock.tsx`
 - `apps/client/src/os/window-manager/WindowManager.tsx`
 - `apps/client/src/os/spotlight/Spotlight.tsx`
+- `apps/client/src/os/theme/` — wallpaper, theme toggle, and theme-aware shell surfaces
+- `apps/client/src/os/widgets/` — desktop/mobile status widgets
 - `apps/client/src/lib/searchIndex.ts` — Fuse.js index, now registry-driven
 
 ## The app registry: one source of truth for "what apps exist"
@@ -49,6 +51,10 @@ inventing a large app roster prematurely ("do not invent a huge number of
 apps yet"). The registry pattern makes adding a Settings app or a utility
 widget later a one-file change — but that's a decision for whoever's
 building that feature, deliberately deferred rather than guessed at now.
+
+Phase 7 adds `icon` metadata here as well so Dock, Spotlight, and title bars
+can render real glyphs instead of text-only markers, while keeping the app
+list itself authoritative in one place.
 
 ## `useWindowStore` gets `title` and registry-driven defaults
 
@@ -149,6 +155,10 @@ Motion, not GSAP — this is reactive, per-icon hover state, which is exactly
 Framer Motion's strength (see `docs/02-tech-stack.md`), not an authored
 timeline.
 
+Phase 7 swaps the text-first markers for theme-aware icons and gives the
+mobile shell a tab-bar style dock instead of a miniature desktop dock, so
+the same app roster feels native on both screen classes.
+
 ## Menu Bar
 
 The smallest component, but it's what makes two of the UX flow doc's §7
@@ -177,6 +187,10 @@ the two would leave the app in an inconsistent state (e.g. mode says
 menu bar spans edge-to-edge and needed a distinct, simpler variant (no
 rounding, only a bottom border) rather than fighting `.glass-panel`'s
 styles with utility-class overrides.
+
+Phase 7 keeps that desktop bar but also adds a compact iOS-inspired mobile
+variant and a built-in theme toggle, so the top chrome stays recognizable
+without pretending the phone view is just a scaled-down monitor.
 
 ## Spotlight
 
@@ -222,7 +236,7 @@ against.
 ```tsx
 export function Desktop() {
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full flex-col overflow-hidden">
       <MenuBar />
       <WindowManager renderAppContent={renderAppContent} />
       <Dock />
@@ -232,14 +246,18 @@ export function Desktop() {
 }
 ```
 
-Four independent pieces of chrome, stacked as siblings, each reading from
+Several independent pieces of chrome, stacked as siblings, each reading from
 shared Zustand stores rather than passing props down through `Desktop`
 itself. `Desktop` doesn't hold any state of its own — it's purely a
-composition point. This is deliberate: it means any of these four pieces
-could be reordered, or Desktop could be replaced by a different composition
-(e.g. the future Tour mode's version, which per the UX doc "drives the OS
-itself" rather than getting a separate implementation) without touching the
+composition point. This is deliberate: it means these pieces could be
+reordered, or Desktop could be replaced by a different composition (e.g.
+the future Tour mode's version, which per the UX doc "drives the OS itself"
+rather than getting a separate implementation) without touching the
 components themselves.
+
+Phase 7 extends this composition with the theme-aware wallpaper and the
+status widget stack, so the shell now feels much closer to a macOS desktop:
+top menu bar, glass layers, app dock, real icons, and live widgets.
 
 **`renderAppContent` is passed in as a prop, not imported by
 `WindowManager` directly:** this keeps `WindowManager` from needing to know

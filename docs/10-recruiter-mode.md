@@ -1,75 +1,72 @@
 # Recruiter Mode (Phase 6)
 
+**Status note:** this phase was built directly by Krishna, not scaffolded
+through this doc first. This file was written after the fact by reading
+`recruiter/RecruiterRoot.tsx` — it documents what's actually there, not a
+plan that was executed.
+
 ## Files involved
 
-- `apps/client/src/recruiter/RecruiterRoot.tsx` — the single-screen glass view
-- `apps/client/src/app/OsRoot.tsx` — switches to `RecruiterRoot` for the
-  in-app `mode === 'recruiter'` path
-- `apps/client/src/lib/content.ts` — shared content slices used to populate
-  the recruiter layout
-- `apps/client/src/os/appRegistry.ts` — the shared `AppId` set, still the
-  source for opening the contact window from the escape hatch
+- `apps/client/src/recruiter/RecruiterRoot.tsx` — the single-screen route
+- `apps/client/src/app/App.tsx` — routes `/recruiter` directly to it
 
-## What Recruiter Mode is
+## Matches the UX doc's brief closely
 
-Recruiter Mode is the direct-linkable, no-metaphor fast path described in the
-UX flow doc: a single-screen glass "document" view that surfaces the most
-important information without making the visitor learn the desktop metaphor
-first.
+Per UX flow doc §6, Recruiter Mode is meant to be a single, scroll-minimal
+glass "document" view — same design tokens as the rest of KrishnaOS, but
+resume-shaped rather than desktop-shaped. `RecruiterRoot` delivers exactly
+that: name/headline/bio up top, then Skills / Experience / Education /
+Achievements / Projects / Contact as glass-panel sections in a responsive
+grid, all visible without needing the desktop metaphor at all.
 
-The implementation follows the coding prompt's Phase 6 scope:
+**Reads from the same content source as the real apps** — `lib/content.ts`
+— rather than duplicating data. `FEATURED_PROJECTS = PROJECTS_CONTENT.filter(p
+=> p.featured)` is exactly the mechanism the coding prompt §5 called out in
+advance: *"this is exactly how Recruiter Mode's '2–4 featured projects'
+filters from the same data source as the full Projects app."* `Project.featured`
+sat unread since Phase 4 specifically for this.
 
-- name + frontend-engineer identity up top
-- compact skills summary
-- condensed experience timeline
-- featured projects only, filtered from the same shared `PROJECTS_CONTENT`
-  that the full Projects app uses
-- education and selected achievements visible on the same screen
-- resume / GitHub / LinkedIn / contact surfaced up front
-- a low-emphasis escape hatch into Free Exploration
+## The escape hatch, both ways
 
-## Why it reads from the same content slices
+UX doc §6 describes Recruiter Mode as "an escape hatch, not a cage" —
+`RecruiterRoot` gives visitors two different ways out, matching two
+different intents:
 
-Recruiter Mode does not maintain its own data source. It imports the same
-client-side content constants that the windowed apps use, then presents a
-compressed version of them. That keeps the screen honest and avoids a second
-copy of the same information drifting out of sync.
+- **"Open the full desktop" / "Explore freely"** → `setMode('free')` +
+  `navigate('/')`. A recruiter who wants to see the whole OS metaphor.
+- **"Open contact window"** → `openWindow('contact')` **then**
+  `setMode('free')` + `navigate('/')`. A recruiter who specifically wants
+  to reach out — this pre-opens the real `ContactApp` window (the same one
+  from Phase 4, wired to the real `/api/contact` endpoint) so they land
+  directly on the form instead of an empty desktop.
 
-The one special behavior is the featured-project filter:
+Both paths reuse the real `useWindowStore`/`useModeStore` — Recruiter Mode
+never had its own contact form; it just gives fast access into the desktop
+apps that already exist.
 
-```ts
-const FEATURED_PROJECTS = PROJECTS_CONTENT.filter((project) => project.featured);
-```
+## Mode sync on direct visits
 
-That `featured` flag already existed in the shared `Project` type so Recruiter
-Mode could have a 2-4 project highlight list without inventing a separate data
-model or duplicating project content.
-
-## Route behavior
-
-`/recruiter` is a real React Router route, not just another `OsMode` value.
-That matters because the route must be shareable directly. A recruiter can
-open the URL and land on the view immediately, without seeing Boot or Welcome.
-
-To keep the global state honest on direct visits, `RecruiterRoot` syncs the
-mode store on mount:
-
-```ts
+```tsx
 useEffect(() => {
   setMode('recruiter');
 }, [setMode]);
 ```
 
-The screen also provides two exits:
+Because `/recruiter` is directly linkable (bypassing Boot + Welcome
+entirely, per the coding prompt §6's open question — resolved as "yes" by
+this implementation), a visitor can land here with `useModeStore.mode`
+still at its default `'welcome'`. This effect keeps the store honest for
+any other component that reads `mode` (e.g. if `MenuBar` were ever
+rendered here) without gating the route behind boot/welcome first.
 
-- `Open the full desktop` sets the mode to `free` and routes back to `/`
-- `Open contact window` opens the `contact` window in the OS shell and then
-  routes back to the desktop
+## Deviations worth knowing about
 
-## Why this is separate from the OS shell
-
-Recruiter Mode is intentionally not another desktop variant. It is the one
-screen that is allowed to skip the OS metaphor entirely when that helps the
-visitor move faster. That keeps the "highest-intent, lowest-time-budget"
-path lightweight while still preserving the same visual language as the rest
-of KrishnaOS.
+- No `ModePlaceholder` fallback for Recruiter Mode remains anywhere —
+  `OsRoot.tsx` renders `<RecruiterRoot key={mode} />` directly for
+  `mode === 'recruiter'`.
+- `RecruiterRoot` includes a `<ThemeToggle />` (Phase 7 territory,
+  see `docs/11-theme-and-polish.md`) even though Phase 6 wasn't scoped to
+  include it — reasonable since Recruiter Mode is a fully standalone route
+  that doesn't inherit `MenuBar`'s toggle, and a recruiter opening a shared
+  link with no dark/light control at all would be a worse experience than
+  a slightly early Phase 7 dependency.

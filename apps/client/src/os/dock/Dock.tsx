@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { APP_ORDER, APP_REGISTRY } from '@/os/appRegistry';
+import { AppGlyph } from '@/os/icons';
+import { useIsMobile } from '@/lib/useMediaQuery';
 import { useWindowStore } from '@/store/useWindowStore';
 
 /**
@@ -15,6 +17,48 @@ export function Dock() {
   const openWindows = useWindowStore((s) => s.openWindows);
   const openWindow = useWindowStore((s) => s.openWindow);
   const focusedWindowId = useWindowStore((s) => s.focusedWindowId);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-40 px-os-3 pb-os-3">
+        <div className="glass-bar pointer-events-auto flex gap-os-2 overflow-x-auto rounded-os-xl px-os-3 py-os-2">
+          {APP_ORDER.map((appId) => {
+            const app = APP_REGISTRY[appId];
+            const isOpen = openWindows.some((w) => w.id === appId);
+            const isFocused = focusedWindowId === appId;
+
+            return (
+              <button
+                key={appId}
+                type="button"
+                onClick={() => openWindow(appId)}
+                aria-label={`Open ${app.title}`}
+                className="flex min-w-16 flex-col items-center gap-os-1 rounded-os-md px-os-2 py-os-2 text-center transition-colors hover:bg-[color:var(--color-os-glass-highlight)]"
+              >
+                <span
+                  className={`flex h-10 w-10 items-center justify-center rounded-os-md ${
+                    isFocused
+                      ? 'bg-[color:var(--color-os-accent)] text-white'
+                      : 'bg-[color:var(--color-os-surface-elevated)] text-[color:var(--color-os-text-primary)]'
+                  }`}
+                >
+                  <AppGlyph appId={appId} className="h-5 w-5" />
+                </span>
+                <span className="text-[10px] text-[color:var(--color-os-text-secondary)]">{app.title}</span>
+                <span
+                  className={`h-1 w-1 rounded-full transition-opacity ${
+                    isOpen ? 'bg-[color:var(--color-os-text-secondary)] opacity-100' : 'opacity-0'
+                  }`}
+                  aria-hidden
+                />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pointer-events-none absolute bottom-os-4 left-1/2 z-40 -translate-x-1/2">
@@ -47,7 +91,7 @@ export function Dock() {
                     : 'bg-[color:var(--color-os-surface-elevated)] text-[color:var(--color-os-text-primary)]'
                 }`}
               >
-                {app.shortLabel.slice(0, 1)}
+                <AppGlyph appId={appId} className="h-6 w-6" />
               </div>
 
               {/* Open indicator dot, matches macOS's "app is running" dock dot */}

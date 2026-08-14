@@ -2,6 +2,8 @@ import { Rnd } from 'react-rnd';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useWindowStore, type OsWindow } from '@/store/useWindowStore';
+import { AppGlyph } from '@/os/icons';
+import { useIsMobile } from '@/lib/useMediaQuery';
 
 const MIN_WIDTH = 320;
 const MIN_HEIGHT = 240;
@@ -27,8 +29,57 @@ function WindowFrame({ win, children }: WindowFrameProps) {
   const minimizeWindow = useWindowStore((s) => s.minimizeWindow);
   const moveWindow = useWindowStore((s) => s.moveWindow);
   const resizeWindow = useWindowStore((s) => s.resizeWindow);
+  const isMobile = useIsMobile();
 
   if (win.isMinimized) return null;
+
+  if (isMobile) {
+    return (
+      <motion.section
+        className="glass-panel flex min-h-0 w-full flex-col overflow-hidden"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 12 }}
+        transition={{ duration: 0.18 }}
+        onPointerDown={() => focusWindow(win.id)}
+      >
+        <div className="flex shrink-0 items-center gap-os-2 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3">
+          <div className="flex items-center gap-os-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-os-md bg-[color:var(--color-os-surface-elevated)] text-[color:var(--color-os-text-primary)]">
+              <AppGlyph appId={win.id} className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-os-body font-semibold">{win.title}</p>
+              <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">Touch-friendly sheet</p>
+            </div>
+          </div>
+
+          <div className="ml-auto flex items-center gap-os-2">
+            <button
+              type="button"
+              aria-label={`Minimize ${win.title}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                minimizeWindow(win.id);
+              }}
+              className="h-3 w-3 rounded-full bg-[#febc2e] transition-opacity hover:opacity-80"
+            />
+            <button
+              type="button"
+              aria-label={`Close ${win.title}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                closeWindow(win.id);
+              }}
+              className="h-3 w-3 rounded-full bg-[#ff5f57] transition-opacity hover:opacity-80"
+            />
+          </div>
+        </div>
+
+        <div className="max-h-[70vh] flex-1 overflow-auto p-os-4">{children}</div>
+      </motion.section>
+    );
+  }
 
   return (
     <Rnd
@@ -53,11 +104,14 @@ function WindowFrame({ win, children }: WindowFrameProps) {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.97 }}
         transition={{ duration: 0.18 }}
-        onMouseDown={() => focusWindow(win.id)}
+        onPointerDown={() => focusWindow(win.id)}
       >
         {/* Title bar — the drag handle for the whole window */}
         <div className="window-drag-handle flex shrink-0 cursor-grab items-center gap-os-2 border-b border-[color:var(--color-os-glass-border)] px-os-3 py-os-2 active:cursor-grabbing">
-          <div className="flex items-center gap-os-1">
+          <div className="flex items-center gap-os-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-os-sm bg-[color:var(--color-os-surface-elevated)] text-[color:var(--color-os-text-primary)]">
+              <AppGlyph appId={win.id} className="h-3.5 w-3.5" />
+            </span>
             <button
               type="button"
               aria-label={`Close ${win.title}`}
@@ -104,9 +158,16 @@ interface WindowManagerProps {
 
 export function WindowManager({ renderAppContent }: WindowManagerProps) {
   const openWindows = useWindowStore((s) => s.openWindows);
+  const isMobile = useIsMobile();
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div
+      className={`${
+        isMobile
+          ? 'relative flex-1 min-h-0 flex-col gap-os-4 overflow-auto px-os-4 pb-os-28 pt-os-4'
+          : 'absolute inset-0 overflow-hidden'
+      }`}
+    >
       <AnimatePresence>
         {openWindows.map((win) => (
           <WindowFrame key={win.id} win={win}>

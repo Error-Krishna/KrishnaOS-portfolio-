@@ -39,6 +39,20 @@ visually distinct from Tailwind's own built-in scale (`bg-blue-500`,
 If you see `os-` in a class name, it's a project-specific design token, not
 a Tailwind default.
 
+## Theme overrides in CSS
+
+The base `@theme` block defines the defaults, but the actual runtime theme is
+now driven by `data-os-theme` on the root element:
+
+```css
+[data-os-theme='light'] { /* lighter surfaces, text, and shadows */ }
+[data-os-theme='dark'] { /* deeper surfaces and higher contrast glass */ }
+```
+
+This lets the shell switch Light, Dark, and System themes without swapping
+component class names. The same components keep rendering; only the CSS
+variables and theme-scoped overrides change.
+
 ## Token categories
 
 | Category | Prefix | Example | Used for |
@@ -117,6 +131,10 @@ place to edit.
    separation from what's behind) plus an `inset` highlight along the top
    edge (mimics a light catching the top of a physical glass surface).
 
+The same pattern is reused for the theme-aware wallpaper and mobile shell
+surfaces, but with slightly lower blur/opacity on smaller screens so the
+look stays crisp without punishing weaker GPUs.
+
 ## Performance note: `backdrop-filter` is expensive
 
 The coding prompt flags this explicitly (Phase 7, item 17): `backdrop-filter`
@@ -126,6 +144,10 @@ it's worth knowing now: if you're building a screen with several
 `.glass-panel` elements overlapping or animating at once, that's a candidate
 for a performance check on mid-tier hardware before considering the feature
 done.
+
+The current shell also uses `prefers-reduced-motion` to shorten or remove
+animations when the user asks for less motion, which keeps the visual style
+intact without forcing every transition to run at full intensity.
 
 ## `body { overflow: hidden }`
 

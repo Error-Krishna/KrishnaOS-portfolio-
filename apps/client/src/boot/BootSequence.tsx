@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useBootTimeline } from './useBootTimeline';
 import { useBootStore } from '@/store/useBootStore';
+import { Wallpaper } from '@/os/theme/Wallpaper';
 
 const SKIP_AFFORDANCE_DELAY_MS = 1500;
 
@@ -62,16 +63,9 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-[color:var(--color-os-bg)]"
     >
       {/* Beat 5: blurred desktop wallpaper */}
-      <div
-        ref={wallpaperRef}
-        className="absolute inset-0"
-        style={{
-          opacity: 0,
-          background:
-            'radial-gradient(circle at 30% 20%, rgb(90 60 160 / 0.5), transparent 60%), radial-gradient(circle at 75% 75%, rgb(20 90 180 / 0.45), transparent 55%), #0a0a0c',
-        }}
-        aria-hidden
-      />
+      <div ref={wallpaperRef} className="absolute inset-0">
+        <Wallpaper className="absolute inset-0" variant="boot" />
+      </div>
 
       {/* Beats 2–4: KrishnaOS mark + progress pulse */}
       <div ref={logoRef} className="absolute flex flex-col items-center gap-os-4" style={{ opacity: 0 }}>

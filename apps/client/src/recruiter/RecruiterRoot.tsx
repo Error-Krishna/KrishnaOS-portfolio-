@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ABOUT_CONTENT, ACHIEVEMENTS_CONTENT, EDUCATION_CONTENT, EXPERIENCE_CONTENT, PROJECTS_CONTENT, SKILLS_CONTENT } from '@/lib/content';
+import { Wallpaper } from '@/os/theme/Wallpaper';
+import { ThemeToggle } from '@/os/theme/ThemeToggle';
 import { useModeStore } from '@/store/useModeStore';
 import { useWindowStore } from '@/store/useWindowStore';
 
@@ -54,13 +56,17 @@ export function RecruiterRoot() {
 
   return (
     <motion.main
-      className="relative h-full w-full overflow-auto bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_34%),linear-gradient(180deg,var(--color-os-surface),var(--color-os-bg))] px-os-4 py-os-4 sm:px-os-6 sm:py-os-6"
+      className="relative h-full w-full overflow-auto px-os-4 py-os-4 sm:px-os-6 sm:py-os-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.34, 1.1, 0.64, 1] }}
     >
+      <Wallpaper className="absolute inset-0" variant="recruiter" />
       <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-os-4">
-        <section className="glass-panel flex shrink-0 flex-col gap-os-4 p-os-6">
+        <section className="glass-panel relative flex shrink-0 flex-col gap-os-4 p-os-6">
+          <div className="absolute right-os-4 top-os-4">
+            <ThemeToggle />
+          </div>
           <div className="flex flex-col gap-os-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl space-y-os-2">
               <p className="text-os-caption font-semibold uppercase tracking-[0.2em] text-[color:var(--color-os-text-tertiary)]">

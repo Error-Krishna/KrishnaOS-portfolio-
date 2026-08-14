@@ -1,17 +1,18 @@
 # State Management
 
-## Why four stores instead of one
+## Why five stores instead of one
 
-`apps/client/src/store/` has four separate Zustand stores:
+`apps/client/src/store/` has five separate Zustand stores:
 
 - `useBootStore` — has the boot sequence finished?
 - `useModeStore` — which top-level mode is active (welcome/tour/free/recruiter)?
 - `useWindowStore` — which windows are open, where, in what order?
 - `useTourStore` — is the guided tour active, and on which step?
+- `useThemeStore` — is the OS following system, light, or dark theme?
 
 A natural question: why not one `useAppStore` with everything in it?
 
-**Because these four things change at completely different rates and are read
+**Because these five things change at completely different rates and are read
 by completely different parts of the app**, and Zustand's whole performance
 model depends on components subscribing to narrow slices. If everything lived
 in one store, a component that only cares about `mode` would still risk
@@ -30,6 +31,7 @@ kinds of state with different lifetimes:
 | `useModeStore` | Once per "session" until user switches | User picking Tour/Free/Recruiter, or returning to Welcome |
 | `useWindowStore` | Continuously, once in Free/Tour mode | Every window open/close/drag/resize/focus |
 | `useTourStore` | Only relevant during a guided tour | Every tour step advance |
+| `useThemeStore` | Persistent preference, or until system theme changes | Theme mode changes or system appearance changes |
 
 Splitting along those lifetime boundaries makes each store's job obvious from
 its name and its file.
@@ -105,6 +107,28 @@ belong in the components that call `setMode()` (e.g. a persistent menu-bar
 control, built in Phase 3), not baked into the store itself. The store's job
 is just to hold and update the current mode; deciding *when* it's
 appropriate to switch modes is a UI/UX concern that lives closer to the UI.
+
+## `useThemeStore`
+
+```ts
+// apps/client/src/store/useThemeStore.ts
+{
+  themeMode: ThemeMode; // 'system' | 'light' | 'dark'
+  resolvedTheme: 'light' | 'dark';
+  setThemeMode: (mode: ThemeMode) => void;
+}
+```
+
+Theme is the only preference that needs to flow across the entire shell, so
+it gets its own store. That keeps the subscription surface narrow: components
+can read theme only when they actually need it instead of sharing a giant
+store with boot, mode, window, and tour state.
+
+`ThemeManager` reads this store and writes the resolved theme to
+`document.documentElement.dataset.osTheme` plus `colorScheme`, which lets
+CSS switch wallpapers, glass tone, icon styling, and text hierarchy from one
+source of truth. `main.tsx` also applies the saved theme before React renders
+so the first paint matches the stored preference.
 
 ## `useWindowStore`
 
@@ -208,3 +232,8 @@ what makes `OsRoot` only re-render when `isBootComplete` specifically
 changes, not on every field in every store. This selector pattern is used
 everywhere stores are read in this codebase; it's the main reason Zustand
 was chosen over plain Context (see `02-tech-stack.md`).
+
+`useThemeStore` is intentionally not read in `OsRoot` itself. Theme is a
+global presentation concern handled at the app root so the shell can react
+to light/dark/system changes everywhere without making `OsRoot` responsible
+for theme plumbing.

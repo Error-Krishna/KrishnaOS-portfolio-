@@ -39,7 +39,7 @@ If this file ever says something that contradicts `krishnaos-ux-flow.md` or
 the product should do* — this file tracks *where we currently are* against
 that plan, not a replacement for the plan.
 
-## Current phase: Phase 6 complete (Recruiter Mode) — Phase 7 not started
+## Current phase: Phase 7 in progress (polish pass)
 
 Per `krishnaos-coding-prompt.md`'s phase breakdown:
 
@@ -123,7 +123,9 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
   route now renders the real condensed glass document view, filters featured
   projects from the shared project data, and includes an escape hatch back
   to Free Exploration.
-- ⬜ **Phase 7 (Polish pass)** — not started.
+- 🔶 **Phase 7 (Polish pass)** — in progress. Theme switching, wallpaper
+  variants, app icons, widgets, and mobile-friendly shell/navigation are now
+  implemented; accessibility/performance tuning and final content remain.
 
 Phase 3 is functionally complete against its scoped items in the coding
 prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
@@ -173,26 +175,13 @@ routes degrade gracefully). See `apps/server/.env.example` and
 
 From `krishnaos-coding-prompt.md` §6 and the UX doc §8:
 
-- **SF Pro web licensing** — unresolved. Currently defaulting to Inter in
-  the font stack (`--font-os-sans` in `index.css`). Needs a final call
-  before any visual polish pass.
 - **Exact Welcome panel / tour-bar copy** — currently placeholder/functional
   text, not final voice/copy.
-- **Dock icon roster beyond confirmed content pillars** — deferred until
-  Phase 3 is underway, per the original brief's explicit instruction not to
-  invent apps prematurely.
-- **Visual "actual macOS feel" pass flagged by Krishna (session after Phase
-  5)** — current UI uses correct glass/token structure but no real
-  wallpaper image, no real app icons (Dock currently renders a single
-  capital letter per app, not an icon), and no desktop widgets. This is
-  Phase 7 (polish pass, coding prompt item 16) scope, not a gap in Phases
-  1–5 — noting it here so it isn't lost before that phase starts. Candidate
-  sub-tasks once tackled: a real (or generated) wallpaper image behind
-  `Desktop`/`BootSequence`'s gradient placeholder, per-app icon assets for
-  `Dock`/`Spotlight`/window title bars (replacing `appRegistry.ts`'s
-  text-only `shortLabel` letter), and the "used sparingly... only if it
-  earns its place" widget(s) the UX doc §5 mentions (e.g. a GitHub-activity
-  widget) — deliberately still undecided per that same section.
+- **Final content pass** — the portfolio copy in `apps/client/src/lib/content.ts`
+  is still intentionally placeholder content, and the resume/GitHub/LinkedIn
+  link targets are still placeholder decisions until the final content pass.
+- **Final voice/copy decisions** — the Welcome panel and tour-bar labels are
+  still functional copy, not final voice.
 
 ## For AI agents picking up this project
 

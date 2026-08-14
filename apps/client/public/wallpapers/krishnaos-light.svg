@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1600" y1="0" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7f9ff"/>
+      <stop offset="0.45" stop-color="#edf3ff"/>
+      <stop offset="1" stop-color="#e5ebf5"/>
+    </linearGradient>
+    <radialGradient id="orbBlue" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1180 260) rotate(120) scale(420 360)">
+      <stop offset="0" stop-color="#86b8ff" stop-opacity=".8"/>
+      <stop offset=".55" stop-color="#86b8ff" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#86b8ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbRose" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(330 250) rotate(70) scale(460 360)">
+      <stop offset="0" stop-color="#ffb0da" stop-opacity=".72"/>
+      <stop offset=".55" stop-color="#ffb0da" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#ffb0da" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbTeal" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(920 900) rotate(-25) scale(540 400)">
+      <stop offset="0" stop-color="#8cf2dd" stop-opacity=".72"/>
+      <stop offset=".6" stop-color="#8cf2dd" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#8cf2dd" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="72" />
+    </filter>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#bg)"/>
+  <g filter="url(#blur)">
+    <circle cx="1180" cy="260" r="360" fill="url(#orbBlue)"/>
+    <circle cx="330" cy="250" r="360" fill="url(#orbRose)"/>
+    <circle cx="920" cy="900" r="420" fill="url(#orbTeal)"/>
+  </g>
+  <g opacity=".45">
+    <path d="M-40 960C180 820 370 828 560 930c190 102 400 106 620-2s330-118 460-58v360H-40V960Z" fill="#dce7fb"/>
+    <path d="M-40 1040c230-116 425-95 598 4s387 110 642-1 334-129 440-74v231H-40v-160Z" fill="#edf2ff" opacity=".72"/>
+  </g>
+  <g opacity=".5" stroke="#ffffff">
+    <path d="M120 310c160 40 300 34 430-18" stroke-width="3"/>
+    <path d="M1010 150c120 60 240 72 360 34" stroke-width="3"/>
+    <path d="M420 820c190 48 360 42 520-18" stroke-width="3"/>
+  </g>
+</svg>

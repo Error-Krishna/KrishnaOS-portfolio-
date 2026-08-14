@@ -3,6 +3,8 @@ import { MenuBar } from '@/os/menu-bar/MenuBar';
 import { Dock } from '@/os/dock/Dock';
 import { WindowManager } from '@/os/window-manager/WindowManager';
 import { Spotlight } from '@/os/spotlight/Spotlight';
+import { Wallpaper } from '@/os/theme/Wallpaper';
+import { StatusWidgets } from '@/os/widgets/StatusWidgets';
 import type { AppId } from '@/os/appRegistry';
 import { AboutApp } from '@/apps/about/AboutApp';
 import { ProjectsApp } from '@/apps/projects/ProjectsApp';
@@ -24,8 +26,10 @@ import { ContactApp } from '@/apps/contact/ContactApp';
  */
 export function Desktop() {
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full flex-col overflow-hidden">
+      <Wallpaper className="absolute inset-0" variant="shell" />
       <MenuBar />
+      <StatusWidgets />
       <WindowManager renderAppContent={renderAppContent} />
       <Dock />
       <Spotlight />

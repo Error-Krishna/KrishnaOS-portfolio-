@@ -3,6 +3,7 @@ import { BootSequence } from '@/boot/BootSequence';
 import { WelcomeScreen } from '@/welcome/WelcomeScreen';
 import { Desktop } from '@/os/desktop/Desktop';
 import { RecruiterRoot } from '@/recruiter/RecruiterRoot';
+import { Wallpaper } from '@/os/theme/Wallpaper';
 import { TourController } from '@/tour/TourController';
 import { useBootStore } from '@/store/useBootStore';
 import { useModeStore } from '@/store/useModeStore';
@@ -35,8 +36,11 @@ export function OsRoot() {
         {!isBootComplete && <BootSequence key="boot" onComplete={completeBoot} />}
 
         {isBootComplete && mode === 'welcome' && (
-          <div key="welcome" className="flex h-full w-full items-center justify-center">
-            <WelcomeScreen />
+          <div key="welcome" className="relative flex h-full w-full items-center justify-center overflow-hidden">
+            <Wallpaper className="absolute inset-0" variant="shell" />
+            <div className="relative z-10">
+              <WelcomeScreen />
+            </div>
           </div>
         )}
 

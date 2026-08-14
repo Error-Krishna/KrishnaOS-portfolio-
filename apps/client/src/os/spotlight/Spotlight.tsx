@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createSearchIndex, type SearchableEntry } from '@/lib/searchIndex';
+import { AppGlyph, SearchGlyph } from '@/os/icons';
 import { useWindowStore } from '@/store/useWindowStore';
 
 /**
@@ -87,23 +88,26 @@ export function Spotlight() {
           transition={{ duration: 0.15 }}
           onClick={() => setIsOpen(false)}
         >
-          <motion.div
-            className="glass-panel w-[min(560px,90vw)] overflow-hidden"
-            initial={{ opacity: 0, scale: 0.96, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -8 }}
+        <motion.div
+          className="glass-panel w-[min(560px,90vw)] overflow-hidden"
+          initial={{ opacity: 0, scale: 0.96, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.18, ease: [0.34, 1.1, 0.64, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-              placeholder="Search KrishnaOS..."
-              className="w-full bg-transparent px-os-4 py-os-4 text-os-headline text-[color:var(--color-os-text-primary)] outline-none placeholder:text-[color:var(--color-os-text-tertiary)]"
-            />
+            <div className="flex items-center gap-os-2 px-os-4 py-os-4">
+              <SearchGlyph className="h-5 w-5 text-[color:var(--color-os-text-tertiary)]" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                placeholder="Search KrishnaOS..."
+                className="w-full bg-transparent text-os-headline text-[color:var(--color-os-text-primary)] outline-none placeholder:text-[color:var(--color-os-text-tertiary)]"
+              />
+            </div>
 
             {results.length > 0 && (
               <div className="border-t border-[color:var(--color-os-glass-border)] py-os-2">
@@ -119,7 +123,13 @@ export function Spotlight() {
                         : 'text-[color:var(--color-os-text-secondary)]'
                     }`}
                   >
-                    {entry.title}
+                    <span className="flex h-8 w-8 items-center justify-center rounded-os-md bg-[color:var(--color-os-surface-elevated)] text-[color:var(--color-os-text-primary)]">
+                      <AppGlyph appId={entry.targetAppId} className="h-4 w-4" />
+                    </span>
+                    <span className="flex flex-col">
+                      <span>{entry.title}</span>
+                      {entry.subtitle && <span className="text-os-caption text-[color:var(--color-os-text-tertiary)]">{entry.subtitle}</span>}
+                    </span>
                   </button>
                 ))}
               </div>

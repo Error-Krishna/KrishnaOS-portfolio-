@@ -68,12 +68,15 @@ src/
 ├── app/            App shell + routing (App.tsx, OsRoot.tsx)
 ├── boot/           GSAP boot sequence timeline
 ├── welcome/        Liquid Glass welcome screen
-├── os/             OS shell — Phase 3, built:
+├── os/             OS shell — Phase 3, now expanded with theme-aware
+│                   wallpaper, widgets, and desktop/mobile chrome:
 │   ├── appRegistry.ts    Single source of truth for the 7 app pillars
 │   ├── menu-bar/          KrishnaOS-home + Recruiter Mode switch
 │   ├── dock/              Icon row, opens windows
 │   ├── window-manager/    Draggable/resizable windows (react-rnd + store)
 │   ├── spotlight/         ⌘K fuzzy search overlay
+│   ├── theme/             Theme mode, wallpaper, and theme toggle
+│   ├── widgets/           Desktop/mobile status widgets
 │   └── desktop/           Composes the above into Free Exploration's shell
 ├── apps/           Content "apps" that render inside windows
 │                   (about, projects, skills, experience, education,
@@ -83,15 +86,16 @@ src/
 ├── tokens/          Design tokens as TS constants, if/when needed
 │                   alongside the CSS custom properties in index.css
 ├── lib/            Utilities: API client, Fuse.js search index
-└── store/          Zustand stores (mode, window, boot, tour)
+└── store/          Zustand stores (mode, window, boot, tour, theme)
 ```
 
 The `apps/` and `tour/` deeper content are still empty or minimal scaffolding
 from Phase 1 — they mark where Phase 4–5 work landed. `recruiter/` graduated
 to a real Phase 6 screen that consumes the same shared content slices as the
 windowed apps, but in a condensed single-screen layout. `os/` graduated from
-scaffolding to real, working components in Phase 3; see `07-os-shell.md` for
-the full breakdown of what's in each subfolder and why.
+scaffolding to real, working components in Phase 3 and now includes the
+theme-aware shell polish from Phase 7; see `07-os-shell.md` for the full
+breakdown of what's in each subfolder and why.
 
 ### `apps/server`
 

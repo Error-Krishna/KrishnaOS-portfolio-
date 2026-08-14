@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { HomeGlyph } from '@/os/icons';
+import { ThemeToggle } from '@/os/theme/ThemeToggle';
+import { useIsMobile } from '@/lib/useMediaQuery';
 import { useModeStore } from '@/store/useModeStore';
 
 /**
@@ -22,6 +25,7 @@ import { useModeStore } from '@/store/useModeStore';
 export function MenuBar() {
   const setMode = useModeStore((s) => s.setMode);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const goHome = () => setMode('welcome');
 
@@ -31,22 +35,35 @@ export function MenuBar() {
   };
 
   return (
-    <div className="glass-bar absolute top-0 left-0 right-0 z-50 flex h-9 items-center justify-between px-os-4">
-      <button
-        type="button"
-        onClick={goHome}
-        className="text-os-caption font-semibold tracking-tight text-[color:var(--color-os-text-primary)] transition-opacity hover:opacity-80"
-      >
-        KrishnaOS
-      </button>
+    <div
+      className={`glass-bar absolute top-0 left-0 right-0 z-50 flex gap-os-3 px-os-3 py-os-2 ${
+        isMobile ? 'flex-col' : 'h-9 items-center justify-between px-os-4 py-0'
+      }`}
+    >
+      <div className={`flex items-center justify-between gap-os-2 ${isMobile ? 'w-full' : ''}`}>
+        <button
+          type="button"
+          onClick={goHome}
+          aria-label="Back to Welcome"
+          className="flex items-center gap-os-2 text-os-caption font-semibold tracking-tight text-[color:var(--color-os-text-primary)] transition-opacity hover:opacity-80"
+        >
+          <HomeGlyph className="h-4 w-4" />
+          <span>KrishnaOS</span>
+        </button>
 
-      <button
-        type="button"
-        onClick={switchToRecruiterMode}
-        className="rounded-os-sm border border-[color:var(--color-os-glass-border)] px-os-3 py-os-1 text-os-caption text-[color:var(--color-os-text-secondary)] transition-colors hover:border-[color:var(--color-os-accent)] hover:text-[color:var(--color-os-text-primary)]"
-      >
-        Switch to Recruiter Mode
-      </button>
+        {isMobile && <ThemeToggle />}
+      </div>
+
+      <div className={`flex items-center gap-os-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+        {!isMobile && <ThemeToggle />}
+        <button
+          type="button"
+          onClick={switchToRecruiterMode}
+          className="rounded-os-sm border border-[color:var(--color-os-glass-border)] px-os-3 py-os-1 text-os-caption text-[color:var(--color-os-text-secondary)] transition-colors hover:border-[color:var(--color-os-accent)] hover:text-[color:var(--color-os-text-primary)]"
+        >
+          Switch to Recruiter Mode
+        </button>
+      </div>
     </div>
   );
 }

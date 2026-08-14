@@ -23,6 +23,7 @@ Each doc assumes you've read the ones before it.
 | `07-os-shell.md` | App registry, menu bar, dock, window manager, Spotlight | You're touching `os/*`, or adding a new app to the registry |
 | `decisions/` | Short ADR-style notes, one per major decision, dated | You want to know *when* and *why* a choice was made, or you're reconsidering one |
 | `10-recruiter-mode.md` | Recruiter Mode's condensed single-screen view | You're touching the `/recruiter` fast path, escape hatch, or featured-project filtering |
+| `11-phase-7-polish.md` | Theme, wallpaper, widgets, responsive shell, and polish | You're working on Light/Dark/System, mobile nav, widgets, or performance/a11y tuning |
 
 ## The learning method we're using
 
