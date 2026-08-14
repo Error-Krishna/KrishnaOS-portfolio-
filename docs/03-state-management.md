@@ -186,9 +186,10 @@ independent (rather than tour logic reaching into window state to "clean up"
 on skip) is what makes that UX guarantee automatic rather than something
 that has to be remembered and hand-coded at every exit point.
 
-**This store is currently a skeleton** — `startTour`/`nextStep` exist and
-work, but nothing yet calls them to actually open/focus the right window per
-step (that wiring is Phase 5, once real content windows exist to open).
+**As of Phase 5, this store is fully wired** — `TourController`
+(`tour/TourController.tsx`) reads `stepIndex`/`isActive` and calls
+`nextStep`/`previousStep`/`skipTour`, driving `useWindowStore.openWindow`
+per step. See `docs/09-guided-tour.md` for the full breakdown.
 
 ## How the stores compose in `OsRoot`
 

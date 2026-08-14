@@ -39,7 +39,7 @@ If this file ever says something that contradicts `krishnaos-ux-flow.md` or
 the product should do* — this file tracks *where we currently are* against
 that plan, not a replacement for the plan.
 
-## Current phase: Phase 4 in progress (Content Apps) — Phases 5–7 not started
+## Current phase: Phase 5 complete (Guided Tour) — Phases 6–7 not started
 
 Per `krishnaos-coding-prompt.md`'s phase breakdown:
 
@@ -101,10 +101,26 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
   - ⬜ Not yet done: real content (every string in `content.ts` is an
     explicit placeholder), any `/api/content` wiring (content stays
     hardcoded client-side per the server route's own comment), Recruiter
-    Mode's `featured`-filtered consumption of `PROJECTS_CONTENT` (Phase 6),
-    Guided Tour driving these windows open/closed per step (Phase 5).
-- ⬜ **Phases 5–7** — not started (guided tour wiring, Recruiter Mode real
-  content, polish pass).
+    Mode's `featured`-filtered consumption of `PROJECTS_CONTENT` (Phase 6).
+- ✅ **Phase 5 (Guided Tour)** — complete. See `docs/09-guided-tour.md` for
+  full detail.
+  - ✅ `tour/tourSteps.ts` — maps the 8 UX-doc tour steps to `AppId`s
+    ("work" intentionally maps to `null` — no 8th app invented for a
+    framing-only step) plus human-readable step labels.
+  - ✅ `tour/TourController.tsx` — drives `useWindowStore.openWindow` per
+    step, renders the real `<Desktop />` alongside itself (not a
+    restricted tour environment), cleanly disambiguates "skipped" vs
+    "completed naturally" without adding new store state.
+  - ✅ `tour/TourBar.tsx` — persistent, top-adjacent progress bar with
+    Back/Next/Skip, plus a completion state offering "Explore Freely" /
+    "Back to Welcome."
+  - ✅ `OsRoot.tsx` updated: `mode === 'tour'` now renders `<Desktop />` +
+    `<TourController />` instead of `ModePlaceholder` — `ModePlaceholder`
+    is now Recruiter-Mode-only, pending Phase 6.
+  - ⬜ Not yet done: nothing scoped to Phase 5 remains. Real tour-bar copy
+    (labels are functional, not final voice) is still an open question
+    carried from the UX doc's §8.
+- ⬜ **Phases 6–7** — not started (Recruiter Mode real content, polish pass).
 
 Phase 3 is functionally complete against its scoped items in the coding
 prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
@@ -162,6 +178,18 @@ From `krishnaos-coding-prompt.md` §6 and the UX doc §8:
 - **Dock icon roster beyond confirmed content pillars** — deferred until
   Phase 3 is underway, per the original brief's explicit instruction not to
   invent apps prematurely.
+- **Visual "actual macOS feel" pass flagged by Krishna (session after Phase
+  5)** — current UI uses correct glass/token structure but no real
+  wallpaper image, no real app icons (Dock currently renders a single
+  capital letter per app, not an icon), and no desktop widgets. This is
+  Phase 7 (polish pass, coding prompt item 16) scope, not a gap in Phases
+  1–5 — noting it here so it isn't lost before that phase starts. Candidate
+  sub-tasks once tackled: a real (or generated) wallpaper image behind
+  `Desktop`/`BootSequence`'s gradient placeholder, per-app icon assets for
+  `Dock`/`Spotlight`/window title bars (replacing `appRegistry.ts`'s
+  text-only `shortLabel` letter), and the "used sparingly... only if it
+  earns its place" widget(s) the UX doc §5 mentions (e.g. a GitHub-activity
+  widget) — deliberately still undecided per that same section.
 
 ## For AI agents picking up this project
 

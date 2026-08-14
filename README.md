@@ -88,9 +88,15 @@ frontend-only iteration.
 - `Contact` is real — posts to `/api/contact` → MongoDB with hand-rolled
   validation and idle/submitting/success/error states
 
+**Phase 5 (Guided Tour): complete**
+- `tour/tourSteps.ts` — maps the UX doc's 8 tour steps to `AppId`s
+- `TourController` drives `useWindowStore.openWindow` per step, rendering
+  the real `Desktop` (not a restricted environment) alongside itself
+- `TourBar` — progress + Back/Next/Skip, plus a completion state
+
 **Still to build:** real content copy (currently explicit placeholders),
-guided tour controller, Recruiter Mode's single-screen layout, polish pass
-— Phases 5–7 in the coding prompt.
+Real wallpaper/icons/widgets, Recruiter Mode's single-screen layout, polish
+pass — Phases 6–7 in the coding prompt.
 
 ## Notes / deviations from the original spec
 
