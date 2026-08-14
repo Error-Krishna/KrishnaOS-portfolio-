@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import type { OsMode } from '@krishnaos/shared-types';
 import { useModeStore } from '@/store/useModeStore';
 import { useTourStore } from '@/store/useTourStore';
@@ -25,12 +26,21 @@ const CHOICES: WelcomeChoice[] = [
 export function WelcomeScreen() {
   const setMode = useModeStore((s) => s.setMode);
   const startTour = useTourStore((s) => s.startTour);
+  const navigate = useNavigate();
 
   const handleChoice = (mode: OsMode) => {
     if (mode === 'tour') {
       startTour();
     }
     setMode(mode);
+    // Recruiter Mode is a real route, not just a mode value, so it's
+    // directly linkable per UX doc §6/§3 — see docs/06-navigation-flow.md's
+    // "Recruiter Mode exception" note. This mirrors MenuBar's
+    // switchToRecruiterMode exactly: setMode keeps useModeStore consistent,
+    // navigate() actually moves the browser to /recruiter.
+    if (mode === 'recruiter') {
+      navigate('/recruiter');
+    }
   };
 
   return (

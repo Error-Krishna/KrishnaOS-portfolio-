@@ -72,8 +72,8 @@ and what's still pending:
 |---|---|---|
 | 1. No mode is a dead end | **Partially implemented** | `ModePlaceholder`'s "Back to Welcome" button satisfies this today. Real per-mode escape hatches (e.g. Recruiter Mode's "Curious? Explore further" link) are Phase 6. |
 | 2. No progress is silently lost | **Store-level guarantee in place** | `useTourStore.skipTour()` never touches `useWindowStore` — see `03-state-management.md`. Not yet exercised by real UI since Tour/Free aren't built. |
-| 3. Recruiter Mode always one action away | **Not yet implemented** | Requires the persistent menu-bar control from Phase 3. Currently Recruiter Mode is only reachable from Welcome or `ModePlaceholder`'s generic back button. |
-| 4. Search is a universal escape valve | **Not yet implemented** | Spotlight doesn't exist yet (Phase 3). `lib/searchIndex.ts` has the Fuse.js index ready to be wired up. |
+| 3. Recruiter Mode always one action away | **Implemented** | `MenuBar`'s "Switch to Recruiter Mode" control (persistent across Free/Tour) and `WelcomeScreen`'s Recruiter Mode button both `setMode('recruiter')` + `navigate('/recruiter')`. |
+| 4. Search is a universal escape valve | **Implemented** | `os/spotlight/Spotlight.tsx` — global ⌘K/Ctrl+K listener, Fuse.js fuzzy search over `os/appRegistry.ts` via `lib/searchIndex.ts`. |
 | 5. Returning to Welcome is always possible | **Implemented** (generically) | `ModePlaceholder`'s back button. Will be superseded by the "KrishnaOS wordmark in menu bar = home" pattern the UX doc specifies, once the menu bar exists. |
 
 This table is meant to be updated as each phase lands — it's a live checklist
@@ -106,12 +106,13 @@ satisfies both of the UX doc's Recruiter Mode requirements simultaneously:
 will call `setMode('recruiter')` and route to `/recruiter`) *and*
 "directly linkable" (when reached via a bookmarked/shared URL).
 
-**Current gap:** clicking "Recruiter Mode" from `WelcomeScreen` today calls
-`setMode('recruiter')`, which renders `ModePlaceholder` *inside* `OsRoot` —
-it does not yet navigate to the `/recruiter` route. Wiring that button to
-actually `navigate('/recruiter')` (via React Router) instead of just setting
-mode is Phase 6 work, once `RecruiterRoot` has real content worth navigating
-to.
+**Resolved:** `WelcomeScreen`'s Recruiter Mode button now calls both
+`setMode('recruiter')` and `navigate('/recruiter')`, mirroring `MenuBar`'s
+`switchToRecruiterMode` exactly. Both entry points into Recruiter Mode
+(Welcome and the persistent menu-bar control) now behave identically —
+neither leaves the app in a state where `mode` and the URL disagree.
+`RecruiterRoot` itself still renders the honest Phase 6 placeholder; only
+the *navigation* half of this gap was in Phase 3's scope to fix.
 
 ## Why the boot sequence isn't skippable via routing
 

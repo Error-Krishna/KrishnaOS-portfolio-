@@ -244,13 +244,13 @@ components themselves.
 **`renderAppContent` is passed in as a prop, not imported by
 `WindowManager` directly:** this keeps `WindowManager` from needing to know
 about every individual app in `apps/*` — it just needs *something* that can
-turn an `AppId` into `ReactNode` content. Right now that's
-`renderPlaceholderAppContent` (an honest "not built yet" stand-in, matching
-the project's hard constraint against faking finished UI — see
-`context.md`). When Phase 4 builds real `apps/about`, `apps/projects`, etc.
-components, only this one function in `Desktop.tsx` needs to change to a
-real switch/lookup over actual components — `WindowManager` itself doesn't
-need to be touched at all.
+turn an `AppId` into `ReactNode` content. As of Phase 4 that's a real
+`switch` over `AppId` returning each app's actual component (`AboutApp`,
+`ProjectsApp`, etc.) — see `docs/08-content-apps.md` for the full Phase 4
+breakdown. Before Phase 4 this was `renderPlaceholderAppContent`, an honest
+"not built yet" stand-in; the swap only touched this one function in
+`Desktop.tsx`, exactly as designed — `WindowManager` itself was never
+touched.
 
 ## `OsRoot` wiring: `free` mode now renders the real thing
 

@@ -1,8 +1,16 @@
+import type { ReactNode } from 'react';
 import { MenuBar } from '@/os/menu-bar/MenuBar';
 import { Dock } from '@/os/dock/Dock';
 import { WindowManager } from '@/os/window-manager/WindowManager';
 import { Spotlight } from '@/os/spotlight/Spotlight';
-import { APP_REGISTRY, type AppId } from '@/os/appRegistry';
+import type { AppId } from '@/os/appRegistry';
+import { AboutApp } from '@/apps/about/AboutApp';
+import { ProjectsApp } from '@/apps/projects/ProjectsApp';
+import { SkillsApp } from '@/apps/skills/SkillsApp';
+import { ExperienceApp } from '@/apps/experience/ExperienceApp';
+import { EducationApp } from '@/apps/education/EducationApp';
+import { AchievementsApp } from '@/apps/achievements/AchievementsApp';
+import { ContactApp } from '@/apps/contact/ContactApp';
 
 /**
  * The full interactive desktop environment, per coding prompt Phase 3:
@@ -18,7 +26,7 @@ export function Desktop() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <MenuBar />
-      <WindowManager renderAppContent={renderPlaceholderAppContent} />
+      <WindowManager renderAppContent={renderAppContent} />
       <Dock />
       <Spotlight />
     </div>
@@ -26,19 +34,26 @@ export function Desktop() {
 }
 
 /**
- * Placeholder content for windows until Phase 4 builds the real apps/*
- * components. Deliberately honest about being unbuilt (see context.md's
- * hard constraint #1 — no faking finished UI), same pattern as OsRoot's
- * ModePlaceholder.
+ * Maps an AppId to its real content component, per Phase 4 (coding prompt
+ * item 10). This is the one function docs/07-os-shell.md flagged as the
+ * only thing that would need to change when real apps/* components
+ * replaced the placeholder — WindowManager itself was never touched.
  */
-function renderPlaceholderAppContent(appId: AppId) {
-  const app = APP_REGISTRY[appId];
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-os-2 text-center">
-      <p className="text-os-body font-medium">{app.title}</p>
-      <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-        Content not built yet — arriving in Phase 4.
-      </p>
-    </div>
-  );
+function renderAppContent(appId: AppId): ReactNode {
+  switch (appId) {
+    case 'about':
+      return <AboutApp />;
+    case 'projects':
+      return <ProjectsApp />;
+    case 'skills':
+      return <SkillsApp />;
+    case 'experience':
+      return <ExperienceApp />;
+    case 'education':
+      return <EducationApp />;
+    case 'achievements':
+      return <AchievementsApp />;
+    case 'contact':
+      return <ContactApp />;
+  }
 }

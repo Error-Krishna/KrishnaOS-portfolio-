@@ -39,7 +39,7 @@ If this file ever says something that contradicts `krishnaos-ux-flow.md` or
 the product should do* — this file tracks *where we currently are* against
 that plan, not a replacement for the plan.
 
-## Current phase: Phase 3 in progress (OS Shell)
+## Current phase: Phase 4 in progress (Content Apps) — Phases 5–7 not started
 
 Per `krishnaos-coding-prompt.md`'s phase breakdown:
 
@@ -56,7 +56,7 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
   - ⬜ Not yet done: exact final copy for Welcome panel (currently
     placeholder text), any visual QA/polish pass, SF Pro vs Inter licensing
     decision (currently defaulting to Inter in the font stack).
-- 🔶 **Phase 3 (OS Shell)** — in progress. See `docs/07-os-shell.md` for full
+- ✅ **Phase 3 (OS Shell)** — complete. See `docs/07-os-shell.md` for full
   detail.
   - ✅ `os/appRegistry.ts` — single source of truth for the 7 confirmed app
     pillars, read by Dock/Spotlight/WindowManager/search index.
@@ -71,21 +71,45 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     Fuse.js fuzzy search over the app registry, arrow-key navigation.
   - ✅ `Desktop.tsx` composes all four into Free Exploration's environment;
     `OsRoot` now renders it for `mode === 'free'`.
-  - ⬜ Not yet done: real app content (windows currently show an honest
-    "not built yet" placeholder — that's Phase 4). No minimized-window
-    tray/indicator yet (matches the coding prompt's explicit Phase 3 scope
-    note — "don't over-scope"). Bundle size warning at build time (510KB)
-    from react-rnd + gsap + framer-motion combined — not yet addressed,
-    candidate for the Phase 7 polish/perf pass.
-- ⬜ **Phases 4–7** — not started (content apps, guided tour wiring,
-  Recruiter Mode real content, polish pass).
+  - ✅ `WelcomeScreen`'s Recruiter Mode button now calls `setMode('recruiter')`
+    **and** `navigate('/recruiter')`, matching `MenuBar`'s
+    `switchToRecruiterMode` exactly — both entry points into Recruiter Mode
+    behave identically. This closes the gap previously tracked here (see
+    `docs/06-navigation-flow.md`, updated same session).
+  - ⬜ Not yet done: minimized-window tray/indicator (matches the coding
+    prompt's explicit Phase 3 scope note — "don't over-scope"). Bundle size
+    warning at build time (510KB) from react-rnd + gsap + framer-motion
+    combined — not yet addressed, candidate for the Phase 7 polish/perf pass.
+- 🔶 **Phase 4 (Content Apps)** — in progress. See `docs/08-content-apps.md`
+  for full detail.
+  - ✅ `lib/content.ts` — hardcoded, typed content data for all 7 apps
+    (`ABOUT_CONTENT`, `PROJECTS_CONTENT`, `SKILLS_CONTENT`,
+    `EXPERIENCE_CONTENT`, `EDUCATION_CONTENT`, `ACHIEVEMENTS_CONTENT`) —
+    all placeholder copy, clearly marked as such, pending the content pass
+    noted in both source docs' open questions.
+  - ✅ All 7 content apps built: `AboutApp`, `ProjectsApp`, `SkillsApp`,
+    `ExperienceApp`, `EducationApp`, `AchievementsApp`, `ContactApp` — each
+    a pure render of its content slice, tokens-only, no owned scroll (the
+    window content region already provides it).
+  - ✅ `ContactApp` is real, not a placeholder — wired to `submitContactForm`
+    (`lib/apiClient.ts`) → Express `/api/contact` → MongoDB, hand-rolled
+    validation mirroring `contactController.ts`, idle/submitting/success/error
+    states.
+  - ✅ `Desktop.tsx`'s `renderAppContent` now returns real components instead
+    of `renderPlaceholderAppContent` — confirmed `WindowManager.tsx` itself
+    needed zero changes, exactly as `docs/07-os-shell.md` predicted.
+  - ⬜ Not yet done: real content (every string in `content.ts` is an
+    explicit placeholder), any `/api/content` wiring (content stays
+    hardcoded client-side per the server route's own comment), Recruiter
+    Mode's `featured`-filtered consumption of `PROJECTS_CONTENT` (Phase 6),
+    Guided Tour driving these windows open/closed per step (Phase 5).
+- ⬜ **Phases 5–7** — not started (guided tour wiring, Recruiter Mode real
+  content, polish pass).
 
-**Known gap to fix during Phase 6:** clicking "Switch to Recruiter Mode"
-from the menu bar, or "Recruiter Mode" from `WelcomeScreen`, both correctly
-navigate/set mode now for the menu bar path — but `WelcomeScreen`'s button
-still only calls `setMode('recruiter')` without navigating to `/recruiter`.
-See `docs/06-navigation-flow.md`'s "Current gap" note — worth reconciling
-both entry points to behave identically before Phase 6.
+Phase 3 is functionally complete against its scoped items in the coding
+prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
+are explicitly deferred to Phase 7 per the coding prompt's own scope notes,
+not gaps to close now.
 
 ## Hard constraints — do not violate these without explicit discussion
 

@@ -74,26 +74,23 @@ frontend-only iteration.
   Mongo), `/api/content` (placeholder)
 - `useModeStore`, `useWindowStore`, `useTourStore` skeletons
 
-**Phase 2 (Boot & Welcome): in progress**
-- `useBootStore` — tracks boot completion + same-session "returning visitor"
-  state via `sessionStorage` (full boot sequence on fresh visits, compressed
-  fast-fade on repeat same-session loads)
-- `useBootTimeline` — GSAP timeline implementing the 6-beat boot sequence
-  from the UX flow doc §2 (black screen → logo → progress pulse → lighten →
-  blurred wallpaper reveal → glass panel arrival), with a compressed variant
-  for returning visitors
-- `BootSequence` component — renders the boot visuals, wires up the timeline,
-  shows a "Skip" affordance after 1.5s
-- `WelcomeScreen` component — the Liquid Glass welcome panel with three
-  equal-weight entry buttons (Tour / Free / Recruiter) plus a "skip intro"
-  affordance, per UX doc §3
-- `OsRoot` rewritten to orchestrate boot → welcome → mode, with placeholder
-  panels for tour/free/recruiter (honest stand-ins, not faked finished UI)
-  until Phases 3, 5, and 6 build the real destinations
+**Phase 3 (OS Shell): complete**
+- `os/appRegistry.ts` — single source of truth for the 7 app pillars
+- Menu bar, Dock, Window Manager (react-rnd + `useWindowStore`), Spotlight
+  (⌘K, Fuse.js fuzzy search) — composed together in `os/desktop/Desktop.tsx`
+- Both entry points into Recruiter Mode (`WelcomeScreen`, `MenuBar`) now
+  behave identically — `setMode('recruiter')` + `navigate('/recruiter')`
 
-**Still to build:** OS shell (menu bar, dock, window manager, Spotlight),
-content apps, guided tour controller, Recruiter Mode's single-screen layout,
-polish pass — Phases 3–7 in the coding prompt.
+**Phase 4 (Content Apps): in progress**
+- `lib/content.ts` — hardcoded, typed placeholder content for all 7 apps
+- All 7 content apps built (`About`, `Projects`, `Skills`, `Experience`,
+  `Education`, `Achievements`, `Contact`) and wired into the window manager
+- `Contact` is real — posts to `/api/contact` → MongoDB with hand-rolled
+  validation and idle/submitting/success/error states
+
+**Still to build:** real content copy (currently explicit placeholders),
+guided tour controller, Recruiter Mode's single-screen layout, polish pass
+— Phases 5–7 in the coding prompt.
 
 ## Notes / deviations from the original spec
 
