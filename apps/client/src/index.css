@@ -81,3 +81,15 @@ body {
     0 8px 32px rgb(0 0 0 / 0.35),
     inset 0 1px 0 var(--color-os-glass-highlight);
 }
+
+/* Glass variant for full-width system chrome (menu bar) — same material,
+   but no rounding and only a bottom border, since it spans edge-to-edge
+   rather than floating as a panel. Kept distinct from .glass-panel rather
+   than overridden with utility classes so the "bar" recipe has one home. */
+.glass-bar {
+  background: var(--color-os-glass);
+  border-bottom: 1px solid var(--color-os-glass-border);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 1px 0 var(--color-os-glass-highlight) inset;
+}

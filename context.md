@@ -39,32 +39,53 @@ If this file ever says something that contradicts `krishnaos-ux-flow.md` or
 the product should do* — this file tracks *where we currently are* against
 that plan, not a replacement for the plan.
 
-## Current phase: Phase 2 in progress (Boot & Welcome)
+## Current phase: Phase 3 in progress (OS Shell)
 
 Per `krishnaos-coding-prompt.md`'s phase breakdown:
 
 - ✅ **Phase 1 (Foundation)** — complete. Monorepo scaffolding, design token
   system, routing skeleton, all four Zustand store skeletons, Express server
   with health/contact/content routes.
-- 🔶 **Phase 2 (Boot & Welcome)** — in progress.
-  - ✅ GSAP boot sequence (`boot/BootSequence.tsx`, `boot/useBootTimeline.ts`)
+- ✅ **Phase 2 (Boot & Welcome)** — functionally complete.
+  - GSAP boot sequence (`boot/BootSequence.tsx`, `boot/useBootTimeline.ts`)
     — full 6-beat timeline + compressed returning-visitor variant + Skip
     affordance, all implemented and matching the UX doc's spec.
-  - ✅ Liquid Glass Welcome screen (`welcome/WelcomeScreen.tsx`) — three
+  - Liquid Glass Welcome screen (`welcome/WelcomeScreen.tsx`) — three
     equal-weight entry buttons + skip-intro affordance.
-  - ✅ `OsRoot` orchestrates boot → welcome → mode via `AnimatePresence`.
+  - `OsRoot` orchestrates boot → welcome → mode via `AnimatePresence`.
   - ⬜ Not yet done: exact final copy for Welcome panel (currently
     placeholder text), any visual QA/polish pass, SF Pro vs Inter licensing
     decision (currently defaulting to Inter in the font stack).
-- ⬜ **Phase 3 (OS Shell)** — not started. Menu bar, dock, window manager,
-  Spotlight search. This is next.
+- 🔶 **Phase 3 (OS Shell)** — in progress. See `docs/07-os-shell.md` for full
+  detail.
+  - ✅ `os/appRegistry.ts` — single source of truth for the 7 confirmed app
+    pillars, read by Dock/Spotlight/WindowManager/search index.
+  - ✅ Menu bar (`os/menu-bar/MenuBar.tsx`) — KrishnaOS-wordmark-as-home +
+    persistent "Switch to Recruiter Mode" control.
+  - ✅ Dock (`os/dock/Dock.tsx`) — icon row, hover magnification, open/focus
+    indicators, opens windows via `useWindowStore`.
+  - ✅ Window Manager (`os/window-manager/WindowManager.tsx`) —
+    draggable/resizable/closable/minimizable windows via react-rnd +
+    `useWindowStore`, cascade positioning for newly-opened windows.
+  - ✅ Spotlight (`os/spotlight/Spotlight.tsx`) — ⌘K/Ctrl+K global shortcut,
+    Fuse.js fuzzy search over the app registry, arrow-key navigation.
+  - ✅ `Desktop.tsx` composes all four into Free Exploration's environment;
+    `OsRoot` now renders it for `mode === 'free'`.
+  - ⬜ Not yet done: real app content (windows currently show an honest
+    "not built yet" placeholder — that's Phase 4). No minimized-window
+    tray/indicator yet (matches the coding prompt's explicit Phase 3 scope
+    note — "don't over-scope"). Bundle size warning at build time (510KB)
+    from react-rnd + gsap + framer-motion combined — not yet addressed,
+    candidate for the Phase 7 polish/perf pass.
 - ⬜ **Phases 4–7** — not started (content apps, guided tour wiring,
   Recruiter Mode real content, polish pass).
 
-**Known gap to fix during Phase 3 or 6:** clicking "Recruiter Mode" from
-`WelcomeScreen` currently calls `setMode('recruiter')`, which renders
-`ModePlaceholder` inside `OsRoot` — it does NOT yet navigate to the real
-`/recruiter` route. See `docs/06-navigation-flow.md`'s "Current gap" note.
+**Known gap to fix during Phase 6:** clicking "Switch to Recruiter Mode"
+from the menu bar, or "Recruiter Mode" from `WelcomeScreen`, both correctly
+navigate/set mode now for the menu bar path — but `WelcomeScreen`'s button
+still only calls `setMode('recruiter')` without navigating to `/recruiter`.
+See `docs/06-navigation-flow.md`'s "Current gap" note — worth reconciling
+both entry points to behave identically before Phase 6.
 
 ## Hard constraints — do not violate these without explicit discussion
 
@@ -95,7 +116,7 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
 ## Environment / running locally
 
 ```bash
-cd "/Users/krishnagoyal/Development/personal projects/krishnaos"
+cd "/Users/krishnagoyal/Desktop/krishnaos"
 npm install
 npm run build -w packages/shared-types   # must run before first dev/build
 npm run dev                               # client :5173, server :4000

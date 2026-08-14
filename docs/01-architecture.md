@@ -68,8 +68,13 @@ src/
 ├── app/            App shell + routing (App.tsx, OsRoot.tsx)
 ├── boot/           GSAP boot sequence timeline
 ├── welcome/        Liquid Glass welcome screen
-├── os/             Menu bar, dock, window manager, spotlight, desktop
-│                   (empty scaffolding — Phase 3)
+├── os/             OS shell — Phase 3, built:
+│   ├── appRegistry.ts    Single source of truth for the 7 app pillars
+│   ├── menu-bar/          KrishnaOS-home + Recruiter Mode switch
+│   ├── dock/              Icon row, opens windows
+│   ├── window-manager/    Draggable/resizable windows (react-rnd + store)
+│   ├── spotlight/         ⌘K fuzzy search overlay
+│   └── desktop/           Composes the above into Free Exploration's shell
 ├── apps/           Content "apps" that render inside windows
 │                   (about, projects, skills, experience, education,
 │                    achievements, contact — empty scaffolding, Phase 4)
@@ -81,9 +86,10 @@ src/
 └── store/          Zustand stores (mode, window, boot, tour)
 ```
 
-This structure exists **before** most of the files inside it do — the empty
-folders under `os/`, `apps/`, and `tour/` are intentional scaffolding from
-Phase 1, not an oversight. They mark where Phase 3–5 work will land.
+The `apps/`, `tour/`, and `recruiter/`'s deeper content are still empty or
+minimal scaffolding from Phase 1 — they mark where Phase 4–5 work will land.
+`os/` graduated from scaffolding to real, working components in Phase 3; see
+`07-os-shell.md` for the full breakdown of what's in each subfolder and why.
 
 ### `apps/server`
 

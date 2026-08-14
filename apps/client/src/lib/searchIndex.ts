@@ -1,4 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
+import { APP_ORDER, APP_REGISTRY, type AppId } from '@/os/appRegistry';
 
 /**
  * A single searchable entry in the Spotlight index. `targetAppId` maps back
@@ -9,7 +10,7 @@ export interface SearchableEntry {
   title: string;
   subtitle?: string;
   keywords: string[];
-  targetAppId: string;
+  targetAppId: AppId;
 }
 
 const fuseOptions: IFuseOptions<SearchableEntry> = {
@@ -23,19 +24,33 @@ const fuseOptions: IFuseOptions<SearchableEntry> = {
 };
 
 /**
- * Placeholder index. Replace with real content once the apps/* content
- * (projects, experience, etc.) is wired to actual data.
+ * Extra search keywords per app, layered on top of the app registry (the
+ * single source of truth for title/id — see os/appRegistry.ts). Kept here
+ * rather than on the registry itself because "words a visitor might type
+ * to find this" is a search-specific concern, not a property of the app.
  */
-const placeholderEntries: SearchableEntry[] = [
-  { id: 'about', title: 'About', keywords: ['bio', 'who', 'intro'], targetAppId: 'about' },
-  { id: 'projects', title: 'Projects', keywords: ['work', 'case studies', 'portfolio'], targetAppId: 'projects' },
-  { id: 'skills', title: 'Skills', keywords: ['stack', 'tech', 'frontend'], targetAppId: 'skills' },
-  { id: 'experience', title: 'Experience', keywords: ['work history', 'jobs'], targetAppId: 'experience' },
-  { id: 'education', title: 'Education', keywords: ['school', 'degree'], targetAppId: 'education' },
-  { id: 'achievements', title: 'Achievements', keywords: ['awards', 'wins'], targetAppId: 'achievements' },
-  { id: 'contact', title: 'Contact', keywords: ['email', 'resume', 'github', 'linkedin'], targetAppId: 'contact' },
-];
+const SEARCH_KEYWORDS: Record<AppId, string[]> = {
+  about: ['bio', 'who', 'intro'],
+  projects: ['work', 'case studies', 'portfolio'],
+  skills: ['stack', 'tech', 'frontend'],
+  experience: ['work history', 'jobs'],
+  education: ['school', 'degree'],
+  achievements: ['awards', 'wins'],
+  contact: ['email', 'resume', 'github', 'linkedin'],
+};
 
-export function createSearchIndex(entries: SearchableEntry[] = placeholderEntries) {
+function buildDefaultEntries(): SearchableEntry[] {
+  return APP_ORDER.map((appId) => {
+    const app = APP_REGISTRY[appId];
+    return {
+      id: app.id,
+      title: app.title,
+      keywords: SEARCH_KEYWORDS[appId],
+      targetAppId: app.id,
+    };
+  });
+}
+
+export function createSearchIndex(entries: SearchableEntry[] = buildDefaultEntries()) {
   return new Fuse(entries, fuseOptions);
 }

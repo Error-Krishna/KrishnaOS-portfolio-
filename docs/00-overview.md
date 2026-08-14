@@ -20,6 +20,7 @@ Each doc assumes you've read the ones before it.
 | `04-styling-system.md` | Tailwind v4 tokens, the glass-panel pattern, no-JS-config approach | You're styling something new and unsure which token to use |
 | `05-boot-sequence.md` | The GSAP timeline beat-by-beat, sessionStorage skip logic | You're touching boot/, or explaining the animation system |
 | `06-navigation-flow.md` | Mode routing, boot→welcome→mode orchestration, cross-mode rules | You're adding a new mode or route |
+| `07-os-shell.md` | App registry, menu bar, dock, window manager, Spotlight | You're touching `os/*`, or adding a new app to the registry |
 | `decisions/` | Short ADR-style notes, one per major decision, dated | You want to know *when* and *why* a choice was made, or you're reconsidering one |
 
 ## The learning method we're using

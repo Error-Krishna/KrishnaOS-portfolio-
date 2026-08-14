@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { APP_REGISTRY, type AppId } from '@/os/appRegistry';
 
 export interface WindowPosition {
   x: number;
@@ -11,8 +12,9 @@ export interface WindowSize {
 }
 
 export interface OsWindow {
-  /** Stable id, typically the app id (e.g. "about", "projects"). */
-  id: string;
+  /** Stable id, matches an AppId in the app registry (e.g. "about", "projects"). */
+  id: AppId;
+  title: string;
   position: WindowPosition;
   size: WindowSize;
   zIndex: number;
@@ -21,18 +23,23 @@ export interface OsWindow {
 
 interface WindowStore {
   openWindows: OsWindow[];
-  focusedWindowId: string | null;
+  focusedWindowId: AppId | null;
 
-  openWindow: (id: string, opts?: Partial<Pick<OsWindow, 'position' | 'size'>>) => void;
-  closeWindow: (id: string) => void;
-  focusWindow: (id: string) => void;
-  minimizeWindow: (id: string) => void;
-  moveWindow: (id: string, position: WindowPosition) => void;
-  resizeWindow: (id: string, size: WindowSize) => void;
+  openWindow: (id: AppId, opts?: Partial<Pick<OsWindow, 'position' | 'size'>>) => void;
+  closeWindow: (id: AppId) => void;
+  focusWindow: (id: AppId) => void;
+  minimizeWindow: (id: AppId) => void;
+  moveWindow: (id: AppId, position: WindowPosition) => void;
+  resizeWindow: (id: AppId, size: WindowSize) => void;
 }
 
 const DEFAULT_SIZE: WindowSize = { width: 720, height: 480 };
-const DEFAULT_POSITION: WindowPosition = { x: 120, y: 96 };
+
+/** Slight cascade offset per newly-opened window so stacked windows don't
+ * open perfectly on top of each other — mirrors real desktop OS behavior. */
+const BASE_POSITION: WindowPosition = { x: 120, y: 96 };
+const CASCADE_STEP = 28;
+let cascadeCount = 0;
 
 let zIndexCounter = 1;
 
@@ -47,10 +54,14 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       return;
     }
     zIndexCounter += 1;
+    const appDef = APP_REGISTRY[id];
+    const cascadeOffset = (cascadeCount % 6) * CASCADE_STEP;
+    cascadeCount += 1;
     const newWindow: OsWindow = {
       id,
-      position: opts?.position ?? DEFAULT_POSITION,
-      size: opts?.size ?? DEFAULT_SIZE,
+      title: appDef.title,
+      position: opts?.position ?? { x: BASE_POSITION.x + cascadeOffset, y: BASE_POSITION.y + cascadeOffset },
+      size: opts?.size ?? appDef.defaultSize ?? DEFAULT_SIZE,
       zIndex: zIndexCounter,
       isMinimized: false,
     };

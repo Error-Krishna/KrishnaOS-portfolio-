@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { BootSequence } from '@/boot/BootSequence';
 import { WelcomeScreen } from '@/welcome/WelcomeScreen';
+import { Desktop } from '@/os/desktop/Desktop';
 import { useBootStore } from '@/store/useBootStore';
 import { useModeStore } from '@/store/useModeStore';
 
@@ -31,7 +32,19 @@ export function OsRoot() {
           </div>
         )}
 
-        {isBootComplete && mode !== 'welcome' && (
+        {isBootComplete && mode === 'free' && (
+          <motion.div
+            key="free"
+            className="h-full w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Desktop />
+          </motion.div>
+        )}
+
+        {isBootComplete && (mode === 'tour' || mode === 'recruiter') && (
           <motion.div
             key={mode}
             className="flex h-full w-full items-center justify-center"
@@ -50,7 +63,6 @@ export function OsRoot() {
 /**
  * Stand-in for the real destinations, which land in later phases:
  *   - 'tour'      → Phase 5 (tour controller + tour-bar over the OS shell)
- *   - 'free'      → Phase 3 (menu bar, dock, window manager)
  *   - 'recruiter' → Phase 6 (single-screen glass document view)
  * Kept here (not faked as finished UI) so the boot→welcome→mode wiring is
  * honestly testable today without pretending later phases are done.
