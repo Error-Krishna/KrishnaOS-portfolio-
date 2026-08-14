@@ -39,7 +39,7 @@ If this file ever says something that contradicts `krishnaos-ux-flow.md` or
 the product should do* — this file tracks *where we currently are* against
 that plan, not a replacement for the plan.
 
-## Current phase: Phase 5 complete (Guided Tour) — Phases 6–7 not started
+## Current phase: Phase 6 complete (Recruiter Mode) — Phase 7 not started
 
 Per `krishnaos-coding-prompt.md`'s phase breakdown:
 
@@ -100,8 +100,7 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     needed zero changes, exactly as `docs/07-os-shell.md` predicted.
   - ⬜ Not yet done: real content (every string in `content.ts` is an
     explicit placeholder), any `/api/content` wiring (content stays
-    hardcoded client-side per the server route's own comment), Recruiter
-    Mode's `featured`-filtered consumption of `PROJECTS_CONTENT` (Phase 6).
+    hardcoded client-side per the server route's own comment).
 - ✅ **Phase 5 (Guided Tour)** — complete. See `docs/09-guided-tour.md` for
   full detail.
   - ✅ `tour/tourSteps.ts` — maps the 8 UX-doc tour steps to `AppId`s
@@ -115,12 +114,16 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     Back/Next/Skip, plus a completion state offering "Explore Freely" /
     "Back to Welcome."
   - ✅ `OsRoot.tsx` updated: `mode === 'tour'` now renders `<Desktop />` +
-    `<TourController />` instead of `ModePlaceholder` — `ModePlaceholder`
-    is now Recruiter-Mode-only, pending Phase 6.
+    `<TourController />`, and `mode === 'recruiter'` now renders the real
+    `<RecruiterRoot />` instead of a placeholder.
   - ⬜ Not yet done: nothing scoped to Phase 5 remains. Real tour-bar copy
     (labels are functional, not final voice) is still an open question
     carried from the UX doc's §8.
-- ⬜ **Phases 6–7** — not started (Recruiter Mode real content, polish pass).
+- ✅ **Phase 6 (Recruiter Mode)** — complete. The direct-linkable `/recruiter`
+  route now renders the real condensed glass document view, filters featured
+  projects from the shared project data, and includes an escape hatch back
+  to Free Exploration.
+- ⬜ **Phase 7 (Polish pass)** — not started.
 
 Phase 3 is functionally complete against its scoped items in the coding
 prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
@@ -129,10 +132,10 @@ not gaps to close now.
 
 ## Hard constraints — do not violate these without explicit discussion
 
-1. **Don't fake finished UI for unbuilt phases.** `ModePlaceholder` is a
-   deliberate, honest stand-in (see `docs/06-navigation-flow.md`). If a
-   phase isn't built, say so in the UI — don't build a convincing-looking
-   screen with no real functionality behind it.
+1. **Don't fake finished UI for unbuilt phases.** If a phase isn't built,
+   say so in the UI — don't build a convincing-looking screen with no real
+   functionality behind it. The old `ModePlaceholder` pattern was used for
+   that during the build-up, but it is no longer part of the runtime flow.
 2. **Don't hardcode colors/spacing/fonts.** Everything visual goes through
    the token system in `apps/client/src/index.css`'s `@theme` block (see
    `docs/04-styling-system.md`). Token values are placeholders pending

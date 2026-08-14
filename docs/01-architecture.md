@@ -79,17 +79,19 @@ src/
 │                   (about, projects, skills, experience, education,
 │                    achievements, contact — empty scaffolding, Phase 4)
 ├── tour/           Guided tour controller + tour-bar UI (Phase 5)
-├── recruiter/      Recruiter Mode's single-screen view
+├── recruiter/      Recruiter Mode's single-screen view (Phase 6)
 ├── tokens/          Design tokens as TS constants, if/when needed
 │                   alongside the CSS custom properties in index.css
 ├── lib/            Utilities: API client, Fuse.js search index
 └── store/          Zustand stores (mode, window, boot, tour)
 ```
 
-The `apps/`, `tour/`, and `recruiter/`'s deeper content are still empty or
-minimal scaffolding from Phase 1 — they mark where Phase 4–5 work will land.
-`os/` graduated from scaffolding to real, working components in Phase 3; see
-`07-os-shell.md` for the full breakdown of what's in each subfolder and why.
+The `apps/` and `tour/` deeper content are still empty or minimal scaffolding
+from Phase 1 — they mark where Phase 4–5 work landed. `recruiter/` graduated
+to a real Phase 6 screen that consumes the same shared content slices as the
+windowed apps, but in a condensed single-screen layout. `os/` graduated from
+scaffolding to real, working components in Phase 3; see `07-os-shell.md` for
+the full breakdown of what's in each subfolder and why.
 
 ### `apps/server`
 
@@ -117,10 +119,10 @@ defined here.
 ## How the packages connect
 
 ```
-┌─────────────────┐         ┌─────────────────┐
-│  apps/client     │         │  apps/server     │
-│  (React/Vite)    │         │  (Express)       │
-└────────┬─────────┘         └────────┬─────────┘
+ ┌─────────────────┐         ┌─────────────────┐
+ │  apps/client     │         │  apps/server     │
+ │  (React/Vite)    │         │  (Express)       │
+ └────────┬─────────┘         └────────┬─────────┘
          │                             │
          │   import from                │   import from
          │   '@krishnaos/shared-types'  │   '@krishnaos/shared-types'
@@ -165,7 +167,7 @@ useModeStore.mode === 'welcome'
 useModeStore.mode === 'tour' | 'free' | 'recruiter'
         │
         ▼
-  Real destination (Phase 3/5/6) or, right now, <ModePlaceholder />
+  Real destination (Desktop or RecruiterRoot), depending on the mode
 ```
 
 This flow is described in full, with the reasoning behind each transition,

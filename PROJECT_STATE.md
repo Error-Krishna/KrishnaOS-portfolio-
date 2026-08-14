@@ -4,21 +4,22 @@ Last updated: 2026-08-14
 
 ## Current Work
 
-- Repository audit and state sync only. No implementation work is currently in progress.
+- Phase 6 recruiter-mode implementation landed; phase/state docs are being synced.
 
 ## Changes Made
 
 - Verified the codebase against `context.md`, the kickoff prompt, and the living docs.
-- Confirmed Phases 1-5 are implemented in the client and supported by the server/shared-types packages.
-- Confirmed Recruiter Mode is still a Phase 6 placeholder and the content copy in `lib/content.ts` is still placeholder text by design.
-- Confirmed the shell architecture is wired through `OsRoot`, `Desktop`, `useWindowStore`, `useModeStore`, `useBootStore`, and `useTourStore`.
+- Replaced the Recruiter Mode placeholder with a real single-screen glass view in `apps/client/src/recruiter/RecruiterRoot.tsx`.
+- Wired Recruiter Mode to consume shared content directly, including `Project.featured` filtering for the condensed case-study column.
+- Updated `OsRoot` so `mode === 'recruiter'` renders the real recruiter view instead of the old placeholder.
+- Updated the phase docs and project context to reflect the new recruiter-mode state.
 
 ## Ongoing / Incomplete
 
-- Phase 6 is not started: Recruiter Mode still renders a placeholder instead of the real single-screen glass document view.
 - Phase 7 is not started: polish, accessibility, performance, and responsive fallback work remain.
 - Final content pass is still open: the portfolio copy in `apps/client/src/lib/content.ts` is intentionally placeholder content.
 - Final voice/copy decisions are still open for the Welcome panel and tour-bar labels.
+- Recruiter Mode still uses placeholder content text and link targets by design pending the final content pass.
 
 ## Important Notes
 
@@ -26,8 +27,9 @@ Last updated: 2026-08-14
 - `useWindowStore` owns open/focus/z-index/minimize/resize state; minimized windows still have no tray or restore UI.
 - `APP_REGISTRY` remains the single source of truth for the seven confirmed content apps, and Spotlight/Dock/WindowManager all read from it.
 - `ContactApp` is wired to the Express `/api/contact` route and MongoDB; `/api/content` still exists as a placeholder surface.
+- `RecruiterRoot` syncs the global mode store on direct route visits so `/recruiter` stays honest even when boot/welcome are bypassed.
 - There is an unrelated modified file in the working tree: `AGENTS.md`. I did not change it.
 
 ## Next Step
 
-- Start Phase 6 by replacing the Recruiter Mode placeholder with the real condensed glass view and filtering featured projects from the shared project data.
+- Start Phase 7 with polish and responsive fallback work, starting from the recruiter-mode layout and the rest of the OS shell.

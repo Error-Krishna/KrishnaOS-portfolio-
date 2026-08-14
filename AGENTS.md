@@ -17,7 +17,7 @@ phase — this file is about **how to write code here**, not what to build.
 See `docs/01-architecture.md` for the full reasoning. Quick reference:
 
 | Building... | Goes in... |
-|---|---|
+| ----------- | ---------- |
 | New content window | `apps/client/src/apps/<name>/` |
 | New OS chrome (dock, menu bar, etc.) | `apps/client/src/os/<feature>/` |
 | New global state | `apps/client/src/store/use<Name>Store.ts` |
@@ -125,12 +125,12 @@ See `docs/04-styling-system.md` for the full reasoning.
 4. Update the relevant `/docs/*.md` file(s) if you made an architectural
    decision, added a pattern, or changed how something works.
 
-
 ## Project State
 
 `PROJECT_STATE.md` is the single source of truth for the current development state.
 
 While working:
+
 - Keep `PROJECT_STATE.md` updated as meaningful changes are made.
 - Record completed changes, ongoing/incomplete work, important discoveries, and the logical next step.
 - Do not wait until the end of the task to update it.
@@ -138,12 +138,15 @@ While working:
 - Never invent or guess project state.
 
 At the start of a task:
+
 - Read `PROJECT_STATE.md` to understand what the previous agent was doing.
 
 Before making a significant change:
+
 - Update the current work/ongoing section if necessary.
 
 After completing a meaningful change:
+
 - Update the changes made section and next step.
 
 The goal is that if the current AI agent suddenly runs out of tokens, another AI agent can read `PROJECT_STATE.md` and immediately continue the work without needing the previous conversation.

@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { BootSequence } from '@/boot/BootSequence';
 import { WelcomeScreen } from '@/welcome/WelcomeScreen';
 import { Desktop } from '@/os/desktop/Desktop';
+import { RecruiterRoot } from '@/recruiter/RecruiterRoot';
 import { TourController } from '@/tour/TourController';
 import { useBootStore } from '@/store/useBootStore';
 import { useModeStore } from '@/store/useModeStore';
@@ -52,45 +53,8 @@ export function OsRoot() {
           </motion.div>
         )}
 
-        {isBootComplete && mode === 'recruiter' && (
-          <motion.div
-            key={mode}
-            className="flex h-full w-full items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <ModePlaceholder mode={mode} />
-          </motion.div>
-        )}
+        {isBootComplete && mode === 'recruiter' && <RecruiterRoot key={mode} />}
       </AnimatePresence>
-    </div>
-  );
-}
-
-/**
- * Stand-in for Recruiter Mode's real destination, which lands in Phase 6
- * (single-screen glass document view). Kept here (not faked as finished
- * UI) so the boot→welcome→mode wiring is honestly testable today without
- * pretending a later phase is done. Tour no longer uses this — as of
- * Phase 5 it renders the real `<Desktop />` + `<TourController />` above.
- */
-function ModePlaceholder({ mode }: { mode: string }) {
-  const setMode = useModeStore((s) => s.setMode);
-
-  return (
-    <div className="glass-panel flex flex-col items-center gap-os-4 px-os-8 py-os-6 text-center">
-      <p className="text-os-title font-semibold capitalize">{mode} mode</p>
-      <p className="text-os-body text-[color:var(--color-os-text-secondary)]">
-        Not built yet — arriving in a later phase.
-      </p>
-      <button
-        type="button"
-        onClick={() => setMode('welcome')}
-        className="text-os-caption text-[color:var(--color-os-accent)] hover:underline"
-      >
-        ← Back to Welcome
-      </button>
     </div>
   );
 }

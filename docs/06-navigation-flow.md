@@ -15,7 +15,11 @@ of four things:
 
 {isBootComplete && mode === 'welcome' && <WelcomeScreen />}
 
-{isBootComplete && mode !== 'welcome' && <ModePlaceholder mode={mode} />}
+{isBootComplete && mode === 'free' && <Desktop />}
+
+{isBootComplete && mode === 'tour' && <Desktop />}
+
+{isBootComplete && mode === 'recruiter' && <RecruiterRoot />}
 ```
 
 This directly implements the UX doc's §1 flow diagram:
@@ -33,7 +37,7 @@ new on top of each other) because boot → Welcome is meant to be **one
 continuous handoff** (see `05-boot-sequence.md`'s note on the glass panel
 handoff), not two elements briefly overlapping.
 
-## Why `ModePlaceholder` exists, and why it's honest about being fake
+## Why the old placeholder existed during the build-out
 
 ```tsx
 function ModePlaceholder({ mode }: { mode: string }) {
@@ -47,21 +51,21 @@ function ModePlaceholder({ mode }: { mode: string }) {
 }
 ```
 
-Tour, Free Exploration, and Recruiter Mode don't have real implementations
-yet (that's Phase 3/5/6). Rather than leave `OsRoot` broken until those
-phases are built, or fake a finished-looking screen that isn't actually
-functional, `ModePlaceholder` is a deliberately honest stand-in — it tells
-you which mode you're in and that it's not built, and gives you a way back.
+Tour, Free Exploration, and Recruiter Mode originally used `ModePlaceholder`
+while their phases were being built. Rather than leave `OsRoot` broken, or
+fake a finished-looking screen that wasn't actually functional, the
+placeholder kept the state machine testable and honest. It has since been
+retired now that the real views are in place.
 
 **Why this matters beyond just "it looks nicer than a crash":** it means the
 boot → welcome → mode-selection wiring is *actually testable right now*,
 today, with real user interaction, rather than only testable once every
-later phase is finished. You can click "Take a Tour," see the app correctly
+later phase is finished. You could click "Take a Tour," see the app correctly
 register `mode === 'tour'`, and click back to Welcome — proving the state
-machine itself is correct, independent of whether Tour's real content
-exists yet. When Phase 5 builds the real Tour experience, `ModePlaceholder`'s
-`mode === 'tour'` branch gets replaced with the real component; nothing about
-`OsRoot`'s orchestration logic needs to change.
+machine itself was correct, independent of whether Tour's real content
+existed yet. When Phase 5 built the real Tour experience, the
+`ModePlaceholder` branch was replaced with the real component; nothing about
+`OsRoot`'s orchestration logic needed to change.
 
 ## Mapping UX doc §7 (cross-mode navigation rules) to code
 
@@ -70,11 +74,11 @@ and what's still pending:
 
 | Rule | Status | Where |
 |---|---|---|
-| 1. No mode is a dead end | **Partially implemented** | `ModePlaceholder`'s "Back to Welcome" button satisfies this today. Real per-mode escape hatches (e.g. Recruiter Mode's "Curious? Explore further" link) are Phase 6. |
+| 1. No mode is a dead end | **Implemented** | `RecruiterRoot` has a visible escape hatch back to the full desktop, while the OS modes themselves have persistent chrome controls for home / recruiter switching. |
 | 2. No progress is silently lost | **Store-level guarantee in place** | `useTourStore.skipTour()` never touches `useWindowStore` — see `03-state-management.md`. Not yet exercised by real UI since Tour/Free aren't built. |
 | 3. Recruiter Mode always one action away | **Implemented** | `MenuBar`'s "Switch to Recruiter Mode" control (persistent across Free/Tour) and `WelcomeScreen`'s Recruiter Mode button both `setMode('recruiter')` + `navigate('/recruiter')`. |
 | 4. Search is a universal escape valve | **Implemented** | `os/spotlight/Spotlight.tsx` — global ⌘K/Ctrl+K listener, Fuse.js fuzzy search over `os/appRegistry.ts` via `lib/searchIndex.ts`. |
-| 5. Returning to Welcome is always possible | **Implemented** (generically) | `ModePlaceholder`'s back button. Will be superseded by the "KrishnaOS wordmark in menu bar = home" pattern the UX doc specifies, once the menu bar exists. |
+| 5. Returning to Welcome is always possible | **Implemented** | `MenuBar`'s KrishnaOS wordmark acts as home in Free/Tour, and Recruiter Mode can always escape to the desktop first before returning home. |
 
 This table is meant to be updated as each phase lands — it's a live checklist
 of "is the navigation contract from the UX doc actually holding," not a
@@ -100,19 +104,18 @@ reached only via `OsRoot`'s internal state:
 
 A visitor arriving directly at `yoursite.com/recruiter` (e.g. from a link a
 recruiter received) never touches `OsRoot`, never sees the boot sequence,
-never passes through Welcome — `RecruiterRoot` renders immediately. This
-satisfies both of the UX doc's Recruiter Mode requirements simultaneously:
-"one action away from Welcome" (when reached via the in-app button, which
-will call `setMode('recruiter')` and route to `/recruiter`) *and*
-"directly linkable" (when reached via a bookmarked/shared URL).
+never passes through Welcome — `RecruiterRoot` renders immediately and
+syncs the global mode store to `recruiter` on mount. This satisfies both of
+the UX doc's Recruiter Mode requirements simultaneously: "one action away
+from Welcome" (when reached via the in-app button, which calls
+`setMode('recruiter')` and route to `/recruiter`) *and* "directly linkable"
+(when reached via a bookmarked/shared URL).
 
-**Resolved:** `WelcomeScreen`'s Recruiter Mode button now calls both
+**Resolved:** `WelcomeScreen`'s Recruiter Mode button calls both
 `setMode('recruiter')` and `navigate('/recruiter')`, mirroring `MenuBar`'s
-`switchToRecruiterMode` exactly. Both entry points into Recruiter Mode
-(Welcome and the persistent menu-bar control) now behave identically —
-neither leaves the app in a state where `mode` and the URL disagree.
-`RecruiterRoot` itself still renders the honest Phase 6 placeholder; only
-the *navigation* half of this gap was in Phase 3's scope to fix.
+`switchToRecruiterMode` exactly. `RecruiterRoot` itself now renders the real
+Phase 6 single-screen view, with a built-in escape hatch back to Free
+Exploration.
 
 ## Why the boot sequence isn't skippable via routing
 

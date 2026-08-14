@@ -22,6 +22,7 @@ Each doc assumes you've read the ones before it.
 | `06-navigation-flow.md` | Mode routing, boot→welcome→mode orchestration, cross-mode rules | You're adding a new mode or route |
 | `07-os-shell.md` | App registry, menu bar, dock, window manager, Spotlight | You're touching `os/*`, or adding a new app to the registry |
 | `decisions/` | Short ADR-style notes, one per major decision, dated | You want to know *when* and *why* a choice was made, or you're reconsidering one |
+| `10-recruiter-mode.md` | Recruiter Mode's condensed single-screen view | You're touching the `/recruiter` fast path, escape hatch, or featured-project filtering |
 
 ## The learning method we're using
 

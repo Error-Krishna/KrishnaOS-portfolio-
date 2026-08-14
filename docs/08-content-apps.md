@@ -59,7 +59,9 @@ down to a condensed highlight list without duplicating content, per the
 coding prompt §5's explicit note: *"this is exactly how Recruiter Mode's
 '2–4 featured projects' filters from the same data source as the full
 Projects app."* Phase 4 doesn't consume `featured` at all — it's there for
-Phase 6 to read later.
+Phase 6 to read later. Recruiter Mode now does read it: the
+`RecruiterRoot` screen filters `PROJECTS_CONTENT` down to
+`project.featured === true` before rendering its compact project column.
 
 ## `Desktop.tsx`: the one file that changed to go from placeholder to real
 
@@ -118,8 +120,9 @@ inline, without losing what the visitor typed.
 
 - **No Guided Tour wiring.** The tour driving these same windows open/closed
   per step is Phase 5 — `useTourStore` isn't referenced anywhere in `apps/*`.
-- **No Recruiter Mode consumption of this content.** `RecruiterRoot` still
-  renders its Phase 6 placeholder; `Project.featured` is defined but unread
-  until then.
+- **No Recruiter Mode consumption of this content.** `RecruiterRoot` now
+  consumes the shared content slices directly and filters featured projects
+  from `PROJECTS_CONTENT`; there is still no separate recruiter-only data
+  source or `/api/content` fetch.
 - **No `/api/content` fetches.** Content is hardcoded per the server route's
   own comment; wiring a real content API is future work, not a Phase 4 gap.

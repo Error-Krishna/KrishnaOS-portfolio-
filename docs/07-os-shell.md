@@ -224,7 +224,7 @@ export function Desktop() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <MenuBar />
-      <WindowManager renderAppContent={renderPlaceholderAppContent} />
+      <WindowManager renderAppContent={renderAppContent} />
       <Dock />
       <Spotlight />
     </div>
@@ -252,17 +252,18 @@ breakdown. Before Phase 4 this was `renderPlaceholderAppContent`, an honest
 `Desktop.tsx`, exactly as designed — `WindowManager` itself was never
 touched.
 
-## `OsRoot` wiring: `free` mode now renders the real thing
+## `OsRoot` wiring: the real modes now render real content
 
 Before Phase 3, `OsRoot` rendered `ModePlaceholder` for all three non-welcome
 modes. Now:
 
 ```tsx
 {isBootComplete && mode === 'free' && <Desktop />}
-{isBootComplete && (mode === 'tour' || mode === 'recruiter') && <ModePlaceholder mode={mode} />}
+{isBootComplete && mode === 'tour' && <Desktop />}
+{isBootComplete && mode === 'recruiter' && <RecruiterRoot />}
 ```
 
-`tour` and `recruiter` still correctly show the honest "not built yet"
-placeholder — Phase 5 and Phase 6 haven't happened. Only `free` graduated to
-real content, because Phase 3 is specifically the OS shell that Free
-Exploration lives in.
+`free` and `tour` both render the real desktop shell, with Tour layering its
+controller on top in `OsRoot`. `recruiter` now renders the Phase 6
+single-screen glass document view directly. The old full-screen
+`ModePlaceholder` is no longer part of the runtime flow.
