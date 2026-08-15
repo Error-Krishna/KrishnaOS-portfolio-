@@ -91,7 +91,7 @@ src/
 │                   alongside the CSS custom properties in index.css
 ├── lib/            Utilities: API client, Fuse.js search index,
 │                   hardcoded content data (content.ts), useMediaQuery
-└── store/          Zustand stores (mode, window, boot, tour, theme)
+└── store/          Zustand stores (mode, window, boot, tour, theme, widgets)
 ```
 
 `os/` graduated from scaffolding to real, working components in Phase 3 and

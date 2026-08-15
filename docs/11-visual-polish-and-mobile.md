@@ -19,6 +19,7 @@ decision recorded in ADR form; this doc covers the implementation detail.
 - `apps/client/src/store/useThemeStore.ts`
 - `apps/client/src/app/ThemeManager.tsx`
 - `apps/client/src/os/widgets/StatusWidgets.tsx`
+- `apps/client/src/store/useWidgetBoardStore.ts`
 - `apps/client/src/lib/useMediaQuery.ts`
 - `apps/client/public/wallpapers/krishnaos-{light,dark}.svg`
 - Mobile-responsive variants added to `Dock.tsx`, `MenuBar.tsx`,
@@ -39,14 +40,10 @@ All glyphs are plain inline SVG using `currentColor` for stroke — no icon
 library dependency added, consistent with the "every dependency earns its
 place" principle (`context.md` hard constraint #3) and `docs/02-tech-stack.md`.
 
-**Worth double-checking:** `appRegistry.ts`'s `AppDefinition` also carries
-an `icon: AppId` field, currently always set to the exact same value as
-`id` on every entry (e.g. `about: { id: 'about', icon: 'about', ... }`).
-Since `AppGlyph` already takes an `appId: AppId` directly and every
-consumer passes the window/app's own id straight in, this field looks
-redundant as written — either it's a forward-looking hook for a future case
-where an app's icon and id diverge, or it's dead weight that should be
-removed. Worth a deliberate call rather than leaving it unexamined.
+**Worth double-checking:** `appRegistry.ts` deliberately has **no** separate
+`icon` field — `AppGlyph({ appId })` in `os/icons.tsx` resolves glyphs
+directly from each entry's `id`. A redundant `icon: AppId` field that always
+mirrored `id` was removed after the docs cross-check confirmed nothing read it.
 
 ## Theming: `useThemeStore` + `ThemeManager` + CSS `[data-os-theme]`
 
@@ -107,11 +104,15 @@ note was written for.
 The UX flow doc §5 explicitly gates desktop widgets behind "used sparingly...
 only if it earns its place," and names two candidate examples: a
 "Now Playing"-style widget, or a live GitHub-activity widget. This
-implementation builds the GitHub-activity one (plus Clock, Weather, and a
-"Timeline" widget showing phase-completion progress) rather than Now
-Playing — reasonable, since a portfolio has no music to play, and a
-contribution graph is directly relevant to a frontend-engineer portfolio
-in a way a Spotify widget wouldn't be.
+implementation builds the GitHub-activity one (plus Clock, Weather, a
+"Timeline" widget showing phase-completion progress, a rotating **Featured
+Project** card, and a **Quick Note** sticky) rather than Now Playing —
+reasonable, since a portfolio has no music to play, and a contribution
+graph is directly relevant to a frontend-engineer portfolio in a way a
+Spotify widget wouldn't be. Featured Project reads `FEATURED_PROJECTS`
+from `lib/content.ts` (same export Recruiter Mode uses); Quick Note
+autosaves to `localStorage` and opts out of drag-start via
+`data-widget-interactive` on its textarea.
 
 **No new dependency was added for any of this** — Weather calls
 `api.open-meteo.com` directly via `fetch` (no API key required, geolocation-
@@ -132,6 +133,43 @@ Weather requires geolocation permission; the widget degrades gracefully
 through three explicit states (`'Location pending'` → `'Weather'` /
 `'Weather unavailable'` / `'Location blocked'`) rather than showing a blank
 or broken widget if permission is denied.
+
+**Each widget is independently positioned and independently draggable —
+not one shared board.** This wasn't the original implementation: the first
+pass had a single `useWidgetBoardStore.position` shared by all four
+widgets inside one draggable panel, so dragging any one of them dragged
+all four together (Krishna flagged this directly — "I want all widgets to
+move independently like an actual OS system, not as a bundle"). The fix
+changed `useWidgetBoardStore`'s shape from one `position` to a
+`positions: Record<WidgetId, WidgetPosition>` map, and split the single
+`StatusWidgets` board component into a `DraggableWidget` wrapper that each
+of the six widgets (`Clock`, `Weather`, `GitHub`, `Timeline`, `Featured
+Project`, `Quick Note`) renders independently through — its own glass
+card, its own drag surface, its own arrow-key nudging, its own
+double-click-to-reset, its own `localStorage` entry. **The whole card is
+the drag surface** (like macOS Stickies), not just a header handle —
+interactive controls inside a widget (links, the Quick Note textarea,
+Featured Project dot buttons) opt out via `isInteractiveTarget` /
+`data-widget-interactive` so they still work normally. None of that state
+is shared between widgets anymore; this is now structurally the same
+relationship every window in `WindowManager` already has to
+`useWindowStore` (many independent entries in one store, not one entry
+that fans out to many UI elements) — see
+`docs/03-state-management.md`'s `useWindowStore` section for why that
+pattern was already the house style before widgets existed.
+
+Default starting positions are laid out in two non-overlapping columns
+along the right edge (`WIDGET_LAYOUT` in `useWidgetBoardStore.ts` is a
+starting-position heuristic only, not a constraint enforced afterward),
+but that's purely a starting arrangement — a visitor can drag any single
+widget anywhere on screen and the others won't move. On mobile, widgets
+still render as a plain scrollable stack with no drag affordance at all
+(touch-dragging small cards around a phone screen isn't a meaningful
+interaction, matching the reasoning already applied to `WindowManager` and
+`Dock` below).
+
+Featured Project auto-rotation pauses on hover and respects
+`prefers-reduced-motion: reduce`.
 
 The Timeline widget's progress dots are driven by a hardcoded
 `index < 6` check against `DEVELOPMENT_MILESTONES`'s array position, not by
@@ -163,13 +201,13 @@ desktop" message:
 - **`StatusWidgets`** → stacks as a scrollable column instead of a
   fixed-position floating panel.
 
-**Known bug, unverified visually:** `WindowManager`'s mobile container
-className is `'relative flex-1 min-h-0 flex-col gap-os-4 overflow-auto...'`
-— it includes `flex-1` and `flex-col` but never the base `flex` display
-class, so the intended flex-column layout may not actually be applying.
-Worth a visual check on an actual mobile viewport (or browser dev tools'
-device emulation) before calling mobile support fully verified, not just
-type-checked.
+**Resolved:** `WindowManager`'s mobile container className was missing the
+base `flex` display class (`'relative flex-1 min-h-0 flex-col gap-os-4
+overflow-auto...'` — `flex-1`/`flex-col` with no `flex` to activate them).
+Fixed to `'relative flex flex-1 min-h-0 flex-col gap-os-4 overflow-auto...'`.
+Still worth a manual visual check on an actual device/emulator to confirm
+the stacked-sheet layout looks right now that the flex context is actually
+active — type-checking alone won't catch a layout regression here.
 
 ## What's still open in Phase 7
 
@@ -177,17 +215,13 @@ type-checked.
   still open — `react-rnd` + `gsap` + `framer-motion` combined).
 - No accessibility/keyboard-navigation audit yet (coding prompt item 18).
 - No minimized-window tray/indicator (Phase 3's deferred item).
-- Final copy pass (Welcome panel, tour-bar labels, `content.ts`) is still
-  outstanding — unrelated to this visual work, tracked since Phase 2/4.
-- **`RecruiterRoot`'s Resume/GitHub/LinkedIn "Quick Tiles" aren't real
-  links yet.** They're static `<div>`s with a label and description, no
-  `href`, no download action — the UX flow doc §6 explicitly requires
-  "Resume (prominent download/view action)" and "GitHub/LinkedIn
-  (icon-linked, always visible)." This is a real gap against the UX doc's
-  Recruiter Mode requirements, not yet tracked anywhere else in the docs —
-  flagged here since it surfaced during a documentation cross-check rather
-  than during the phase itself.
-- `appRegistry.ts`'s `icon: AppId` field's purpose is unconfirmed (see
-  above) — worth a deliberate keep-or-remove decision.
-- `GITHUB_USERNAME`'s fallback value should be confirmed as real or
-  placeholder (see above).
+- Final copy pass (Welcome panel, tour-bar labels, `content.ts`,
+  `PROFILE_LINKS` resume/LinkedIn URLs) is still outstanding — unrelated
+  to this visual work, tracked since Phase 2/4.
+- **`RecruiterRoot`'s Resume/LinkedIn quick tiles still need real URLs**
+  in `PROFILE_LINKS` during the final content pass. GitHub is wired via
+  `PROFILE_LINKS.github`; tiles without a URL show an honest
+  "Link pending final content pass" label instead of faking a dead link.
+- `GITHUB_USERNAME`'s fallback value (`'Error-Krishna'`, matching
+  `.env.example`) should be confirmed as your real handle before shipping
+  (see above).

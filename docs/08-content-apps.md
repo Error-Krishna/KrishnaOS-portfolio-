@@ -19,10 +19,20 @@ Phase 4 existed: *"content can stay hardcoded client-side"* until/unless it
 moves into a real MongoDB-backed API. Phase 4 takes that at face value —
 `lib/content.ts` exports typed constants (`PROJECTS_CONTENT`,
 `EXPERIENCE_CONTENT`, `EDUCATION_CONTENT`, `ACHIEVEMENTS_CONTENT`,
-`ABOUT_CONTENT`, `SKILLS_CONTENT`), each app component imports the slice it
-needs and renders it. No fetch, no loading state, no `/api/content` calls
-yet — that's the deferred "real backend flex" the route comment describes,
-not something Phase 4 needed to build to satisfy the coding prompt's scope.
+`ABOUT_CONTENT`, `SKILLS_CONTENT`, `PROFILE_LINKS`, `FEATURED_PROJECTS`),
+each app component imports the slice it needs and renders it. No fetch, no
+loading state, no `/api/content` calls yet — that's the deferred "real
+backend flex" the route comment describes, not something Phase 4 needed to
+build to satisfy the coding prompt's scope.
+
+**`FEATURED_PROJECTS`** is a derived export —
+`PROJECTS_CONTENT.filter(p => p.featured)` — consumed by Recruiter Mode
+and the desktop Featured Project widget so neither duplicates the filter.
+
+**`PROFILE_LINKS`** holds external resume/GitHub/LinkedIn URLs for Recruiter
+Mode's quick tiles. GitHub is populated; resume/LinkedIn are empty strings
+pending the final content pass (Recruiter Mode shows those tiles as honestly
+disabled until the URLs land here).
 
 **Every value in `content.ts` is placeholder copy, clearly marked as such**
 in the file's own header comment. This mirrors the project's existing
@@ -120,9 +130,8 @@ inline, without losing what the visitor typed.
 
 - **No Guided Tour wiring.** The tour driving these same windows open/closed
   per step is Phase 5 — `useTourStore` isn't referenced anywhere in `apps/*`.
-- **No Recruiter Mode consumption of this content.** `RecruiterRoot` now
-  consumes the shared content slices directly and filters featured projects
-  from `PROJECTS_CONTENT`; there is still no separate recruiter-only data
-  source or `/api/content` fetch.
+- **No separate recruiter-only data source or `/api/content` fetch.**
+  `RecruiterRoot` and the Featured Project widget read the same
+  `lib/content.ts` exports (`FEATURED_PROJECTS`, `PROFILE_LINKS`, etc.).
 - **No `/api/content` fetches.** Content is hardcoded per the server route's
   own comment; wiring a real content API is future work, not a Phase 4 gap.

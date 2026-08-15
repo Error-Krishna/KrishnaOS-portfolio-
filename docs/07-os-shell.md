@@ -256,8 +256,9 @@ rather than getting a separate implementation) without touching the
 components themselves.
 
 Phase 7 extends this composition with the theme-aware wallpaper and the
-status widget stack, so the shell now feels much closer to a macOS desktop:
-top menu bar, glass layers, app dock, real icons, and live widgets.
+movable status widget board, so the shell now feels much closer to a macOS
+desktop: top menu bar, glass layers, app dock, real icons, and live widgets
+that can be repositioned instead of being locked to one corner.
 
 **`renderAppContent` is passed in as a prop, not imported by
 `WindowManager` directly:** this keeps `WindowManager` from needing to know

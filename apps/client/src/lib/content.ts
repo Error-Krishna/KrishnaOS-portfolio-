@@ -22,6 +22,20 @@ export const ABOUT_CONTENT = {
   ],
 };
 
+/**
+ * External profile links surfaced in Recruiter Mode's quick tiles and anywhere
+ * else the UX doc requires resume/GitHub/LinkedIn to be one click away.
+ *
+ * ⚠️ PLACEHOLDER URLS. Swap `resume` and `linkedin` during the final content
+ * pass. `github` defaults to a username-derived URL below — override it here
+ * if the profile URL ever diverges from github.com/<username>.
+ */
+export const PROFILE_LINKS = {
+  resume: '',
+  github: 'https://github.com/Error-Krishna',
+  linkedin: '',
+} as const;
+
 export const PROJECTS_CONTENT: Project[] = [
   {
     id: 'project-krishnaos',
@@ -116,3 +130,15 @@ export const SKILLS_CONTENT: SkillGroup[] = [
   { id: 'state-data', label: 'State & Data', skills: ['Zustand', 'REST'] },
   { id: 'tooling', label: 'Tooling', skills: ['Vite', 'Git', 'Node.js'] },
 ];
+
+/**
+ * The subset of `PROJECTS_CONTENT` flagged `featured: true` — exactly the
+ * mechanism the coding prompt §5 described in advance: "this is exactly
+ * how Recruiter Mode's '2–4 featured projects' filters from the same data
+ * source as the full Projects app." `RecruiterRoot.tsx` and the
+ * `FeaturedProjectWidget` (`os/widgets/StatusWidgets.tsx`) both read this
+ * one export rather than each computing their own filter over
+ * `PROJECTS_CONTENT` — a second `.filter(p => p.featured)` living in
+ * `RecruiterRoot.tsx` was consolidated into this single source of truth.
+ */
+export const FEATURED_PROJECTS: Project[] = PROJECTS_CONTENT.filter((project) => project.featured);

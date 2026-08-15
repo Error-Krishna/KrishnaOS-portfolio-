@@ -44,6 +44,23 @@ Both paths reuse the real `useWindowStore`/`useModeStore` — Recruiter Mode
 never had its own contact form; it just gives fast access into the desktop
 apps that already exist.
 
+## Quick tiles (Resume / GitHub / LinkedIn)
+
+UX doc §6 requires resume/GitHub/LinkedIn to be prominent and one click
+away. `RecruiterRoot` reads `PROFILE_LINKS` from `lib/content.ts` (same
+single source of truth pattern as the rest of the content apps):
+
+- **GitHub** — wired via `PROFILE_LINKS.github` (currently a real URL).
+- **Resume / LinkedIn** — still empty strings in `PROFILE_LINKS` pending
+  the final content pass; those tiles render honestly as disabled cards
+  with a "Link pending final content pass" label rather than faking dead
+  links. Swap the URLs in `content.ts` when ready — no component changes
+  needed.
+
+Tiles with a URL render as external `<a>` tags with focus/hover styles
+matching the rest of the glass UI. Resume uses the `download` attribute
+when a PDF URL is provided.
+
 ## Mode sync on direct visits
 
 ```tsx

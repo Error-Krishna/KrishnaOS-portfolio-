@@ -1,28 +1,29 @@
 # State Management
 
-## Why five stores instead of one
+## Why six stores instead of one
 
-`apps/client/src/store/` has five separate Zustand stores:
+`apps/client/src/store/` has six separate Zustand stores:
 
 - `useBootStore` — has the boot sequence finished?
 - `useModeStore` — which top-level mode is active (welcome/tour/free/recruiter)?
 - `useWindowStore` — which windows are open, where, in what order?
 - `useTourStore` — is the guided tour active, and on which step?
 - `useThemeStore` — is the OS following system, light, or dark theme?
+- `useWidgetBoardStore` — where is each desktop widget positioned?
 
 A natural question: why not one `useAppStore` with everything in it?
 
-**Because these five things change at completely different rates and are read
+**Because these six things change at completely different rates and are read
 by completely different parts of the app**, and Zustand's whole performance
 model depends on components subscribing to narrow slices. If everything lived
 in one store, a component that only cares about `mode` would still risk
 re-rendering when `openWindows` changes (unless you're very careful with
-selectors everywhere, all the time). Splitting into five stores means the
+selectors everywhere, all the time). Splitting into six stores means the
 *boundary itself* protects you — a component importing `useWindowStore`
 structurally cannot be affected by a boot-sequence state change, because
 it's not even looking at that store.
 
-There's also a conceptual reason: these five things really are different
+There's also a conceptual reason: these six things really are different
 kinds of state with different lifetimes:
 
 | Store | Lifetime | Changes on... |
@@ -32,6 +33,7 @@ kinds of state with different lifetimes:
 | `useWindowStore` | Continuously, once in Free/Tour mode | Every window open/close/drag/resize/focus |
 | `useTourStore` | Only relevant during a guided tour | Every tour step advance |
 | `useThemeStore` | Persistent preference, or until system theme changes | Theme mode changes or system appearance changes |
+| `useWidgetBoardStore` | Persistent layout, desktop only | Each widget drag, keyboard nudge, or reset |
 
 Splitting along those lifetime boundaries makes each store's job obvious from
 its name and its file.
@@ -235,6 +237,35 @@ that has to be remembered and hand-coded at every exit point.
 (`tour/TourController.tsx`) reads `stepIndex`/`isActive` and calls
 `nextStep`/`previousStep`/`skipTour`, driving `useWindowStore.openWindow`
 per step. See `docs/09-guided-tour.md` for the full breakdown.
+
+## `useWidgetBoardStore`
+
+```ts
+// apps/client/src/store/useWidgetBoardStore.ts
+{
+  positions: Record<WidgetId, WidgetPosition>;
+  setPosition: (id, position) => void;
+  resetPosition: (id) => void;
+  resetAll: () => void;
+}
+```
+
+Added in Phase 7 alongside the desktop widget stack. Each widget
+(`clock`, `weather`, `github`, `timeline`, `featuredProject`, `quickNote`)
+has its own entry in `positions` — dragging one never moves another, the
+same pattern `useWindowStore` uses for windows.
+
+**Why this is a separate store, not folded into `useWindowStore`:** widgets
+are not windows. They don't participate in focus/z-index/minimize, they're
+not in `APP_REGISTRY`, and they persist across reloads via `localStorage`
+(key `krishnaos:widgetPositions`) rather than living only in session memory.
+Keeping them out of `useWindowStore` avoids widening every window subscriber
+when a widget moves.
+
+**`WIDGET_LAYOUT` is a starting-position heuristic only** — it lays widgets
+out in two non-overlapping columns on first load. After that, each widget's
+position is whatever the visitor dragged it to, clamped on resize via
+`ResizeObserver` in `StatusWidgets.tsx`'s `DraggableWidget`.
 
 ## How the stores compose in `OsRoot`
 

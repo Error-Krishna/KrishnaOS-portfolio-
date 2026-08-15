@@ -46,7 +46,8 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
 - ✅ **Phase 1 (Foundation)** — complete. Monorepo scaffolding, design token
   system, routing skeleton, `useModeStore`/`useWindowStore` skeletons,
   Express server with health/contact/content routes. (`useTourStore` and
-  `useThemeStore` were added later, in Phases 5 and 7 respectively — five
+  `useThemeStore` were added later, in Phases 5 and 7 respectively —
+  `useWidgetBoardStore` joined in Phase 7 alongside the widget stack — six
   Zustand stores total as of now, not four.)
 - ✅ **Phase 2 (Boot & Welcome)** — functionally complete.
   - GSAP boot sequence (`boot/BootSequence.tsx`, `boot/useBootTimeline.ts`)
@@ -121,33 +122,48 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
   - ⬜ Not yet done: nothing scoped to Phase 5 remains. Real tour-bar copy
     (labels are functional, not final voice) is still an open question
     carried from the UX doc's §8.
-- ✅ **Phase 6 (Recruiter Mode)** — functionally complete, one real gap
-  found during a documentation cross-check. The direct-linkable `/recruiter`
-  route renders the real condensed glass document view, filters featured
-  projects from the shared project data, and includes two escape hatches
-  back to Free Exploration. **Gap:** the Resume/GitHub/LinkedIn "Quick
-  Tiles" are static, non-interactive `<div>`s — no `href`, no download
-  action. The UX flow doc §6 explicitly requires these to be a "prominent
-  download/view action" (resume) and "icon-linked, always visible"
-  (GitHub/LinkedIn). Not yet fixed — see `docs/11-visual-polish-and-mobile.md`'s
-  "What's still open" section.
+- ✅ **Phase 6 (Recruiter Mode)** — functionally complete. The direct-linkable
+  `/recruiter` route renders the real condensed glass document view, filters
+  featured projects from the shared project data, and includes two escape
+  hatches back to Free Exploration. Quick tiles read `PROFILE_LINKS` from
+  `lib/content.ts` — GitHub is wired; Resume/LinkedIn URLs are still empty
+  placeholders pending the final content pass (tiles without a URL show an
+  honest disabled state, not fake links).
 - 🔶 **Phase 7 (Polish pass)** — in progress. Theme switching, wallpaper
   variants, app icons, widgets, and mobile-friendly shell/navigation are now
   implemented (see `docs/11-visual-polish-and-mobile.md` and
   `docs/decisions/0004-real-mobile-responsiveness.md` for the deliberate
   mobile-support deviation from the original spec); accessibility/
-  performance tuning and final content remain. A documentation cross-check
-  this session surfaced a few small unresolved items worth a deliberate
-  look, not yet bugs-confirmed:
-  - Possible CSS bug: `WindowManager`'s mobile container is missing the
-    base `flex` class (has `flex-1`/`flex-col` but not `flex` itself) —
-    worth a visual check on a real/emulated mobile viewport.
-  - `StatusWidgets.tsx`'s `GITHUB_USERNAME` fallback value
-    (`'Error-Krishna'`) should be confirmed as a real handle or swapped for
-    an obvious placeholder.
-  - `appRegistry.ts`'s `AppDefinition.icon: AppId` field is always set to
-    the same value as `id` on every entry and looks unused/redundant as
-    written — worth a deliberate keep-or-remove call.
+  performance tuning and final content remain.
+  - ✅ **Fixed this session:** widgets previously shared one
+    `useWidgetBoardStore.position` inside a single draggable board, so
+    dragging any one widget moved all four together. Krishna flagged this
+    directly. `useWidgetBoardStore` now keys positions per widget
+    (`positions: Record<WidgetId, WidgetPosition>`), and `StatusWidgets.tsx`
+    renders each widget through its own `DraggableWidget` — independent
+    drag (whole-card surface, not just a header handle), independent
+    keyboard nudging, independent reset, independent `localStorage` entry.
+    Two additional widgets landed: **Featured Project** (reads
+    `FEATURED_PROJECTS` from `content.ts`, auto-rotates with reduced-motion
+    respect) and **Quick Note** (local sticky, autosaves to `localStorage`).
+    See `docs/11-visual-polish-and-mobile.md`'s Widgets section.
+  - ✅ **Fixed this session:** `WindowManager`'s mobile container was
+    missing the base `flex` display class (had `flex-1`/`flex-col` with
+    nothing activating them). Added `flex`. Still worth a manual visual
+    check on a real/emulated mobile viewport to confirm the stacked-sheet
+    layout actually looks right now.
+  - ✅ **Fixed this session:** Recruiter Mode quick tiles now read
+    `PROFILE_LINKS` from `content.ts`. GitHub is a real external link;
+    Resume/LinkedIn stay honestly disabled until URLs are filled in during
+    the final content pass.
+  - ✅ **Fixed this session:** removed the redundant `icon: AppId` field
+    from `appRegistry.ts` — `AppGlyph` already resolves icons from `id`
+    directly, and nothing read the duplicate field.
+  - ⬜ Still open: `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` and
+    all placeholder copy in `content.ts` await the final content pass.
+    `GITHUB_USERNAME`'s fallback (`'Error-Krishna'`, matching
+    `.env.example`) should be confirmed as your real handle before shipping.
+    Accessibility/perf audit and bundle-size pass remain Phase 7 follow-ups.
 
 Phase 3 is functionally complete against its scoped items in the coding
 prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
@@ -200,26 +216,28 @@ From `krishnaos-coding-prompt.md` §6 and the UX doc §8:
 - **Exact Welcome panel / tour-bar copy** — currently placeholder/functional
   text, not final voice/copy.
 - **Final content pass** — the portfolio copy in `apps/client/src/lib/content.ts`
-  is still intentionally placeholder content, and the resume/GitHub/LinkedIn
-  link targets are still placeholder decisions until the final content pass.
+  is still intentionally placeholder content. `PROFILE_LINKS.resume` and
+  `PROFILE_LINKS.linkedin` are still empty strings — Recruiter Mode shows
+  those tiles as honestly disabled until real URLs land in the same file.
 - **Final voice/copy decisions** — the Welcome panel and tour-bar labels are
   still functional copy, not final voice.
-- **Recruiter Mode's Resume/GitHub/LinkedIn tiles need real links** — see
-  Phase 6 note above. Blocked on having actual resume/GitHub/LinkedIn URLs
-  to point at, which likely lands alongside the final content pass anyway.
+- **Confirm GitHub handle** — `VITE_GITHUB_USERNAME` / the `'Error-Krishna'`
+  fallback should be verified as your real handle before shipping.
 
 ## Note on documentation hygiene (read if starting a fresh session)
 
-As of this session, `docs/` was cross-checked file-by-file against the
-actual code (not just trusted at face value) for the first time since
-Phase 6/7 were built directly by Krishna outside a docs-first flow. Two
-stale/duplicate docs (`11-phase-7-polish.md` vs `11-theme-and-polish.md`)
-were found and reconciled — `docs/11-visual-polish-and-mobile.md` is now
-the canonical Phase 7 doc; the old `11-phase-7-polish.md` is a redirect
-stub only. If you're an AI agent and notice a doc that seems to contradict
-the code, **verify against the actual source file before trusting either**
-— this project has had real drift before, and catching it early is exactly
-what this documentation system is for.
+`docs/` has now been cross-checked file-by-file against the actual code
+twice: once after Phase 6/7 were built directly by Krishna outside a
+docs-first flow, and again this session after the widget-independence fix.
+Three stale/duplicate Phase 7 docs existed at one point
+(`11-phase-7-polish.md`, `11-theme-and-polish.md`,
+`11-visual-polish-and-mobile.md`) from multiple sessions covering the same
+slice — `docs/11-visual-polish-and-mobile.md` is the canonical one; both
+`11-phase-7-polish.md` and `11-theme-and-polish.md` are now redirect stubs
+only, carrying no content of their own. If you're an AI agent and notice a
+doc that seems to contradict the code, **verify against the actual source
+file before trusting either** — this project has had real drift before,
+and catching it early is exactly what this documentation system is for.
 
 ## For AI agents picking up this project
 

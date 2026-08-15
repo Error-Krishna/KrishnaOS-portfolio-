@@ -1,28 +1,41 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ABOUT_CONTENT, ACHIEVEMENTS_CONTENT, EDUCATION_CONTENT, EXPERIENCE_CONTENT, PROJECTS_CONTENT, SKILLS_CONTENT } from '@/lib/content';
+import {
+  ABOUT_CONTENT,
+  ACHIEVEMENTS_CONTENT,
+  EDUCATION_CONTENT,
+  EXPERIENCE_CONTENT,
+  FEATURED_PROJECTS,
+  PROFILE_LINKS,
+  SKILLS_CONTENT,
+} from '@/lib/content';
 import { Wallpaper } from '@/os/theme/Wallpaper';
 import { ThemeToggle } from '@/os/theme/ThemeToggle';
 import { useModeStore } from '@/store/useModeStore';
 import { useWindowStore } from '@/store/useWindowStore';
 
-const FEATURED_PROJECTS = PROJECTS_CONTENT.filter((project) => project.featured);
-
 const QUICK_TILES = [
   {
     label: 'Resume',
     detail: 'Condensed profile, one-screen and recruiter-friendly.',
+    href: PROFILE_LINKS.resume,
+    download: true,
   },
   {
     label: 'GitHub',
     detail: 'Project source and implementation details live here.',
+    href: PROFILE_LINKS.github,
   },
   {
     label: 'LinkedIn',
     detail: 'Professional history and network touchpoints.',
+    href: PROFILE_LINKS.linkedin,
   },
 ] as const;
+
+const quickTileClassName =
+  'rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-3 transition-colors hover:bg-[color:var(--color-os-glass-highlight)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-os-accent)]';
 
 /**
  * Direct-linkable Recruiter Mode entry (route: /recruiter). Per UX doc §6,
@@ -82,17 +95,42 @@ export function RecruiterRoot() {
             </div>
 
             <div className="grid gap-os-2 sm:grid-cols-2 lg:max-w-md">
-              {QUICK_TILES.map((tile) => (
-                <div
-                  key={tile.label}
-                  className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-3"
-                >
-                  <p className="text-os-caption font-semibold uppercase tracking-wide text-[color:var(--color-os-text-tertiary)]">
-                    {tile.label}
-                  </p>
-                  <p className="mt-os-1 text-os-caption text-[color:var(--color-os-text-secondary)]">{tile.detail}</p>
-                </div>
-              ))}
+              {QUICK_TILES.map((tile) => {
+                const tileBody = (
+                  <>
+                    <p className="text-os-caption font-semibold uppercase tracking-wide text-[color:var(--color-os-text-tertiary)]">
+                      {tile.label}
+                    </p>
+                    <p className="mt-os-1 text-os-caption text-[color:var(--color-os-text-secondary)]">{tile.detail}</p>
+                    {!tile.href && (
+                      <p className="mt-os-1 text-os-caption text-[color:var(--color-os-text-tertiary)]">
+                        Link pending final content pass
+                      </p>
+                    )}
+                  </>
+                );
+
+                if (!tile.href) {
+                  return (
+                    <div key={tile.label} className={quickTileClassName} aria-disabled="true">
+                      {tileBody}
+                    </div>
+                  );
+                }
+
+                return (
+                  <a
+                    key={tile.label}
+                    href={tile.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    {...('download' in tile && tile.download ? { download: true } : {})}
+                    className={quickTileClassName}
+                  >
+                    {tileBody}
+                  </a>
+                );
+              })}
 
               <button
                 type="button"

@@ -81,7 +81,7 @@ frontend-only iteration.
 - Both entry points into Recruiter Mode (`WelcomeScreen`, `MenuBar`) now
   behave identically — `setMode('recruiter')` + `navigate('/recruiter')`
 
-**Phase 4 (Content Apps): in progress**
+**Phase 4 (Content Apps): complete**
 - `lib/content.ts` — hardcoded, typed placeholder content for all 7 apps
 - All 7 content apps built (`About`, `Projects`, `Skills`, `Experience`,
   `Education`, `Achievements`, `Contact`) and wired into the window manager
@@ -94,9 +94,25 @@ frontend-only iteration.
   the real `Desktop` (not a restricted environment) alongside itself
 - `TourBar` — progress + Back/Next/Skip, plus a completion state
 
-**Still to build:** real content copy (currently explicit placeholders),
-Real wallpaper/icons/widgets, Recruiter Mode's single-screen layout, polish
-pass — Phases 6–7 in the coding prompt.
+**Phase 6 (Recruiter Mode): functionally complete**
+- Direct-linkable `/recruiter` route, single-screen glass document view,
+  reads from the same `lib/content.ts` the real apps use
+- One partial gap: Resume/LinkedIn quick-tile URLs are still empty in
+  `PROFILE_LINKS` (`content.ts`) pending the final content pass — GitHub is
+  wired; see `docs/10-recruiter-mode.md`
+
+**Phase 7 (Polish pass): in progress**
+- Real theming (`useThemeStore`, light/dark, system-aware), real wallpaper
+  assets, hand-drawn SVG app icons, real mobile-responsive layouts for
+  Dock/MenuBar/WindowManager (a deliberate deviation from the original
+  "desktop-only" spec — see `docs/decisions/0004-real-mobile-responsiveness.md`)
+- Desktop widgets (Clock, Weather, GitHub, Timeline) — each **independently**
+  positioned and draggable, not one shared bundle
+- Still open: final content copy, accessibility/perf pass, a couple of
+  small flagged items in `docs/11-visual-polish-and-mobile.md`
+
+See [`context.md`](./context.md) for the full, currently-accurate phase
+breakdown — this section is a summary, that file is the source of truth.
 
 ## Notes / deviations from the original spec
 

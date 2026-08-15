@@ -164,7 +164,7 @@ export function WindowManager({ renderAppContent }: WindowManagerProps) {
     <div
       className={`${
         isMobile
-          ? 'relative flex-1 min-h-0 flex-col gap-os-4 overflow-auto px-os-4 pb-os-28 pt-os-4'
+          ? 'relative flex flex-1 min-h-0 flex-col gap-os-4 overflow-auto px-os-4 pb-os-28 pt-os-4'
           : 'absolute inset-0 overflow-hidden'
       }`}
     >

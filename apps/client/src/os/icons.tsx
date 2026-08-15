@@ -85,6 +85,32 @@ export function TimelineGlyph({ className }: IconProps) {
   );
 }
 
+export function RocketGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M12 3c2.5 1.5 4 4.3 4 7.8 0 2-1 4.2-2.5 5.7L12 18l-1.5-1.5C9 15 8 12.8 8 10.8 8 7.3 9.5 4.5 12 3Z"
+      />
+      <circle {...iconStrokeProps()} cx="12" cy="10" r="1.6" />
+      <path {...iconStrokeProps()} d="M9.5 15.5 7 17.5l.6-3.2" />
+      <path {...iconStrokeProps()} d="M14.5 15.5 17 17.5l-.6-3.2" />
+      <path {...iconStrokeProps()} d="M10.5 18.5c.5 1 2.5 1 3 0" />
+    </svg>
+  );
+}
+
+export function NoteGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M6 4.5h9L18.5 8v11.5H6z" />
+      <path {...iconStrokeProps()} d="M15 4.5V8h3.5" />
+      <path {...iconStrokeProps()} d="M8.5 12h7" />
+      <path {...iconStrokeProps()} d="M8.5 15h5" />
+    </svg>
+  );
+}
+
 function AboutGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
