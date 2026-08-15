@@ -573,10 +573,8 @@ export function StatusWidgets() {
   );
 
   if (isMobile) {
-    return <div className="grid gap-os-3 px-os-4 pt-os-20 pb-os-4 md:hidden">{widgets}</div>;
+    return <div className="grid gap-os-3 px-os-4 pt-os-20 pb-os-4">{widgets}</div>;
   }
 
-  return (
-    <div className="pointer-events-none fixed left-0 top-0 z-30 hidden h-full w-full md:block">{widgets}</div>
-  );
+  return <div className="pointer-events-none fixed left-0 top-0 z-30 block h-full w-full">{widgets}</div>;
 }

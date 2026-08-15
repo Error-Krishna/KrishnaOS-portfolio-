@@ -201,13 +201,36 @@ desktop" message:
 - **`StatusWidgets`** → stacks as a scrollable column instead of a
   fixed-position floating panel.
 
-**Resolved:** `WindowManager`'s mobile container className was missing the
-base `flex` display class (`'relative flex-1 min-h-0 flex-col gap-os-4
-overflow-auto...'` — `flex-1`/`flex-col` with no `flex` to activate them).
-Fixed to `'relative flex flex-1 min-h-0 flex-col gap-os-4 overflow-auto...'`.
-Still worth a manual visual check on an actual device/emulator to confirm
-the stacked-sheet layout looks right now that the flex context is actually
-active — type-checking alone won't catch a layout regression here.
+**Resolved (this session, reported directly by Krishna as "can't see the widgets"):**
+The root cause wasn't the `flex` fix above — it was `StatusWidgets.tsx`'s own
+desktop return, which gated visibility with `hidden md:block`:
+
+```tsx
+// before — visibility decided TWICE, by two different, misaligned rules
+if (isMobile) {
+  return <div className="... md:hidden">{widgets}</div>;
+}
+return <div className="... hidden ... md:block">{widgets}</div>;
+```
+
+`isMobile` (from `useMediaQuery.ts`, `max-width: 767px`) already decides
+which branch renders — that's the actual, single source of truth for
+mobile vs. desktop everywhere else in this codebase (`Dock.tsx`,
+`MenuBar.tsx`, `WindowManager.tsx` all just branch on `isMobile` and
+render different JSX, nothing more). `StatusWidgets` was the one place
+that *also* layered Tailwind's `md:` responsive classes on top of that
+same decision. Two problems followed from that redundancy: it did nothing
+useful (the `isMobile` branch already decided which JSX tree exists at
+all), and worse, Tailwind's `md` breakpoint (768px) and `useIsMobile`'s
+threshold (767px) are two independently-defined, not-quite-matching
+numbers — at any viewport width where the two disagreed, or if a browser's
+reported width and CSS media-query evaluation timing ever diverged even
+briefly, the desktop return path's `hidden` could apply with `md:block`
+never kicking in, and the widgets rendered but were invisible.
+
+Fixed by deleting `md:hidden`/`hidden ... md:block` entirely — `isMobile`
+alone now decides visibility, matching every other responsive component in
+the project.
 
 ## What's still open in Phase 7
 

@@ -152,13 +152,26 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     nothing activating them). Added `flex`. Still worth a manual visual
     check on a real/emulated mobile viewport to confirm the stacked-sheet
     layout actually looks right now.
-  - ✅ **Fixed this session:** Recruiter Mode quick tiles now read
-    `PROFILE_LINKS` from `content.ts`. GitHub is a real external link;
+  - ✅ **Fixed this session (previous pass):** Recruiter Mode quick tiles now
+    read `PROFILE_LINKS` from `content.ts`. GitHub is a real external link;
     Resume/LinkedIn stay honestly disabled until URLs are filled in during
     the final content pass.
-  - ✅ **Fixed this session:** removed the redundant `icon: AppId` field
-    from `appRegistry.ts` — `AppGlyph` already resolves icons from `id`
+  - ✅ **Fixed this session (previous pass):** removed the redundant `icon: AppId`
+    field from `appRegistry.ts` — `AppGlyph` already resolves icons from `id`
     directly, and nothing read the duplicate field.
+  - ✅ **Fixed this session:** Krishna reported "can't see the widgets." Root
+    cause was `StatusWidgets.tsx`'s desktop return using `hidden md:block`
+    to gate visibility — redundant with (and not perfectly aligned to)
+    `useIsMobile()`'s own `max-width: 767px` check, which already decided
+    which branch rendered. Tailwind's `md` breakpoint is 768px, one pixel
+    off from `useIsMobile`'s 767px threshold; at the boundary (or if a
+    browser's reported width/media-query evaluation ever diverged even
+    briefly) the desktop widgets could render but stay `display: none`.
+    Fixed by removing `md:hidden`/`hidden ... md:block` entirely —
+    `isMobile` alone now controls visibility, matching `Dock.tsx`,
+    `MenuBar.tsx`, and `WindowManager.tsx`, which never had this redundancy.
+    See `docs/11-visual-polish-and-mobile.md`'s Mobile Responsiveness
+    section for the full writeup.
   - ⬜ Still open: `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` and
     all placeholder copy in `content.ts` await the final content pass.
     `GITHUB_USERNAME`'s fallback (`'Error-Krishna'`, matching

@@ -67,6 +67,19 @@ Welcome." The blur exists so the visitor senses "there's a world behind this
 glass" without that world competing for attention before they've made a
 choice.
 
+**This beat now renders through `<Wallpaper variant="boot" />`
+(`os/theme/Wallpaper.tsx`), not an inline gradient.** Originally this was a
+plain CSS `radial-gradient` written directly inside `BootSequence.tsx`; once
+Phase 7 built a real, theme-aware `Wallpaper` component (light/dark SVG
+assets, mobile-aware blur strength — see `docs/11-visual-polish-and-mobile.md`),
+`BootSequence` was updated to use it instead, via a `variant` prop that lets
+the same component serve boot, the desktop shell, and Recruiter Mode with
+slightly different blur/overlay strength per surface rather than three
+separate implementations. The GSAP timeline itself is unaffected — it still
+animates opacity on the *wrapping* `<div ref={wallpaperRef}>`, so swapping
+what's inside that div for a real component didn't require any timeline
+changes.
+
 **Beat 6 (glass panel, 0.5s):** `ease: 'power2.out'`, scale from `0.96` to
 `1`, **no bounce or overshoot**. The UX doc is explicit about this too: "no
 bounce/overshoot — restrained, not playful." A bouncy spring here would
