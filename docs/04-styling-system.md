@@ -106,10 +106,10 @@ This is a plain CSS class, not a Tailwind utility, because it's a **composite
 pattern** — five properties working together to create one visual effect
 (the "Liquid Glass" material) — not a single-property utility like `p-4`.
 Defining it once here and applying `className="glass-panel"` wherever glass
-material is needed (Welcome panel, boot sequence panel, mode placeholders)
-means the glass *look* stays perfectly consistent, and if the recipe needs
-to change (e.g. adjusting blur intensity project-wide), there's exactly one
-place to edit.
+material is needed (the Welcome panel, boot sequence panel, every window's
+chrome, Dock, widgets, Recruiter Mode's sections) means the glass *look*
+stays perfectly consistent, and if the recipe needs to change (e.g.
+adjusting blur intensity project-wide), there's exactly one place to edit.
 
 **The four layers that make up the glass effect, and why each exists:**
 1. **`background` (8% white)** — the base tint. Very low opacity because
@@ -159,10 +159,22 @@ body {
 }
 ```
 
-This is intentional and will matter a lot once the OS shell (Phase 3) is
-built: KrishnaOS is meant to feel like an actual operating system, not a
-scrolling webpage. The browser page itself should never scroll — instead,
-*individual windows* will have their own internal scroll regions once the
-window manager exists. If you ever find yourself needing the whole page to
-scroll for a new feature, that's a signal something is being built outside
-the OS metaphor, not a signal to remove this rule.
+This is intentional: KrishnaOS is meant to feel like an actual operating
+system, not a scrolling webpage. The browser page itself never scrolls —
+instead, *individual windows* have their own internal scroll regions
+(`WindowManager`'s content area is `flex-1 overflow-auto`, confirmed in
+`07-os-shell.md`), and content components (`apps/*`) never add their own
+`overflow-auto` or outer padding, since that would fight the chrome that
+already provides both (see `08-content-apps.md`).
+
+**`RecruiterRoot` is a deliberate, narrow exception.** As a full-page route
+rather than a windowed app, its own `<main>` uses `overflow-auto` directly
+— there's no window chrome above it to own scrolling on its behalf, so the
+page itself has to. This doesn't violate the rule's intent ("the OS shell
+owns scroll regions, not an unbounded page") so much as it reflects that
+Recruiter Mode isn't part of the desktop-OS metaphor at all — it's
+explicitly a resume-shaped document view (see `10-recruiter-mode.md`), so
+it's reasonable for it to scroll like one. If you ever find a *desktop-mode*
+screen needing the whole page to scroll, that's the real signal something's
+being built outside the OS metaphor — not Recruiter Mode's `overflow-auto`,
+which is a considered exception, not a crack in the rule.

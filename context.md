@@ -44,8 +44,10 @@ that plan, not a replacement for the plan.
 Per `krishnaos-coding-prompt.md`'s phase breakdown:
 
 - ✅ **Phase 1 (Foundation)** — complete. Monorepo scaffolding, design token
-  system, routing skeleton, all four Zustand store skeletons, Express server
-  with health/contact/content routes.
+  system, routing skeleton, `useModeStore`/`useWindowStore` skeletons,
+  Express server with health/contact/content routes. (`useTourStore` and
+  `useThemeStore` were added later, in Phases 5 and 7 respectively — five
+  Zustand stores total as of now, not four.)
 - ✅ **Phase 2 (Boot & Welcome)** — functionally complete.
   - GSAP boot sequence (`boot/BootSequence.tsx`, `boot/useBootTimeline.ts`)
     — full 6-beat timeline + compressed returning-visitor variant + Skip
@@ -80,7 +82,7 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     prompt's explicit Phase 3 scope note — "don't over-scope"). Bundle size
     warning at build time (510KB) from react-rnd + gsap + framer-motion
     combined — not yet addressed, candidate for the Phase 7 polish/perf pass.
-- 🔶 **Phase 4 (Content Apps)** — in progress. See `docs/08-content-apps.md`
+- ✅ **Phase 4 (Content Apps)** — complete. See `docs/08-content-apps.md`
   for full detail.
   - ✅ `lib/content.ts` — hardcoded, typed content data for all 7 apps
     (`ABOUT_CONTENT`, `PROJECTS_CONTENT`, `SKILLS_CONTENT`,
@@ -119,13 +121,33 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
   - ⬜ Not yet done: nothing scoped to Phase 5 remains. Real tour-bar copy
     (labels are functional, not final voice) is still an open question
     carried from the UX doc's §8.
-- ✅ **Phase 6 (Recruiter Mode)** — complete. The direct-linkable `/recruiter`
-  route now renders the real condensed glass document view, filters featured
-  projects from the shared project data, and includes an escape hatch back
-  to Free Exploration.
+- ✅ **Phase 6 (Recruiter Mode)** — functionally complete, one real gap
+  found during a documentation cross-check. The direct-linkable `/recruiter`
+  route renders the real condensed glass document view, filters featured
+  projects from the shared project data, and includes two escape hatches
+  back to Free Exploration. **Gap:** the Resume/GitHub/LinkedIn "Quick
+  Tiles" are static, non-interactive `<div>`s — no `href`, no download
+  action. The UX flow doc §6 explicitly requires these to be a "prominent
+  download/view action" (resume) and "icon-linked, always visible"
+  (GitHub/LinkedIn). Not yet fixed — see `docs/11-visual-polish-and-mobile.md`'s
+  "What's still open" section.
 - 🔶 **Phase 7 (Polish pass)** — in progress. Theme switching, wallpaper
   variants, app icons, widgets, and mobile-friendly shell/navigation are now
-  implemented; accessibility/performance tuning and final content remain.
+  implemented (see `docs/11-visual-polish-and-mobile.md` and
+  `docs/decisions/0004-real-mobile-responsiveness.md` for the deliberate
+  mobile-support deviation from the original spec); accessibility/
+  performance tuning and final content remain. A documentation cross-check
+  this session surfaced a few small unresolved items worth a deliberate
+  look, not yet bugs-confirmed:
+  - Possible CSS bug: `WindowManager`'s mobile container is missing the
+    base `flex` class (has `flex-1`/`flex-col` but not `flex` itself) —
+    worth a visual check on a real/emulated mobile viewport.
+  - `StatusWidgets.tsx`'s `GITHUB_USERNAME` fallback value
+    (`'Error-Krishna'`) should be confirmed as a real handle or swapped for
+    an obvious placeholder.
+  - `appRegistry.ts`'s `AppDefinition.icon: AppId` field is always set to
+    the same value as `id` on every entry and looks unused/redundant as
+    written — worth a deliberate keep-or-remove call.
 
 Phase 3 is functionally complete against its scoped items in the coding
 prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
@@ -182,6 +204,22 @@ From `krishnaos-coding-prompt.md` §6 and the UX doc §8:
   link targets are still placeholder decisions until the final content pass.
 - **Final voice/copy decisions** — the Welcome panel and tour-bar labels are
   still functional copy, not final voice.
+- **Recruiter Mode's Resume/GitHub/LinkedIn tiles need real links** — see
+  Phase 6 note above. Blocked on having actual resume/GitHub/LinkedIn URLs
+  to point at, which likely lands alongside the final content pass anyway.
+
+## Note on documentation hygiene (read if starting a fresh session)
+
+As of this session, `docs/` was cross-checked file-by-file against the
+actual code (not just trusted at face value) for the first time since
+Phase 6/7 were built directly by Krishna outside a docs-first flow. Two
+stale/duplicate docs (`11-phase-7-polish.md` vs `11-theme-and-polish.md`)
+were found and reconciled — `docs/11-visual-polish-and-mobile.md` is now
+the canonical Phase 7 doc; the old `11-phase-7-polish.md` is a redirect
+stub only. If you're an AI agent and notice a doc that seems to contradict
+the code, **verify against the actual source file before trusting either**
+— this project has had real drift before, and catching it early is exactly
+what this documentation system is for.
 
 ## For AI agents picking up this project
 

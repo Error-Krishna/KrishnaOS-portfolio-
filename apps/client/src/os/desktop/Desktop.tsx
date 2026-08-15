@@ -18,11 +18,13 @@ import { ContactApp } from '@/apps/contact/ContactApp';
  * The full interactive desktop environment, per coding prompt Phase 3:
  * menu bar + dock + window manager + Spotlight, composed together.
  *
- * This is Free Exploration's home (UX flow doc §5) and will also be what
- * the Guided Tour (§4) renders underneath its tour-bar once Phase 5 wires
- * that up — the tour doesn't get its own separate desktop, it drives this
- * same one, per the UX doc: "rather than a modal carousel, the tour drives
- * the OS itself."
+ * This is Free Exploration's home (UX flow doc §5) and is also what the
+ * Guided Tour (§4) renders underneath its tour-bar — `OsRoot.tsx` mounts
+ * this same `<Desktop />` for both `mode === 'free'` and `mode === 'tour'`,
+ * with `<TourController />` layered alongside it only in tour mode. The
+ * tour never gets a separate, restricted desktop of its own, per the UX
+ * doc: "rather than a modal carousel, the tour drives the OS itself." See
+ * docs/09-guided-tour.md for the full breakdown.
  */
 export function Desktop() {
   return (

@@ -17,12 +17,12 @@ by completely different parts of the app**, and Zustand's whole performance
 model depends on components subscribing to narrow slices. If everything lived
 in one store, a component that only cares about `mode` would still risk
 re-rendering when `openWindows` changes (unless you're very careful with
-selectors everywhere, all the time). Four stores means the *boundary itself*
-protects you — a component importing `useWindowStore` structurally cannot be
-affected by a boot-sequence state change, because it's not even looking at
-that store.
+selectors everywhere, all the time). Splitting into five stores means the
+*boundary itself* protects you — a component importing `useWindowStore`
+structurally cannot be affected by a boot-sequence state change, because
+it's not even looking at that store.
 
-There's also a conceptual reason: these four things really are different
+There's also a conceptual reason: these five things really are different
 kinds of state with different lifetimes:
 
 | Store | Lifetime | Changes on... |
@@ -114,7 +114,6 @@ appropriate to switch modes is a UI/UX concern that lives closer to the UI.
 // apps/client/src/store/useThemeStore.ts
 {
   themeMode: ThemeMode; // 'system' | 'light' | 'dark'
-  resolvedTheme: 'light' | 'dark';
   setThemeMode: (mode: ThemeMode) => void;
 }
 ```
@@ -123,6 +122,20 @@ Theme is the only preference that needs to flow across the entire shell, so
 it gets its own store. That keeps the subscription surface narrow: components
 can read theme only when they actually need it instead of sharing a giant
 store with boot, mode, window, and tour state.
+
+**The store only holds the raw `themeMode` choice, not a resolved
+light/dark value.** When `themeMode === 'system'`, resolving that into an
+actual `'light' | 'dark'` (by checking `window.matchMedia('(prefers-color-scheme: dark)')`)
+is done independently, on demand, by each consumer that needs it —
+`ThemeManager`'s `resolveTheme()` helper and `Wallpaper`'s own inline check
+both do this same lookup separately rather than the store precomputing and
+caching a `resolvedTheme` field. This is a small, deliberate duplication
+rather than an oversight: `matchMedia` is cheap to call, and neither
+consumer needs to *react* to the store when the OS-level preference changes
+mid-session on its own — `ThemeManager` already has its own `matchMedia`
+change listener for that (see below), so a shared `resolvedTheme` field in
+the store wouldn't have removed either consumer's need to also listen for
+system changes independently.
 
 `ThemeManager` reads this store and writes the resolved theme to
 `document.documentElement.dataset.osTheme` plus `colorScheme`, which lets
@@ -136,7 +149,7 @@ so the first paint matches the stored preference.
 // apps/client/src/store/useWindowStore.ts
 {
   openWindows: OsWindow[];
-  focusedWindowId: string | null;
+  focusedWindowId: AppId | null;
   openWindow, closeWindow, focusWindow, minimizeWindow, moveWindow, resizeWindow
 }
 ```
@@ -147,13 +160,21 @@ architecture yourself" piece the coding prompt called out explicitly (see
 
 ```ts
 {
-  id: string;           // stable id, e.g. "about", "projects" — matches the app it hosts
+  id: AppId;             // matches an entry in os/appRegistry.ts's AppId union
+  title: string;         // pulled from APP_REGISTRY[id].title automatically
   position: { x, y };
   size: { width, height };
   zIndex: number;
   isMinimized: boolean;
 }
 ```
+
+**`id` is typed as `AppId`, not a plain `string`** — this was tightened in
+Phase 3 once `os/appRegistry.ts` existed (see `07-os-shell.md`), so
+`openWindow('projcets')` (a typo) is a compile-time error everywhere in the
+codebase, not just a runtime no-op. **`title` was also added in Phase 3**:
+`openWindow` looks it up from the registry automatically, so callers only
+ever pass an `AppId`, never a title they'd have to keep in sync by hand.
 
 **z-index management** uses a module-level counter (`zIndexCounter`) that
 increments every time a window opens *or* gets focused. This is the standard

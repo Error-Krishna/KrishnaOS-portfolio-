@@ -96,7 +96,8 @@ windows are open, boot completion status, tour progress.
 - **vs. Redux:** Redux's actions/reducers/dispatch ceremony is overhead this
   project doesn't need. Zustand stores are just a function returning state +
   the functions that mutate it — see `03-state-management.md` for the actual
-  stores and why there are four separate ones instead of one big store.
+  stores (five, as of Phase 7's `useThemeStore`) and why they're kept
+  separate instead of one big store.
 
 ### Fuse.js
 
@@ -124,8 +125,10 @@ bookmarkable/shareable via URL."
 
 ### react-rnd
 
-**What it does:** low-level drag/resize math for the window manager (Phase 3,
-not yet built).
+**What it does:** low-level drag/resize math for the window manager
+(`os/window-manager/WindowManager.tsx`), on desktop viewports only — on
+mobile, windows render as stacked sheets instead and never touch
+react-rnd at all (see `docs/11-visual-polish-and-mobile.md`).
 
 **Why react-rnd, and why the coding prompt explicitly said "own the
 window-state architecture yourself":** dragging and resizing a DOM element
@@ -194,3 +197,18 @@ Worth knowing for interviews — the absence of a tool is also a decision:
   instead of Framer Motion) — Framer Motion covers both component animation
   and gesture/drag primitives, so one library does more of the job.
 - **No Turborepo/Nx** — see `01-architecture.md`.
+- **No icon library** (e.g. lucide-react, heroicons) — `os/icons.tsx` is a
+  small, fixed set of hand-drawn inline SVGs (7 app glyphs + a handful of
+  chrome glyphs). A real icon library makes sense when you need hundreds of
+  icons on demand; this project needs about a dozen, known in advance, so
+  pulling in a dependency (and its bundle weight) for that would cost more
+  than it saves. See `docs/11-visual-polish-and-mobile.md`.
+- **No weather/GitHub API client library** — `StatusWidgets.tsx` calls
+  `api.open-meteo.com` with plain `fetch` (no API key required) and renders
+  GitHub's own public image endpoints (`github.com/<user>.png`,
+  `github.com/users/<user>/contributions`) as plain `<img>` tags. Neither
+  integration is complex enough to justify a dedicated SDK.
+- **No responsive/breakpoint library** (e.g. react-responsive) —
+  `lib/useMediaQuery.ts` is an 8-line hook wrapping `window.matchMedia`
+  directly. The project only ever needs one breakpoint check
+  (`useIsMobile`, `max-width: 767px`), which doesn't warrant a dependency.

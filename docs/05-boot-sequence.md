@@ -6,6 +6,9 @@
 - `apps/client/src/boot/BootSequence.tsx` — the component that renders the
   visual elements and wires the timeline to them
 - `apps/client/src/store/useBootStore.ts` — tracks completion + returning-visitor state
+- `apps/client/src/os/theme/Wallpaper.tsx` — renders the actual wallpaper
+  image for beat 5 (see note below — this replaced an early inline gradient
+  placeholder once the Phase 7 theme system existed)
 
 ## The goal (from the UX flow doc)
 

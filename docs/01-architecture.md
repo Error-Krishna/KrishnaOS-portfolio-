@@ -78,24 +78,29 @@ src/
 │   ├── theme/             Theme mode, wallpaper, and theme toggle
 │   ├── widgets/           Desktop/mobile status widgets
 │   └── desktop/           Composes the above into Free Exploration's shell
-├── apps/           Content "apps" that render inside windows
-│                   (about, projects, skills, experience, education,
-│                    achievements, contact — empty scaffolding, Phase 4)
-├── tour/           Guided tour controller + tour-bar UI (Phase 5)
+├── apps/           Content "apps" that render inside windows — built,
+│                   Phase 4: about, projects, skills, experience,
+│                   education, achievements, contact (each a pure render
+│                   of a lib/content.ts slice; contact is the one real
+│                   form, wired to POST /api/contact)
+├── tour/           Guided tour — built, Phase 5: tourSteps.ts (step→app
+│                   mapping), TourController.tsx (drives useWindowStore
+│                   per step), TourBar.tsx (progress/back/next/skip UI)
 ├── recruiter/      Recruiter Mode's single-screen view (Phase 6)
 ├── tokens/          Design tokens as TS constants, if/when needed
 │                   alongside the CSS custom properties in index.css
-├── lib/            Utilities: API client, Fuse.js search index
+├── lib/            Utilities: API client, Fuse.js search index,
+│                   hardcoded content data (content.ts), useMediaQuery
 └── store/          Zustand stores (mode, window, boot, tour, theme)
 ```
 
-The `apps/` and `tour/` deeper content are still empty or minimal scaffolding
-from Phase 1 — they mark where Phase 4–5 work landed. `recruiter/` graduated
-to a real Phase 6 screen that consumes the same shared content slices as the
-windowed apps, but in a condensed single-screen layout. `os/` graduated from
-scaffolding to real, working components in Phase 3 and now includes the
-theme-aware shell polish from Phase 7; see `07-os-shell.md` for the full
-breakdown of what's in each subfolder and why.
+`os/` graduated from scaffolding to real, working components in Phase 3 and
+now includes the theme-aware shell polish from Phase 7 (see `07-os-shell.md`
+and `11-visual-polish-and-mobile.md`). `apps/`, `tour/`, and `recruiter/`
+are all fully built as of Phase 6 (see `08-content-apps.md`,
+`09-guided-tour.md`, `10-recruiter-mode.md`). `tokens/` remains empty —
+design tokens still live entirely in `index.css`'s `@theme` block; nothing
+has needed a TS-constant mirror of them yet.
 
 ### `apps/server`
 
@@ -171,7 +176,12 @@ useModeStore.mode === 'welcome'
 useModeStore.mode === 'tour' | 'free' | 'recruiter'
         │
         ▼
-  Real destination (Desktop or RecruiterRoot), depending on the mode
+  mode === 'free'      → <Desktop />
+  mode === 'tour'      → <Desktop /> + <TourController /> (same desktop,
+                          tour drives useWindowStore alongside it —
+                          see 09-guided-tour.md)
+  mode === 'recruiter' → <RecruiterRoot /> (separate route, bypasses
+                          Boot + Welcome entirely when linked directly)
 ```
 
 This flow is described in full, with the reasoning behind each transition,

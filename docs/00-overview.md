@@ -21,9 +21,11 @@ Each doc assumes you've read the ones before it.
 | `05-boot-sequence.md` | The GSAP timeline beat-by-beat, sessionStorage skip logic | You're touching boot/, or explaining the animation system |
 | `06-navigation-flow.md` | Mode routing, boot→welcome→mode orchestration, cross-mode rules | You're adding a new mode or route |
 | `07-os-shell.md` | App registry, menu bar, dock, window manager, Spotlight | You're touching `os/*`, or adding a new app to the registry |
-| `decisions/` | Short ADR-style notes, one per major decision, dated | You want to know *when* and *why* a choice was made, or you're reconsidering one |
+| `08-content-apps.md` | The 7 content apps, `lib/content.ts`, the real Contact form/backend flow | You're touching `apps/*` content components or `content.ts` |
+| `09-guided-tour.md` | Tour controller, step→app mapping, skip vs. completion logic | You're touching `tour/*` or the 8-step tour sequence |
 | `10-recruiter-mode.md` | Recruiter Mode's condensed single-screen view | You're touching the `/recruiter` fast path, escape hatch, or featured-project filtering |
-| `11-phase-7-polish.md` | Theme, wallpaper, widgets, responsive shell, and polish | You're working on Light/Dark/System, mobile nav, widgets, or performance/a11y tuning |
+| `11-visual-polish-and-mobile.md` | Theme, wallpaper, icons, widgets, real mobile responsiveness | You're working on Light/Dark/System, mobile nav, widgets, or performance/a11y tuning |
+| `decisions/` | Short ADR-style notes, one per major decision, dated | You want to know *when* and *why* a choice was made, or you're reconsidering one |
 
 ## The learning method we're using
 

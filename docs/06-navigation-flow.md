@@ -75,7 +75,7 @@ and what's still pending:
 | Rule | Status | Where |
 |---|---|---|
 | 1. No mode is a dead end | **Implemented** | `RecruiterRoot` has a visible escape hatch back to the full desktop, while the OS modes themselves have persistent chrome controls for home / recruiter switching. |
-| 2. No progress is silently lost | **Store-level guarantee in place** | `useTourStore.skipTour()` never touches `useWindowStore` — see `03-state-management.md`. Not yet exercised by real UI since Tour/Free aren't built. |
+| 2. No progress is silently lost | **Implemented, exercised by real UI** | `useTourStore.skipTour()` never touches `useWindowStore` — see `03-state-management.md`. `TourController.handleSkip()` calls `skipTour()` + `setMode('free')` only; whatever window the tour had open stays open in Free Exploration. |
 | 3. Recruiter Mode always one action away | **Implemented** | `MenuBar`'s "Switch to Recruiter Mode" control (persistent across Free/Tour) and `WelcomeScreen`'s Recruiter Mode button both `setMode('recruiter')` + `navigate('/recruiter')`. |
 | 4. Search is a universal escape valve | **Implemented** | `os/spotlight/Spotlight.tsx` — global ⌘K/Ctrl+K listener, Fuse.js fuzzy search over `os/appRegistry.ts` via `lib/searchIndex.ts`. |
 | 5. Returning to Welcome is always possible | **Implemented** | `MenuBar`'s KrishnaOS wordmark acts as home in Free/Tour, and Recruiter Mode can always escape to the desktop first before returning home. |
@@ -129,14 +129,24 @@ Boot → Welcome flow — they're the "experience the whole thing" paths, and
 short-circuiting them via a direct URL would undermine the reason they
 exist as separate from Recruiter Mode in the first place.
 
-## What Phase 3 will add here
+## How the menu bar actually ended up persistent (not what was predicted here)
 
-Once the menu bar exists, `OsRoot`'s orchestration will need to change in
-one specific way: **the menu bar needs to render persistently across Tour,
-Free, and Recruiter modes** (it's system-level chrome, not mode-specific
-content) — so the shape will likely evolve from "one of four things renders"
-to "menu bar always renders when boot is complete, plus mode-specific
-content below it." That's a meaningful structural change worth flagging now
-so it's not a surprise later — `ModePlaceholder`'s simple full-screen glass
-panel will need to become mode content that sits *underneath* persistent
-chrome, not content that fills the whole screen by itself.
+This doc originally speculated, before Phase 3 was built, that `OsRoot`
+itself would need to render the menu bar directly so it could persist
+across Tour/Free/Recruiter. That's not what happened, and it's worth
+naming the actual outcome instead of leaving the old prediction standing.
+
+`MenuBar` is mounted inside `Desktop.tsx`, not inside `OsRoot.tsx`. Because
+both `mode === 'free'` and `mode === 'tour'` render the same `<Desktop />`
+component (see `docs/09-guided-tour.md`'s "the tour doesn't get its own
+environment"), the menu bar is persistent across those two modes simply by
+being part of the one shared component both modes already render — no
+separate "always render chrome, then mode content below it" restructuring
+of `OsRoot` was needed. Recruiter Mode (`RecruiterRoot.tsx`) doesn't
+include `MenuBar` at all; per `docs/10-recruiter-mode.md`, it's a fully
+independent single-screen route with its own theme toggle instead.
+
+The simpler outcome (menu bar lives with Desktop, not with the router
+orchestrator) held up because `OsRoot`'s job stayed narrowly "which
+top-level thing renders," while "what chrome that thing includes" stayed a
+concern of the thing itself (`Desktop`) rather than leaking upward.
