@@ -79,6 +79,18 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     `switchToRecruiterMode` exactly — both entry points into Recruiter Mode
     behave identically. This closes the gap previously tracked here (see
     `docs/06-navigation-flow.md`, updated same session).
+  - ✅ **Window fullscreen (green traffic light), added hands-on post-Phase-3:**
+    `OsWindow` gained `isFullscreen`/`previousGeometry`; `toggleFullscreen`
+    captures a window's current position/size before entering fullscreen and
+    restores it on exit. `WindowManager.tsx`'s `<Rnd>` renders at 100%/100%
+    with dragging/resizing disabled while fullscreen (guards against a stray
+    drag corrupting the geometry that's about to be restored). `Desktop.tsx`
+    hides MenuBar/StatusWidgets/Dock/Spotlight while any window is
+    fullscreen, matching real macOS. Minimize is disabled (real `disabled`
+    attribute, grayed out) while fullscreen, closing a bug where minimizing
+    a fullscreen window left it flagged fullscreen with nothing visible to
+    show for it. See `docs/07-os-shell.md`'s "Fullscreen" section for the
+    full mechanism.
   - ⬜ Not yet done: minimized-window tray/indicator (matches the coding
     prompt's explicit Phase 3 scope note — "don't over-scope"). Bundle size
     warning at build time (510KB) from react-rnd + gsap + framer-motion

@@ -13,6 +13,7 @@ import { ExperienceApp } from '@/apps/experience/ExperienceApp';
 import { EducationApp } from '@/apps/education/EducationApp';
 import { AchievementsApp } from '@/apps/achievements/AchievementsApp';
 import { ContactApp } from '@/apps/contact/ContactApp';
+import { useWindowStore } from '@/store/useWindowStore';
 
 /**
  * The full interactive desktop environment, per coding prompt Phase 3:
@@ -27,14 +28,16 @@ import { ContactApp } from '@/apps/contact/ContactApp';
  * docs/09-guided-tour.md for the full breakdown.
  */
 export function Desktop() {
+
+  const hasFullscreenWindow = useWindowStore((s) => s.openWindows.some((w) => w.isFullscreen));
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       <Wallpaper className="absolute inset-0" variant="shell" />
-      <MenuBar />
-      <StatusWidgets />
+      {!hasFullscreenWindow && <MenuBar />}
+      {!hasFullscreenWindow && <StatusWidgets />}
       <WindowManager renderAppContent={renderAppContent} />
-      <Dock />
-      <Spotlight />
+      {!hasFullscreenWindow && <Dock />}
+      {!hasFullscreenWindow && <Spotlight />}
     </div>
   );
 }

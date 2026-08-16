@@ -19,6 +19,8 @@ export interface OsWindow {
   size: WindowSize;
   zIndex: number;
   isMinimized: boolean;
+  isFullscreen: boolean;
+  previousGeometry: { position: WindowPosition, size: WindowSize } | null
 }
 
 interface WindowStore {
@@ -29,6 +31,7 @@ interface WindowStore {
   closeWindow: (id: AppId) => void;
   focusWindow: (id: AppId) => void;
   minimizeWindow: (id: AppId) => void;
+  toggleFullscreen: (id: AppId) => void;
   moveWindow: (id: AppId, position: WindowPosition) => void;
   resizeWindow: (id: AppId, size: WindowSize) => void;
 }
@@ -64,6 +67,8 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       size: opts?.size ?? appDef.defaultSize ?? DEFAULT_SIZE,
       zIndex: zIndexCounter,
       isMinimized: false,
+      isFullscreen: false,
+      previousGeometry: null
     };
     set((state) => ({
       openWindows: [...state.openWindows, newWindow],
@@ -92,6 +97,32 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       openWindows: state.openWindows.map((w) => (w.id === id ? { ...w, isMinimized: true } : w)),
       focusedWindowId: state.focusedWindowId === id ? null : state.focusedWindowId,
     }));
+  },
+  toggleFullscreen: (id) => {
+    const target = get().openWindows.find((w) => w.id === id);
+    if(!target) return;
+    if(!target.isFullscreen){
+      // entering the full screen, remember the current geometry
+      set((state) => ({
+        openWindows: state.openWindows.map((w) => (w.id ===id ? { ...w, isFullscreen: true, previousGeometry: { position: w.position, size: w.size } } : w))
+      }));
+    } else {
+      // Exiting fullscreen — restore it.
+      set((state) => ({
+        openWindows: state.openWindows.map((w) => {
+          if (w.id !== id) return w;
+          const restored = w.previousGeometry;
+          return {
+            ...w,
+            isFullscreen: false,
+            previousGeometry: null,
+            position: restored?.position ?? w.position,
+            size: restored?.size ?? w.size,
+          };
+        }),
+      }));
+
+    }
   },
 
   moveWindow: (id, position) => {

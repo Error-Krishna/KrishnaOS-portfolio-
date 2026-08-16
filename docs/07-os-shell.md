@@ -131,6 +131,129 @@ nothing currently shows it can be reopened — `focusWindow` already clears
 `isMinimized`, so the mechanism is ready; only the "how does a user get
 back to a minimized window" UI (e.g. a Dock indicator) is deferred.
 
+## Fullscreen (green traffic light)
+
+Added after the initial Phase 3 build, as a hands-on feature (see
+`KRISHNAOS_HANDS_ON_CONTEXT.md` Phase A). Extends the existing window
+model rather than introducing a second one — the design goal from the
+start was "don't build fullscreen as x=0, y=0, 100%/100% and call it done,"
+because that throws away whatever position/size the visitor had the window
+at before.
+
+**`OsWindow` gained two fields:**
+
+```ts
+isFullscreen: boolean;
+previousGeometry: { position: WindowPosition; size: WindowSize } | null;
+```
+
+`previousGeometry` is the mechanism that makes restore possible.
+`toggleFullscreen(id)` reads the window's *current* `isFullscreen` via
+`get()` before deciding which of two branches to run — the same
+read-before-`set()` pattern `openWindow` already uses for its "does this
+window already exist" check:
+
+- **Entering** (`isFullscreen` currently `false`): copies the window's
+  *current* `position`/`size` into `previousGeometry`, flips
+  `isFullscreen` to `true`. Note this branch does **not** touch
+  `position`/`size` themselves — those stay exactly as they were,
+  untouched and safely preserved, while `WindowManager` is what decides
+  how to *render* a fullscreen window differently (below). The store's
+  only job here is remembering + flagging.
+- **Exiting** (`isFullscreen` currently `true`): copies `previousGeometry`
+  back into `position`/`size`, clears `previousGeometry` to `null`, flips
+  `isFullscreen` back to `false`.
+
+**Why `previousGeometry` lives on `OsWindow` itself, not as separate
+top-level store state:** each window needs its own remembered geometry
+independently — two windows could be fullscreened and restored in any
+order, and a single shared "last remembered geometry" field would corrupt
+one window's restore with another's data. Keeping it per-window, right
+next to the `position`/`size` it's a snapshot of, means there's no
+cross-window bookkeeping to get wrong.
+
+**`WindowManager.tsx`'s `<Rnd>` becomes fullscreen-aware via ternaries on
+`size`/`position`, plus two react-rnd props:**
+
+```tsx
+size={win.isFullscreen ? { width: '100%', height: '100%' } : { width: win.size.width, height: win.size.height }}
+position={win.isFullscreen ? { x: 0, y: 0 } : { x: win.position.x, y: win.position.y }}
+disableDragging={win.isFullscreen}
+enableResizing={!win.isFullscreen}
+```
+
+`disableDragging`/`enableResizing` matter for more than UX polish — without
+them, a stray drag or resize event while "fullscreen" would fire
+`onDragStop`/`onResizeStop`, which write straight into `win.position`/
+`win.size` in the store. Since those are the exact fields `previousGeometry`
+is supposed to protect until restore, an unguarded drag mid-fullscreen
+would silently corrupt the value that's about to be restored on exit —
+the bug surfaced in practice during hands-on debugging before these two
+props were added.
+
+**`Desktop.tsx` hides the rest of the shell while any window is
+fullscreen**, matching real macOS fullscreen (menu bar, dock, and desktop
+chrome all disappear, not just the window growing):
+
+```ts
+const hasFullscreenWindow = useWindowStore((s) => s.openWindows.some((w) => w.isFullscreen));
+```
+
+```tsx
+{!hasFullscreenWindow && <MenuBar />}
+{!hasFullscreenWindow && <StatusWidgets />}
+<WindowManager renderAppContent={renderAppContent} />
+{!hasFullscreenWindow && <Dock />}
+{!hasFullscreenWindow && <Spotlight />}
+```
+
+**Why the check is computed once in `Desktop.tsx` rather than by `MenuBar`
+and `Dock` independently:** both components could each subscribe to
+`useWindowStore` and compute their own "is anything fullscreen" boolean,
+but that duplicates the same derived logic in two places with no guarantee
+they stay in sync if the fullscreen model ever changes. `Desktop.tsx` is
+already the composition point for the whole shell (see below), so it's the
+natural single place to decide what does and doesn't render.
+
+**Why `.some(...)` is written *inside* the Zustand selector, not
+computed from a separately-subscribed `openWindows` array:** per
+`AGENTS.md`'s "Zustand selectors, always narrow" rule — subscribing to
+`openWindows` directly and then calling `.some(...)` outside the selector
+would re-render `Desktop` on *every* window state change (drag, resize,
+focus), not just when fullscreen status actually flips. Computing the
+boolean inside the selector means Zustand only triggers a re-render when
+the derived value itself changes.
+
+**Minimize is disabled (not just hidden) while a window is fullscreen,
+matching real macOS's grayed-out yellow traffic light during fullscreen:**
+
+```tsx
+disabled={win.isFullscreen}
+onClick={(e) => {
+  e.stopPropagation();
+  if (win.isFullscreen) return;
+  minimizeWindow(win.id);
+}}
+className={win.isFullscreen ? 'bg-[color:var(--color-os-glass-border)] cursor-not-allowed' : 'bg-[#febc2e] hover:opacity-80'}
+```
+
+This isn't just a visual choice — it closes a real bug. `minimizeWindow`
+doesn't touch `isFullscreen` at all, so without this guard a visitor could
+minimize a fullscreen window and leave it in a contradictory state
+(`isMinimized: true` *and* `isFullscreen: true` simultaneously), which
+surfaced as "the shell doesn't come back, only wallpaper shows" — because
+`hasFullscreenWindow` stayed `true` (the minimized window was still in
+`openWindows`, still flagged fullscreen) even though nothing fullscreen was
+actually visible anymore. Disabling minimize while fullscreen — the real
+HTML `disabled` attribute, not just a style change, so keyboard/screen
+reader users get the same guarantee — sidesteps the contradictory-state
+question entirely rather than trying to define what "minimize a fullscreen
+window" should mean.
+
+Close still works normally while fullscreen — `closeWindow` removes the
+window from `openWindows` entirely, so there's no stale-flag problem the
+way there is with minimize.
+
 ## Dock
 
 Reads `APP_ORDER` and `APP_REGISTRY` to render one button per app. Two

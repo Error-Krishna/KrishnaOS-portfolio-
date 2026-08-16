@@ -1,15 +1,17 @@
 # Project State
 
-Last updated: 2026-08-15
+Last updated: 2026-08-16
 
 ## Current Work
 
+- Phase A (window fullscreen mode) is complete — implemented hands-on by Krishna per `KRISHNAOS_HANDS_ON_CONTEXT.md`, reviewed and debugged with AI mentoring rather than AI-authored.
 - Phase 7 shell polish is largely landed: theme switching, wallpaper variants, theme-aware icons, independently draggable widgets (six cards), and the responsive desktop/mobile shell are implemented.
 - Recruiter Mode quick tiles now read `PROFILE_LINKS` from `content.ts` — GitHub is wired; Resume/LinkedIn await the final content pass.
 - Phase/state docs are synced to the current code.
 
 ## Changes Made
 
+- Added window fullscreen mode (Phase A): `isFullscreen`/`previousGeometry` on `OsWindow`, `toggleFullscreen` action in `useWindowStore.ts`, fullscreen-aware `<Rnd>` sizing with dragging/resizing disabled in `WindowManager.tsx`, shell-hiding (`MenuBar`/`StatusWidgets`/`Dock`/`Spotlight`) via a derived `hasFullscreenWindow` selector in `Desktop.tsx`, and disabled-while-fullscreen minimize button. See `docs/07-os-shell.md`'s "Fullscreen" section.
 - Verified the codebase against `context.md`, the kickoff prompt, and the living docs.
 - Added a persisted theme store plus a root theme manager so KrishnaOS now supports `system`, `light`, and `dark` modes.
 - Added theme-aware wallpaper assets and routed the boot, welcome, desktop, and recruiter surfaces through the new wallpaper component.
@@ -39,5 +41,7 @@ Last updated: 2026-08-15
 
 ## Next Step
 
-- Final content pass: swap placeholder copy and fill `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` in `content.ts`.
-- Then run a quick accessibility/performance review (bundle size, keyboard nav edge cases, mobile layout on a real device).
+- Confirm Phase A with a green `npm run typecheck && npm run build && npm run lint` baseline (not yet run as part of this change).
+- Move to Phase B (About Me) per `KRISHNAOS_HANDS_ON_CONTEXT.md`'s roadmap — needs real personal content from Krishna first (bio, journey, personality), not invented copy.
+- Final content pass remains open: placeholder copy and empty `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` in `content.ts`.
+- Accessibility/performance review (bundle size, keyboard nav edge cases, mobile layout on a real device) still pending.

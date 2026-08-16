@@ -27,6 +27,7 @@ function WindowFrame({ win, children }: WindowFrameProps) {
   const focusWindow = useWindowStore((s) => s.focusWindow);
   const closeWindow = useWindowStore((s) => s.closeWindow);
   const minimizeWindow = useWindowStore((s) => s.minimizeWindow);
+  const toggleFullscreen = useWindowStore((s) => s.toggleFullscreen);
   const moveWindow = useWindowStore((s) => s.moveWindow);
   const resizeWindow = useWindowStore((s) => s.resizeWindow);
   const isMobile = useIsMobile();
@@ -83,12 +84,14 @@ function WindowFrame({ win, children }: WindowFrameProps) {
 
   return (
     <Rnd
-      size={{ width: win.size.width, height: win.size.height }}
-      position={{ x: win.position.x, y: win.position.y }}
+      size={win.isFullscreen ? { width: '100%', height: '100%' } : { width: win.size.width, height: win.size.height }}
+      position={win.isFullscreen ? { x: 0, y: 0 } : { x: win.position.x, y: win.position.y }}
       minWidth={MIN_WIDTH}
       minHeight={MIN_HEIGHT}
       bounds="parent"
       dragHandleClassName="window-drag-handle"
+      disableDragging={win.isFullscreen}
+      enableResizing={!win.isFullscreen}
       style={{ zIndex: win.zIndex }}
       onDragStart={() => focusWindow(win.id)}
       onDragStop={(_e, d) => moveWindow(win.id, { x: d.x, y: d.y })}
@@ -124,11 +127,25 @@ function WindowFrame({ win, children }: WindowFrameProps) {
             <button
               type="button"
               aria-label={`Minimize ${win.title}`}
+              disabled={win.isFullscreen}
               onClick={(e) => {
                 e.stopPropagation();
                 minimizeWindow(win.id);
               }}
-              className="h-3 w-3 rounded-full bg-[#febc2e] transition-opacity hover:opacity-80"
+              className={`h-3 w-3 rounded-full transition-opacity ${
+                win.isFullscreen
+                  ? 'bg-[color:var(--color-os-glass-border)] cursor-not-allowed'
+                  : 'bg-[#febc2e] hover:opacity-80'
+              }`}
+            />
+            <button
+              type="button"
+              aria-label={`${win.isFullscreen ? 'Exit' : 'Enter'} fullscreen for ${win.title}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullscreen(win.id);
+              }}
+              className="h-3 w-3 rounded-full bg-[#34C759] transition-opacity hover:opacity-80"
             />
           </div>
           <span className="flex-1 select-none truncate text-center text-os-caption font-medium text-[color:var(--color-os-text-secondary)]">
