@@ -20,6 +20,49 @@ export function AboutApp() {
           </p>
         ))}
       </div>
+      <div className="flex flex-col gap-os-4">
+        {ABOUT_CONTENT.sections.map((section) => {
+          if (section.kind === 'story') {
+            return (
+              <div key={section.id} className="flex flex-col gap-os-2">
+                {section.heading && (
+                  <h3 className="text-os-title font-semibold">{section.heading}</h3>
+                )}
+                {section.body?.map((paragraph, i) => (
+                  <p key={i} className="text-os-body text-[color:var(--color-os-text-secondary)]">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            );
+          } else if(section.kind === 'quote') {
+            return (
+              <blockquote
+                key={section.id}
+                className="border-l-2 border-[color:var(--color-os-accent)] pl-os-4 text-os-title italic text-[color:var(--color-os-text-primary)]"
+              >
+                {section.quote}
+              </blockquote>
+            );
+          } else if (section.kind === 'traits') {
+            return (
+              <div key={section.id} className="flex flex-col gap-os-2"> 
+                {section.heading && (
+                  <h3 className="text-os-title font-semibold">{section.heading}</h3>
+                )}
+                <div className="flex flex-wrap gap-os-2">
+                  {section.items?.map((item, i) => (
+                    <span key={i} className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-3 py-os-1 text-os-caption text-[color:var(--color-os-text-secondary)]">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
     </div>
   );
 }

@@ -35,13 +35,17 @@ pending the final content pass (Recruiter Mode shows those tiles as honestly
 disabled until the URLs land here).
 
 **Every value in `content.ts` is placeholder copy, clearly marked as such**
-in the file's own header comment. This mirrors the project's existing
-"don't fake finished UI" principle (`context.md` hard constraint #1),
-extended to content: rather than inventing a fabricated job history or
-fake achievements that read as real, every entry is an obvious stand-in
-("Company Name", "Add your real bio here") that's honest about needing a
-real content pass — which was already an open question in both source docs
-before this phase started, not a new gap introduced here.
+in the file's own header comment — **except `ABOUT_CONTENT`, which now
+holds Krishna's real bio and narrative content** (see "About: from a
+single bio field to a typed narrative" below). The remaining sections
+(`PROJECTS_CONTENT`, `EXPERIENCE_CONTENT`, etc.) still mirror the
+project's existing "don't fake finished UI" principle (`context.md` hard
+constraint #1), extended to content: rather than inventing a fabricated
+job history or fake achievements that read as real, every entry is an
+obvious stand-in ("Company Name", "Add your real bio here") that's honest
+about needing a real content pass — which was already an open question in
+both source docs before this phase started, not a new gap introduced
+here.
 
 ## Why `SkillGroup` lives in `content.ts`, not `shared-types`
 
@@ -135,3 +139,85 @@ inline, without losing what the visitor typed.
   `lib/content.ts` exports (`FEATURED_PROJECTS`, `PROFILE_LINKS`, etc.).
 - **No `/api/content` fetches.** Content is hardcoded per the server route's
   own comment; wiring a real content API is future work, not a Phase 4 gap.
+
+## About: from a single bio field to a typed narrative (hands-on Phase B)
+
+Added after Phase 4/7, as a hands-on feature (see
+`KRISHNAOS_HANDS_ON_CONTEXT.md` Phase B). `ABOUT_CONTENT` originally held
+just `{ name, headline, bio: string[] }` — enough for a short professional
+summary, but nowhere to put a real narrative (identity, journey, honest
+self-reflection, ambition) without overloading `bio`'s job.
+
+**`bio` was kept exactly as-is rather than repurposed**, because it's load
+-bearing outside `AboutApp.tsx`: `RecruiterRoot.tsx` renders `bio[0]`
+directly as a short, scannable one-liner for a recruiter skimming many
+portfolios. That's a fundamentally different kind of writing than a story
+section — trying to make one field serve both audiences would have meant
+either a recruiter-hostile wall of text or a visitor-hostile one-liner
+masquerading as a personal story. So the narrative content is additive:
+
+```ts
+export interface AboutSection {
+  id: string;
+  kind: 'story' | 'quote' | 'traits';
+  heading?: string;
+  body?: string[];   // 'story' only
+  quote?: string;    // 'quote' only
+  items?: string[];  // 'traits' only
+}
+
+export interface AboutContent {
+  name: string;
+  headline: string;
+  bio: string[];
+  tagline: string;
+  sections: AboutSection[];
+}
+```
+
+`ABOUT_CONTENT` is explicitly annotated `: AboutContent` (rather than left
+to structural inference) specifically so `AboutApp.tsx` gets real
+discriminated-union narrowing on `section.kind` — without the annotation,
+TypeScript's inferred type for the `sections` array is close enough to
+work by accident, but doesn't actually constrain what fields are required
+for a given `kind`, which defeats the point of the union.
+
+**`AboutApp.tsx` renders each section differently by `kind`**, one
+`if`/`else if` branch per kind inside a single `.map()`:
+
+- `'quote'` → `<blockquote>` with a left accent border
+  (`--color-os-accent`) and `text-os-title italic` — visually set apart
+  from body text rather than just bolded, since a pull-quote's job is to
+  read as a distinct moment, not emphasized prose.
+- `'traits'` → heading + a `flex flex-wrap` row of pill `<span>`s, styled
+  with the same glass-border pill recipe `RecruiterRoot.tsx`'s skill tags
+  already use — reused rather than reinvented, so the pill visual language
+  stays consistent across the app.
+- `'story'` → heading + `body.map(...)` paragraphs, the same shape as the
+  existing `bio.map(...)` rendering just above it in the component.
+
+Each branch's returned element is keyed by `section.id` (a real, stable
+identifier already on the data), not array index — matching how
+`SKILLS_CONTENT` groups are already keyed elsewhere in the codebase.
+Array index is only used for the disposable inner lists (`body` paragraphs,
+`items` pills), where the items are plain strings with no independent
+identity and the array is never reordered — the same reasoning
+`docs/07-os-shell.md`'s window-manager sections apply to `key` choices
+elsewhere.
+
+**Content is real, not placeholder-with-a-different-label.** The three
+story sections (`journey`, `self-awareness`, `ambition`) were deliberately
+left as empty `body: []` arrays with `// Do not paraphrase or invent this
+section` comments until Krishna wrote the actual words himself — per
+`KRISHNAOS_HANDS_ON_CONTEXT.md`'s explicit Phase B rule that the AI must
+not invent personal experiences or personality claims. An AI-drafted
+illustrative example was caught and rejected mid-session specifically
+because it would have shipped as first-person narrative that wasn't
+actually Krishna's.
+
+**Not yet done:** scroll-in motion (a stagger-fade using Framer Motion's
+`whileInView`, matching the pattern already used in `StatusWidgets`/`Dock`,
+respecting `prefers-reduced-motion`) and a full visual pass beyond plain
+text blocks — both deferred to a follow-up pass once the narrative
+content existed. Mobile/responsive verification for this specific screen
+is also still open (desktop-first, per explicit scope decision).

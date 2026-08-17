@@ -1,9 +1,10 @@
 # Project State
 
-Last updated: 2026-08-16
+Last updated: 2026-08-17
 
 ## Current Work
 
+- Phase B (About Me) is in progress — data/render mechanism and real content are done; visual/storyline treatment is the explicit next step, mobile deferred until desktop is finished.
 - Phase A (window fullscreen mode) is complete — implemented hands-on by Krishna per `KRISHNAOS_HANDS_ON_CONTEXT.md`, reviewed and debugged with AI mentoring rather than AI-authored.
 - Phase 7 shell polish is largely landed: theme switching, wallpaper variants, theme-aware icons, independently draggable widgets (six cards), and the responsive desktop/mobile shell are implemented.
 - Recruiter Mode quick tiles now read `PROFILE_LINKS` from `content.ts` — GitHub is wired; Resume/LinkedIn await the final content pass.
@@ -11,6 +12,7 @@ Last updated: 2026-08-16
 
 ## Changes Made
 
+- Added Phase B (About Me) narrative content: `ABOUT_CONTENT` gained a typed `sections: AboutSection[]` (kinds `'story' | 'quote' | 'traits'`) alongside the existing `bio` field (kept untouched — `RecruiterRoot.tsx` reads `bio[0]` directly for its short recruiter-facing line). `AboutApp.tsx` renders all three kinds: accent-bordered italic pull-quotes, a wrapping pill row (reusing `RecruiterRoot.tsx`'s existing skill-tag recipe), and heading+paragraph story sections. Real content for `bio`, `journey`, `self-awareness`, and `ambition` was written by Krishna — an AI-drafted illustrative example was caught and rejected mid-session for being first-person narrative that wasn't actually his. See `docs/08-content-apps.md`'s "About: from a single bio field to a typed narrative" section.
 - Added window fullscreen mode (Phase A): `isFullscreen`/`previousGeometry` on `OsWindow`, `toggleFullscreen` action in `useWindowStore.ts`, fullscreen-aware `<Rnd>` sizing with dragging/resizing disabled in `WindowManager.tsx`, shell-hiding (`MenuBar`/`StatusWidgets`/`Dock`/`Spotlight`) via a derived `hasFullscreenWindow` selector in `Desktop.tsx`, and disabled-while-fullscreen minimize button. See `docs/07-os-shell.md`'s "Fullscreen" section.
 - Verified the codebase against `context.md`, the kickoff prompt, and the living docs.
 - Added a persisted theme store plus a root theme manager so KrishnaOS now supports `system`, `light`, and `dark` modes.
@@ -41,7 +43,8 @@ Last updated: 2026-08-16
 
 ## Next Step
 
-- Confirm Phase A with a green `npm run typecheck && npm run build && npm run lint` baseline (not yet run as part of this change).
-- Move to Phase B (About Me) per `KRISHNAOS_HANDS_ON_CONTEXT.md`'s roadmap — needs real personal content from Krishna first (bio, journey, personality), not invented copy.
-- Final content pass remains open: placeholder copy and empty `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` in `content.ts`.
+- Build out About Me's visual/storyline treatment: scroll-in stagger motion (Framer Motion `whileInView`, reduced-motion aware, matching `StatusWidgets`/`Dock`'s existing pattern) and a fuller visual language beyond plain text blocks for the six sections. Desktop-only for now; mobile/responsive pass for this screen comes after.
+- Confirm Phase A + Phase B with a green `npm run typecheck && npm run build && npm run lint` baseline (not yet run since either change).
+- After About Me visuals: Phase C (Projects) per `KRISHNAOS_HANDS_ON_CONTEXT.md`'s roadmap.
+- Final content pass remains open elsewhere: placeholder copy (`PROJECTS_CONTENT`, `EXPERIENCE_CONTENT`, etc.) and empty `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` in `content.ts`.
 - Accessibility/performance review (bundle size, keyboard nav edge cases, mobile layout on a real device) still pending.

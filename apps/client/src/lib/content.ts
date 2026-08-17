@@ -21,19 +21,155 @@ import type {
 /* -------------------------------------------------------------------------- */
 /* ABOUT                                                                       */
 /* -------------------------------------------------------------------------- */
+export interface AboutSection {
+  id: string;
+  kind: 'story' | 'quote' | 'traits';
+  heading?: string;
+  body?: string[];
+  quote?: string;
+  items?: string[];
+}
 
-export const ABOUT_CONTENT = {
+export interface AboutContent {
+  name: string;
+  headline: string;
+  bio: string[];
+  tagline: string;
+  sections: AboutSection[];
+}
+
+export const ABOUT_CONTENT: AboutContent = {
+
   name: 'Krishna Goyal',
 
   headline: 'Product-Minded Frontend & Full-Stack Engineer',
 
   bio: [
-    'I’m Krishna Goyal, a Computer Science student and product-minded developer who enjoys turning real-world problems into practical software.',
 
-    'I work across frontend engineering, full-stack development, SaaS products, developer tools, automation, data-driven applications, and product architecture. I particularly enjoy building polished interfaces with React, designing systems end-to-end, and understanding how software works beneath the surface.',
+    'I am a Computer Science student and builder who enjoys understanding how things work and then turning that understanding into something people can actually use.',
 
-    'I like building things from scratch — from business software for manufacturers to developer tooling and automation systems. My goal is to combine strong engineering fundamentals with product thinking and create software that is genuinely useful.',
+    'My journey has moved from learning the fundamentals of programming to building full-stack applications, developer tools, automation systems, and products around real business problems. I learn best by building, breaking things, debugging them, and trying again.',
+
+    'I am especially drawn to frontend engineering because I like the intersection of engineering and product thinking: how a system works underneath, but also how it feels when someone uses it. At the same time, I enjoy going deeper into backend systems, APIs, databases, WebSockets, deployment, and the problems that appear when software becomes real.',
+
   ],
+
+  tagline: "I don't just want to build things. I want to build myself.",
+
+  sections: [
+
+    {
+
+      id: 'identity',
+
+      kind: 'quote',
+
+      quote:
+
+        "I don't see myself as just an engineering student who codes. I see myself as a builder.",
+
+    },
+
+    {
+
+      id: 'curiosity',
+
+      kind: 'traits',
+
+      heading: 'Questions I keep asking myself',
+
+      items: [
+
+        'What actually happens when I enter a URL?',
+
+        'How does fullscreen logic work?',
+
+        "What happens when there's no internet?",
+
+        'Why is this server failing?',
+
+        'How can I turn a technical idea into something people actually want to use?',
+
+        'What is the simplest way to build this properly?',
+
+      ],
+
+    },
+
+    {
+
+      id: 'journey',
+
+      kind: 'story',
+
+      heading: 'The journey so far',
+
+      body: [
+
+        'I started with the usual curiosity of wanting to understand code, but over time I became more interested in building complete things rather than only solving isolated problems. That led me into frontend development, backend systems, databases, APIs, deployment, automation, and eventually product development.',
+
+        'Along the way, I have built projects such as InsightLoop, a personal finance tracker, a job automation system, and HotReload, a developer CLI. I am also building Udhyog Saathi, a SaaS product aimed at helping small and mid-sized manufacturers manage their day-to-day operations digitally.',
+
+        'A lot of my learning has come from things going wrong: broken deployments, database connections, WebSockets, dependency conflicts, server errors, and features that looked simple until I actually had to build them. Those problems have taught me more than simply following tutorials ever could.',
+
+      ],
+
+    },
+
+    {
+
+      id: 'self-awareness',
+
+      kind: 'story',
+
+      heading: "What I'm still working on",
+
+      body: [
+
+        'I am still learning how to distinguish movement from real progress. There is always another technology to learn, another project to start, or another idea to explore, but I am learning that building better requires focus, patience, and finishing what I start.',
+
+        'I am also working on becoming stronger in the fundamentals behind the interfaces and products I build: computer science concepts, system design, backend architecture, data, and the reasoning that makes software reliable rather than merely functional.',
+
+        'More than anything, I am learning to slow down enough to understand problems deeply instead of always rushing toward the next thing.',
+
+      ],
+
+    },
+
+    {
+
+      id: 'ambition',
+
+      kind: 'story',
+
+      heading: "What I'm building toward",
+
+      body: [
+
+        'I want to become an engineer who can take an idea from a rough problem statement to a working product. That means being comfortable with the interface users see, the systems underneath it, and the product decisions that connect the two.',
+
+        'I want to keep building products from scratch, work on problems that have real users and real constraints, and eventually build technology that is useful beyond a portfolio or a college project.',
+
+        'For me, the goal is not simply to collect technologies or titles. It is to become someone who can look at a problem, understand it deeply, build a thoughtful solution, and keep improving it.',
+
+      ],
+
+    },
+
+    {
+
+      id: 'krishnaos-meaning',
+
+      kind: 'quote',
+
+      quote:
+
+        "I'm not simply trying to make a portfolio. I want them to experience: this is Krishna.",
+
+    },
+
+  ],
+
 };
 
 /* -------------------------------------------------------------------------- */

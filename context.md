@@ -185,15 +185,41 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     See `docs/11-visual-polish-and-mobile.md`'s Mobile Responsiveness
     section for the full writeup.
   - ⬜ Still open: `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` and
-    all placeholder copy in `content.ts` await the final content pass.
-    `GITHUB_USERNAME`'s fallback (`'Error-Krishna'`, matching
-    `.env.example`) should be confirmed as your real handle before shipping.
-    Accessibility/perf audit and bundle-size pass remain Phase 7 follow-ups.
+    all placeholder copy in `content.ts` (except `ABOUT_CONTENT`, see below)
+    await the final content pass. `GITHUB_USERNAME`'s fallback
+    (`'Error-Krishna'`, matching `.env.example`) should be confirmed as
+    your real handle before shipping. Accessibility/perf audit and
+    bundle-size pass remain Phase 7 follow-ups.
 
 Phase 3 is functionally complete against its scoped items in the coding
 prompt. Remaining Phase 3 items (minimized-window tray, bundle-size pass)
 are explicitly deferred to Phase 7 per the coding prompt's own scope notes,
 not gaps to close now.
+
+## Hands-on phases (per `KRISHNAOS_HANDS_ON_CONTEXT.md`, built by Krishna, AI as reviewer)
+
+- ✅ **Phase A — Window Fullscreen Mode.** See Phase 3's entry above and
+  `docs/07-os-shell.md`'s "Fullscreen" section.
+- 🔶 **Phase B — About Me.** In progress. See
+  `docs/08-content-apps.md`'s "About: from a single bio field to a typed
+  narrative" section for full detail.
+  - ✅ `ABOUT_CONTENT` grew a typed `sections: AboutSection[]` (kinds:
+    `'story' | 'quote' | 'traits'`), additive alongside the existing
+    `bio` field — `bio` stays untouched because `RecruiterRoot.tsx` reads
+    `bio[0]` directly and needs a short recruiter-facing line, a different
+    job than the narrative sections.
+  - ✅ `AboutApp.tsx` renders all three `kind`s: quotes as accent-bordered
+    pull-quotes, traits as a pill row (reusing `RecruiterRoot.tsx`'s
+    existing skill-tag recipe), story sections as heading + paragraphs.
+  - ✅ Real content written by Krishna for `bio` and all three story
+    sections (`journey`, `self-awareness`, `ambition`) — no invented
+    personal narrative; empty-`body`/TODO placeholders were used and kept
+    honest until the real words existed.
+  - ⬜ Not yet done: scroll-in motion (stagger-fade, reduced-motion aware,
+    matching `StatusWidgets`/`Dock`'s existing pattern), a fuller visual
+    treatment beyond plain text blocks (explicitly the next step), and
+    mobile/responsive verification for this screen (deferred — desktop
+    first, per explicit scope decision this session).
 
 ## Hard constraints — do not violate these without explicit discussion
 
