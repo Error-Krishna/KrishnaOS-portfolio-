@@ -29,6 +29,14 @@ export interface AboutSection {
   quote?: string;
   items?: string[];
 }
+export interface AboutBadge {
+  label: string;
+}
+
+export interface AboutStatus {
+  label: string;   
+  lines: string[]; 
+}
 
 export interface AboutContent {
   name: string;
@@ -36,6 +44,10 @@ export interface AboutContent {
   bio: string[];
   tagline: string;
   sections: AboutSection[];
+  badges: AboutBadge[];
+  welcomeBadge: string;
+  status: AboutStatus;
+  photoUrl: string;          
 }
 
 export const ABOUT_CONTENT: AboutContent = {
@@ -169,6 +181,22 @@ export const ABOUT_CONTENT: AboutContent = {
     },
 
   ],
+  badges: [
+    {label: '📍 India'},
+    {label: '🎓 CS Student'},
+    {label: '💡 Builder'},
+    {label: '🚀 Life-long Learner'},
+    
+  ],
+  welcomeBadge: '👋 Welcome to my portfolio!',
+  status: {
+    label: 'Currently:',
+    lines: [
+      'Building Cool things',
+      'Solving real problems'
+    ]
+  },
+  photoUrl: 'https://res.cloudinary.com/dt131godr/image/upload/v1787050172/motion_photo_2308644998421275287_kppqhx.jpg',
 
 };
 
@@ -650,3 +678,34 @@ export const INTERESTS_CONTENT = [
  */
 export const FEATURED_PROJECTS: Project[] =
   PROJECTS_CONTENT.filter((project) => project.featured);
+
+/* -------------------------------------------------------------------------- */
+/* TERMINAL                                                                   */
+/* -------------------------------------------------------------------------- */
+export interface TerminalCommand {
+  description: string;
+  run: () => string[];
+}
+
+export const TERMINAL_COMMANDS: Record<string, TerminalCommand> = {
+  whoami: {
+    description: 'Display who I am',
+    run: () => [`${ABOUT_CONTENT.name} — ${ABOUT_CONTENT.headline}`],
+  },
+  skills: {
+    description: 'List my technical skills',
+    run: () => SKILLS_CONTENT.map((group) => `${group.label}: ${group.skills.join(', ')}`),
+  },
+  projects: {
+    description: 'List my featured projects',
+    run: () => FEATURED_PROJECTS.map((p) => `${p.title} — ${p.summary}`),
+  },
+  help: {
+    description: 'Show available commands',
+    run: () => Object.entries(TERMINAL_COMMANDS).map(([name, cmd]) => `${name} — ${cmd.description}`),
+  },
+  clear: {
+    description: 'Clear the terminal',
+    run: () => [],
+  },
+};

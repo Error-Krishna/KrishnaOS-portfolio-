@@ -1,4 +1,5 @@
 import { ABOUT_CONTENT } from '@/lib/content';
+import { HeroSection } from './HeroSection';
 
 /**
  * About window content, per coding prompt Phase 4 item 10 and UX flow
@@ -9,10 +10,7 @@ import { ABOUT_CONTENT } from '@/lib/content';
 export function AboutApp() {
   return (
     <div className="flex h-full flex-col gap-os-4">
-      <div className="flex flex-col gap-os-1">
-        <h2 className="text-os-headline font-semibold">{ABOUT_CONTENT.name}</h2>
-        <p className="text-os-body text-[color:var(--color-os-text-secondary)]">{ABOUT_CONTENT.headline}</p>
-      </div>
+      <HeroSection />
       <div className="flex flex-col gap-os-3">
         {ABOUT_CONTENT.bio.map((paragraph, i) => (
           <p key={i} className="text-os-body text-[color:var(--color-os-text-secondary)]">
