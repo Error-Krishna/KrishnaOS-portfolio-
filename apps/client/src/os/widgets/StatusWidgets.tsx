@@ -525,20 +525,11 @@ export function StatusWidgets() {
       </DraggableWidget>
 
       <DraggableWidget id="github" title="GitHub" icon={<GithubGlyph className="h-4 w-4" />}>
-        <div className="flex items-center gap-os-3">
-          <img
-            src={avatar}
-            alt={`GitHub avatar for ${GITHUB_USERNAME}`}
-            className="h-12 w-12 rounded-os-md border border-[color:var(--color-os-glass-border)]"
-          />
-          <div className="min-w-0">
-            <p className="truncate text-os-body font-semibold">{GITHUB_USERNAME}</p>
-            <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">Contribution timeline below</p>
-          </div>
-        </div>
+        <div className="flex items-center gap-os-3">dscv;sdukfs.a fr
         <div className="overflow-hidden rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface)] p-os-2">
           <img
-            src={`https://github.com/users/${GITHUB_USERNAME}/contributions`}
+            // src={`https://github.com/users/${GITHUB_USERNAME}/contributions`}
+            src={`https://github-contributions-api.deno.dev/Error-Krishna`}
             alt="GitHub contribution graph"
             className="h-auto w-full"
           />
