@@ -200,9 +200,12 @@ not gaps to close now.
 
 - ✅ **Phase A — Window Fullscreen Mode.** See Phase 3's entry above and
   `docs/07-os-shell.md`'s "Fullscreen" section.
-- 🔶 **Phase B — About Me.** In progress. See
-  `docs/08-content-apps.md`'s "About: from a single bio field to a typed
-  narrative" section for full detail.
+- 🔶 **Phase B — About Me.** In progress — narrative content done, expanded
+  visual redesign (hero, icon-grid traits, journey pipeline, terminal,
+  closing section) in progress. See `docs/08-content-apps.md`'s "About:
+  from a single bio field to a typed narrative," "About: expanded visual
+  redesign — hero section," and "Terminal command table" sections for full
+  detail.
   - ✅ `ABOUT_CONTENT` grew a typed `sections: AboutSection[]` (kinds:
     `'story' | 'quote' | 'traits'`), additive alongside the existing
     `bio` field — `bio` stays untouched because `RecruiterRoot.tsx` reads
@@ -215,11 +218,29 @@ not gaps to close now.
     sections (`journey`, `self-awareness`, `ambition`) — no invented
     personal narrative; empty-`body`/TODO placeholders were used and kept
     honest until the real words existed.
+  - ✅ **Expanded scope, approved by Krishna:** a fuller visual redesign
+    modeled on a reference screenshot — photo hero, status card,
+    icon-grid traits, journey pipeline, real command-driven terminal,
+    richer closing section. Reference leaned more decorative than
+    `context.md` §13's stated restraint; surfaced explicitly, Krishna's
+    call was to keep the fuller visual language while still routing
+    everything through real design tokens.
+  - ✅ **Hero section built** (`HeroSection.tsx`): `AboutContent` gained
+    `badges`/`welcomeBadge`/`status`/`photoUrl`; two-column responsive
+    layout with photo in a reused `glass-panel` frame, decorative status
+    dot, and a floating status card correctly structured as a sibling
+    (not a child) of the photo's `overflow-hidden` box so it isn't
+    clipped while hanging partially off the frame's edge.
+  - ✅ **Terminal command table built** (`TERMINAL_COMMANDS` in
+    `content.ts`): a real, bounded set of commands (`whoami`, `skills`,
+    `projects`, `help`, `clear`) whose `run()` functions read live from
+    existing content exports — no duplicate content, no arbitrary
+    execution. Terminal UI component itself not yet built.
   - ⬜ Not yet done: scroll-in motion (stagger-fade, reduced-motion aware,
-    matching `StatusWidgets`/`Dock`'s existing pattern), a fuller visual
-    treatment beyond plain text blocks (explicitly the next step), and
-    mobile/responsive verification for this screen (deferred — desktop
-    first, per explicit scope decision this session).
+    matching `StatusWidgets`/`Dock`'s existing pattern), icon-grid traits,
+    journey pipeline, the terminal UI component, closing-section redesign,
+    and mobile/responsive verification (deferred — desktop first, per
+    explicit scope decision).
 
 ## Hard constraints — do not violate these without explicit discussion
 

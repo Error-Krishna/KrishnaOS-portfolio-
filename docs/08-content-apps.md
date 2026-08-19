@@ -217,7 +217,187 @@ actually Krishna's.
 
 **Not yet done:** scroll-in motion (a stagger-fade using Framer Motion's
 `whileInView`, matching the pattern already used in `StatusWidgets`/`Dock`,
-respecting `prefers-reduced-motion`) and a full visual pass beyond plain
-text blocks — both deferred to a follow-up pass once the narrative
-content existed. Mobile/responsive verification for this specific screen
-is also still open (desktop-first, per explicit scope decision).
+respecting `prefers-reduced-motion`), the remaining visual redesign below
+the hero (icon-grid traits, journey pipeline, terminal, closing-quote pill
+row — see "About: expanded visual redesign" below), and mobile/responsive
+verification for this screen (desktop-first, per explicit scope decision).
+
+## About: expanded visual redesign — hero section (hands-on Phase B, continued)
+
+After the initial narrative pass above, Krishna requested a substantially
+larger visual redesign modeled on a reference screenshot: photo, status
+card, icon-grid trait questions, a multi-stage "journey" pipeline, a real
+interactive terminal, and a richer closing section. This is being built
+incrementally, one piece at a time, same reviewed-hands-on process as
+everything else — this section covers the **hero**, the first piece done.
+
+**Scope tension, resolved explicitly rather than silently:** the reference
+leans harder on decorative gradients/glow/duplicate imagery than
+`context.md` §13's stated visual direction ("avoid excessive glass...
+flashy effects that do not communicate anything"). This was surfaced to
+Krishna directly rather than either refused outright or built without
+comment; his call was to keep the reference's fuller visual language
+(including a decorative terminal, addressed below) while still reusing
+this project's real design tokens throughout rather than inventing new
+raw colors — the tension is resolved per-token, not by abandoning the
+restraint principle wholesale.
+
+**`AboutContent` grew hero-specific fields**, additive alongside the
+existing narrative shape:
+
+```ts
+export interface AboutBadge {
+  label: string;
+}
+
+export interface AboutStatus {
+  label: string;
+  lines: string[];
+}
+
+export interface AboutContent {
+  name: string;
+  headline: string;
+  bio: string[];
+  tagline: string;
+  sections: AboutSection[];
+  badges: AboutBadge[];
+  welcomeBadge: string;
+  status: AboutStatus;
+  photoUrl: string;
+}
+```
+
+`welcomeBadge` is a plain `string`, not an `AboutBadge[]` — an early draft
+mistakenly modeled it as a one-item array of the same shape as the four
+trait badges. Caught during review: `welcomeBadge` is conceptually a
+single fixed eyebrow label above the name, not a member of a parallel,
+reorderable collection the way `badges` (India / CS Student / Builder /
+Lifelong Learner) genuinely is — forcing it into the same shape would have
+meant an unnecessary `.map()` over an array that can only ever hold one
+item.
+
+**`bio` stays the single source for the hero's intro line too** —
+`HeroSection.tsx` renders `bio[0]`, the same value `RecruiterRoot.tsx`
+already reads. No new duplicate intro-text field was added.
+
+**No new icon-lookup registry was built for the four hero badges.** The
+project already has a real theme-aware icon system (`os/icons.tsx`,
+hand-drawn stroke SVGs keyed by `AppId` for Dock/Spotlight/title bars).
+The hero badges deliberately don't extend that registry — four one-off
+labels used in exactly one place don't justify a second lookup table; they
+render as plain text pills, matching the pill recipe already established
+for `AboutSection`'s `'traits'` kind.
+
+**`HeroSection.tsx` (`apps/client/src/apps/about/`) replaces `AboutApp.tsx`'s
+original plain name/headline block**, wired in as `<HeroSection />` at the
+top of `AboutApp`'s render, before the `bio` paragraphs and `sections`
+list (both untouched). Structure: a `flex flex-col md:flex-row` two-column
+layout (stacked on narrow viewports, side-by-side from `md:` up, `w-3/5`
+text / `w-2/5` photo split) containing:
+
+- Left: welcome badge, split-styled name (`"I'm "` normal weight, first
+  name only in `--color-os-accent`, surname normal — the exact split is
+  hardcoded in JSX rather than derived from `name.split(' ')`, a
+  deliberate choice: deriving it programmatically would silently assume
+  `name` always has exactly a "First Last" shape with no type-level
+  guarantee, whereas the fixed split Krishna asked for is more honestly
+  expressed as literal JSX than as fragile string-parsing logic), headline,
+  `bio[0]`, and the four `badges` as a `flex flex-wrap` pill row.
+- Right: the photo in a `glass-panel` frame (reusing the project's existing
+  reusable glass-surface class from `index.css` rather than hand-rolled
+  border/shadow values), a small decorative (`aria-hidden`) green status
+  dot in the top-right corner, and the floating `status` card
+  (`status.label` + `status.lines.map(...)`) anchored `absolute
+  bottom-os-4 right-[-1rem]` to the photo's bottom-right corner.
+
+**The floating status card's positioning required understanding a real
+CSS ownership rule, not just copying classes:** the photo has
+`overflow-hidden` (needed so the `<img>` clips to the frame's rounded
+corners), but the status card intentionally hangs partially outside the
+photo's box (negative `right` offset). A child of an `overflow-hidden`
+element gets clipped at that element's edge — so the status card cannot
+live inside the same box as the photo. The resolved structure is one
+shared `relative` wrapper with **no** `overflow-hidden` of its own,
+containing two siblings: the photo (its own separate `overflow-hidden`
+box, holding only the `<img>` and the green dot) and the status card
+(`absolute`, positioned against the shared wrapper, never clipped). An
+earlier draft tried nesting two `glass-panel` divs — one wrapping the
+other — specifically to add `overflow-visible` somewhere to escape
+clipping; that worked by accident but duplicated the glass-panel
+treatment twice for no visual gain. The sibling structure is the version
+that actually reflects why each box exists.
+
+**A `--clor-os-accent` typo (missing the `o` in `color`) and a
+`--color-os-text-muted` reference (not a real token — the actual tier
+names are `-primary`/`-secondary`/`-tertiary`) both surfaced during this
+build and were caught in review, not by the build failing.** Worth noting
+for anyone debugging a token that silently doesn't apply later: `var()`
+referencing an undefined CSS custom property fails silently in the
+browser — no TypeScript error, no console warning, no build failure — the
+property just doesn't get set. This is a different failure mode than a
+missing Tailwind utility class (which also does nothing, but for a
+different reason) and is worth checking for by eye against `index.css`'s
+real token list whenever a color or token-driven style doesn't seem to be
+applying.
+
+**Not yet done, hero-adjacent:** the reference's icon-grid trait treatment,
+journey pipeline, terminal, and closing-quote redesign are separate,
+not-yet-built pieces (see the top-level "Not yet done" note above this
+section). `photoUrl` currently points to a real hosted image URL Krishna
+provided; no local asset pipeline/optimization was added since the URL is
+externally hosted already.
+
+## Terminal command table (hands-on Phase B, continued)
+
+`TERMINAL_COMMANDS` (`content.ts`) is built ahead of the terminal UI
+component itself, data-first — same sequencing as `ABOUT_CONTENT.sections`
+was built before `AboutApp.tsx`'s render logic. This backs a **real,
+bounded command-driven terminal**, not decorative typing-animation text: a
+visitor can type one of a small fixed set of commands and see real output
+read live from existing content exports, with no arbitrary code execution
+and therefore no meaningful security surface.
+
+```ts
+export interface TerminalCommand {
+  description: string;
+  run: () => string[];
+}
+
+export const TERMINAL_COMMANDS: Record<string, TerminalCommand> = {
+  whoami: { description: 'Display who I am', run: () => [...] },
+  skills: { description: 'List my technical skills', run: () => SKILLS_CONTENT.map(...) },
+  projects: { description: 'List my featured projects', run: () => FEATURED_PROJECTS.map(...) },
+  help: { description: 'Show available commands', run: () => Object.entries(TERMINAL_COMMANDS).map(...) },
+  clear: { description: 'Clear the terminal', run: () => [] },
+};
+```
+
+**Why `run` is a function (`() => string[]`) and not a precomputed
+string/array value:** a precomputed value would duplicate content that
+already lives in `ABOUT_CONTENT`/`SKILLS_CONTENT`/`FEATURED_PROJECTS` —
+exactly the "same content in two places" pattern
+`KRISHNAOS_HANDS_ON_CONTEXT.md` §7 warns against, and it would silently
+drift out of sync the moment either source was edited without remembering
+to update the terminal's copy too. A function computes the output live,
+from the real source, every time it runs, so there is only ever one place
+any of this content actually lives.
+
+**`help`'s `run` function references `TERMINAL_COMMANDS` from inside
+`TERMINAL_COMMANDS`'s own definition, and this is not a bug.** The
+reference is inside an arrow function body, which doesn't execute at
+definition time — only later, whenever something actually calls
+`TERMINAL_COMMANDS.help.run()`. By then the `const TERMINAL_COMMANDS = {...}`
+statement has long finished, so the full object (all five commands)
+already exists. This is the general reason closures can safely reference
+bindings that don't exist yet at the *point in the file* where the closure
+is written, as long as nothing tries to *call* the closure before the
+binding is actually ready.
+
+**Not yet built:** the terminal UI component itself (input field, output
+history, prompt styling, keyboard/accessibility handling, wiring into the
+"What I'm still working on" section) — this is data/logic only so far.
+History/current-input state for that component is planned as local
+`useState`, not a new Zustand store, per the same reasoning
+`ContactApp.tsx`'s status state already established: nothing outside a
+single self-contained widget needs to read or coordinate with it.

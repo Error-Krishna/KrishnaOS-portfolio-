@@ -1,10 +1,10 @@
 # Project State
 
-Last updated: 2026-08-17
+Last updated: 2026-08-18
 
 ## Current Work
 
-- Phase B (About Me) is in progress — data/render mechanism and real content are done; visual/storyline treatment is the explicit next step, mobile deferred until desktop is finished.
+- Phase B (About Me) is in an expanded scope, approved by Krishna: full visual redesign modeled on a reference screenshot (hero, icon-grid traits, journey pipeline, real command-driven terminal, richer closing section), built incrementally. Hero section and the terminal's command-table data layer are done; remaining pieces are queued.
 - Phase A (window fullscreen mode) is complete — implemented hands-on by Krishna per `KRISHNAOS_HANDS_ON_CONTEXT.md`, reviewed and debugged with AI mentoring rather than AI-authored.
 - Phase 7 shell polish is largely landed: theme switching, wallpaper variants, theme-aware icons, independently draggable widgets (six cards), and the responsive desktop/mobile shell are implemented.
 - Recruiter Mode quick tiles now read `PROFILE_LINKS` from `content.ts` — GitHub is wired; Resume/LinkedIn await the final content pass.
@@ -12,6 +12,8 @@ Last updated: 2026-08-17
 
 ## Changes Made
 
+- Built About Me's hero section (`HeroSection.tsx`): `AboutContent` gained `badges: AboutBadge[]`, `welcomeBadge: string`, `status: AboutStatus`, `photoUrl: string`. Two-column responsive layout, photo in a reused `glass-panel` frame, decorative status dot, floating status card built as a sibling (not a child) of the photo's `overflow-hidden` box so it isn't clipped while overlapping the frame's edge. A `--clor-os-accent` typo and a non-existent `--color-os-text-muted` reference were caught in review (CSS custom-property lookups fail silently, not as build/type errors). See `docs/08-content-apps.md`'s "About: expanded visual redesign — hero section."
+- Built the terminal's command-table data layer (`TERMINAL_COMMANDS` in `content.ts`): a real, bounded set of commands (`whoami`, `skills`, `projects`, `help`, `clear`) whose `run()` functions read live from `ABOUT_CONTENT`/`SKILLS_CONTENT`/`FEATURED_PROJECTS` rather than duplicating content. Terminal UI component not yet built. See `docs/08-content-apps.md`'s "Terminal command table" section.
 - Added Phase B (About Me) narrative content: `ABOUT_CONTENT` gained a typed `sections: AboutSection[]` (kinds `'story' | 'quote' | 'traits'`) alongside the existing `bio` field (kept untouched — `RecruiterRoot.tsx` reads `bio[0]` directly for its short recruiter-facing line). `AboutApp.tsx` renders all three kinds: accent-bordered italic pull-quotes, a wrapping pill row (reusing `RecruiterRoot.tsx`'s existing skill-tag recipe), and heading+paragraph story sections. Real content for `bio`, `journey`, `self-awareness`, and `ambition` was written by Krishna — an AI-drafted illustrative example was caught and rejected mid-session for being first-person narrative that wasn't actually his. See `docs/08-content-apps.md`'s "About: from a single bio field to a typed narrative" section.
 - Added window fullscreen mode (Phase A): `isFullscreen`/`previousGeometry` on `OsWindow`, `toggleFullscreen` action in `useWindowStore.ts`, fullscreen-aware `<Rnd>` sizing with dragging/resizing disabled in `WindowManager.tsx`, shell-hiding (`MenuBar`/`StatusWidgets`/`Dock`/`Spotlight`) via a derived `hasFullscreenWindow` selector in `Desktop.tsx`, and disabled-while-fullscreen minimize button. See `docs/07-os-shell.md`'s "Fullscreen" section.
 - Verified the codebase against `context.md`, the kickoff prompt, and the living docs.
@@ -43,8 +45,10 @@ Last updated: 2026-08-17
 
 ## Next Step
 
-- Build out About Me's visual/storyline treatment: scroll-in stagger motion (Framer Motion `whileInView`, reduced-motion aware, matching `StatusWidgets`/`Dock`'s existing pattern) and a fuller visual language beyond plain text blocks for the six sections. Desktop-only for now; mobile/responsive pass for this screen comes after.
-- Confirm Phase A + Phase B with a green `npm run typecheck && npm run build && npm run lint` baseline (not yet run since either change).
-- After About Me visuals: Phase C (Projects) per `KRISHNAOS_HANDS_ON_CONTEXT.md`'s roadmap.
+- Continue About Me's expanded visual redesign: icon-grid trait questions (replacing the current pill row for `curiosity`), the multi-stage journey pipeline, the terminal UI component (input + history + keyboard handling, wired to the now-complete `TERMINAL_COMMANDS` table), and the closing-section redesign (pill tags + avatar) — each its own focused step, same reviewed hands-on process.
+- Once the visual pieces exist: scroll-in stagger motion (Framer Motion `whileInView`, reduced-motion aware, matching `StatusWidgets`/`Dock`'s existing pattern).
+- Confirm Phase A + Phase B with a green `npm run typecheck && npm run build && npm run lint` baseline (not yet run since any of these changes).
+- Mobile/responsive pass for the About page comes after the desktop visual redesign is complete.
+- After About Me: Phase C (Projects) per `KRISHNAOS_HANDS_ON_CONTEXT.md`'s roadmap.
 - Final content pass remains open elsewhere: placeholder copy (`PROJECTS_CONTENT`, `EXPERIENCE_CONTENT`, etc.) and empty `PROFILE_LINKS.resume` / `PROFILE_LINKS.linkedin` in `content.ts`.
 - Accessibility/performance review (bundle size, keyboard nav edge cases, mobile layout on a real device) still pending.

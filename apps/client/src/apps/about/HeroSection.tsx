@@ -38,51 +38,34 @@ export function HeroSection() {
       </div>
 
       {/* RIGHT COLUMN — PHOTO */}
-      <div className="relative w-full md:w-2/5 md:self-start md:-translate-x-12">
-        <div className="glass-panel relative overflow-visible">
+<div className="relative w-full md:w-2/5">
+  {/* PHOTO — its own overflow-hidden box, nothing else lives inside it */}
+  <div className="glass-panel relative h-[300px] w-full overflow-hidden ring-1 ring-[color:var(--color-os-glass-border)]">
+    <img
+      src={ABOUT_CONTENT.photoUrl}
+      alt={`Portrait of ${ABOUT_CONTENT.name}`}
+      className="h-full w-full object-cover"
+    />
+    <span
+      aria-hidden="true"
+      className="absolute right-os-3 top-os-3 h-4 w-4 rounded-full bg-[#4cd86f] shadow-[0_0_10px_#4cd86f] ring-2 ring-[color:var(--color-os-glass-border)]"
+    />
+  </div>
 
-          {/* PHOTO */}
-          <div className="glass-panel relative h-[300px] w-full overflow-hidden rounded-os-lg ring-1 ring-[color:var(--color-os-glass-border)] shadow-[0_0_30px_rgba(80,140,255,0.18)]">
-            <img
-              src={ABOUT_CONTENT.photoUrl}
-              alt={`Portrait of ${ABOUT_CONTENT.name}`}
-              className="h-full w-full object-cover"
-            />
-
-            {/* ONLINE DOT */}
-            <span
-              aria-hidden="true"
-              className="absolute right-os-3 top-os-3 h-4 w-4 rounded-full bg-[#4cd86f] shadow-[0_0_10px_#4cd86f] ring-2 ring-[color:var(--color-os-glass-border)]"
-            />
-          </div>
-
-          {/* STATUS CARD */}
-          <div className="absolute bottom-os-4 right-[-1.5rem] z-10 min-w-[220px] rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-black/65 px-os-4 py-os-3 shadow-[0_8px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-
-            <p className="text-xs text-[color:var(--color-os-text-muted)]">
-              {ABOUT_CONTENT.status.label}
-            </p>
-
-            <div className="mt-os-1">
-              {ABOUT_CONTENT.status.lines.map((line, index) => (
-                <p
-                  key={index}
-                  className="text-sm font-medium text-white"
-                >
-                  {line}
-                </p>
-              ))}
-            </div>
-
-            {/* STATUS DOT */}
-            <span
-              aria-hidden="true"
-              className="absolute bottom-os-3 right-os-3 h-2 w-2 rounded-full bg-[#4cd86f] shadow-[0_0_8px_#4cd86f]"
-            />
-          </div>
-
-        </div>
-      </div>
+  {/* STATUS CARD — sibling of the photo, not nested inside it, so it isn't clipped */}
+  <div className="glass-panel absolute bottom-os-4 right-[-1rem] z-10 min-w-[200px] px-os-4 py-os-3">
+    <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+      {ABOUT_CONTENT.status.label}
+    </p>
+    <div className="mt-os-1">
+      {ABOUT_CONTENT.status.lines.map((line, index) => (
+        <p key={index} className="text-os-body font-medium text-[color:var(--color-os-text-primary)]">
+          {line}
+        </p>
+      ))}
+    </div>
+  </div>
+</div>
     </div>
   );
 }
