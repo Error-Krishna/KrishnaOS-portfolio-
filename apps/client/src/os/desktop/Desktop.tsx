@@ -34,7 +34,7 @@ export function Desktop() {
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       <Wallpaper className="absolute inset-0" variant="shell" />
       {!hasFullscreenWindow && <MenuBar />}
-      {!hasFullscreenWindow && <StatusWidgets />}
+      {/* {!hasFullscreenWindow && <StatusWidgets />} temporary: hide status widgets */}
       <WindowManager renderAppContent={renderAppContent} />
       {!hasFullscreenWindow && <Dock />}
       {!hasFullscreenWindow && <Spotlight />}

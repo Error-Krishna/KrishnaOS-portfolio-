@@ -25,6 +25,7 @@ export function HomeGlyph({ className }: IconProps) {
   );
 }
 
+
 export function SearchGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
@@ -75,12 +76,13 @@ export function GithubGlyph({ className }: IconProps) {
 export function TimelineGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path {...iconStrokeProps()} d="M5 6.5h14" />
-      <path {...iconStrokeProps()} d="M5 12h9" />
-      <path {...iconStrokeProps()} d="M5 17.5h12" />
-      <circle {...iconStrokeProps()} cx="17" cy="6.5" r="1.2" />
-      <circle {...iconStrokeProps()} cx="14" cy="12" r="1.2" />
-      <circle {...iconStrokeProps()} cx="18" cy="17.5" r="1.2" />
+      <path {...iconStrokeProps()} d="M7 9h10" />
+      <path {...iconStrokeProps()} d="M8 12h6" />
+      <path {...iconStrokeProps()} d="M8 15h9" />
+      <circle {...iconStrokeProps()} cx="16" cy="9" r="0.8" />
+      <circle {...iconStrokeProps()} cx="14" cy="12" r="0.8" />
+      <circle {...iconStrokeProps()} cx="17" cy="15" r="0.8" />
+      <circle {...iconStrokeProps()} cx="12" cy="12" r="11" />
     </svg>
   );
 }
@@ -110,7 +112,175 @@ export function NoteGlyph({ className }: IconProps) {
     </svg>
   );
 }
+export function FullScreenGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M9 5H5v4M15 5h4v4M9 19H5v-4M19 15v4h-4"
+        stroke="#60a5fa"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M8 8 5 5M16 8l3-3M8 16l-3 3M16 16l3 3"
+        stroke="#60a5fa"
+      />
+    </svg>
+  );
+}
 
+export function LinkGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M9.5 14.5 14.5 9.5"
+        stroke="#60a5fa"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M8 17H6.5a4 4 0 0 1 0-8H10"
+        stroke="#a78bfa"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M16 7h1.5a4 4 0 0 1 0 8H14"
+        stroke="#a78bfa"
+      />
+    </svg>
+  );
+}
+
+export function WifiOffGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M4.5 9.5a11.5 11.5 0 0 1 15 0"
+        stroke="#38bdf8"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M7.5 13a7 7 0 0 1 4.5-1.6 7 7 0 0 1 4.5 1.6"
+        stroke="#38bdf8"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M10.5 16.5a3 3 0 0 1 3 0"
+        stroke="#38bdf8"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M4 4l16 16"
+        stroke="#f87171"
+      />
+    </svg>
+  );
+}
+
+export function ServerGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect
+        {...iconStrokeProps()}
+        x="5"
+        y="5"
+        width="14"
+        height="4"
+        rx="1"
+        stroke="#60a5fa"
+      />
+      <rect
+        {...iconStrokeProps()}
+        x="5"
+        y="10"
+        width="14"
+        height="4"
+        rx="1"
+        stroke="#60a5fa"
+      />
+      <rect
+        {...iconStrokeProps()}
+        x="5"
+        y="15"
+        width="14"
+        height="4"
+        rx="1"
+        stroke="#60a5fa"
+      />
+      <circle
+        {...iconStrokeProps()}
+        cx="8"
+        cy="7"
+        r="0.7"
+        fill="#4ade80"
+        stroke="#4ade80"
+      />
+    </svg>
+  );
+}
+
+export function LightbulbGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M8 14a6 6 0 1 1 8 0c-.9.8-1.5 1.7-1.5 3H9.5c0-1.3-.6-2.2-1.5-3Z"
+        stroke="#facc15"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M9.5 19h5"
+        stroke="#f59e0b"
+      />
+      <path
+        {...iconStrokeProps()}
+        d="M10 21h4"
+        stroke="#f59e0b"
+      />
+    </svg>
+  );
+}
+
+export function TargetGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle
+        {...iconStrokeProps()}
+        cx="12"
+        cy="12"
+        r="8"
+        stroke="#fb7185"
+      />
+      <circle
+        {...iconStrokeProps()}
+        cx="12"
+        cy="12"
+        r="4"
+        stroke="#f97316"
+      />
+      <circle
+        {...iconStrokeProps()}
+        cx="12"
+        cy="12"
+        r="1.2"
+        fill="#ef4444"
+        stroke="#ef4444"
+      />
+    </svg>
+  );
+}
+
+export function QuestionGlyph({ className }: IconProps) {
+  return (
+
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle {...iconStrokeProps()} cx="12" cy="12" r="11" />
+      <path {...iconStrokeProps()} d="M9.5 9a2.5 2.5 0 1 1 4.3 1.8c-.9.8-1.8 1.2-1.8 2.7" />
+      <circle {...iconStrokeProps()} cx="12" cy="16.5" r="0.7" />
+    </svg>
+  );
+}
 function AboutGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
