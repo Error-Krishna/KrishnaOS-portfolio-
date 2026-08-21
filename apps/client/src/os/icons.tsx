@@ -271,6 +271,48 @@ export function TargetGlyph({ className }: IconProps) {
   );
 }
 
+export function DatabaseGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <ellipse {...iconStrokeProps()} cx="12" cy="6" rx="7" ry="2.5" />
+      <path {...iconStrokeProps()} d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" />
+      <path {...iconStrokeProps()} d="M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6" />
+    </svg>
+  );
+}
+
+export function WrenchGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M14.5 6.5a3.5 3.5 0 0 0-4.6 4.6L5 16l2 2 4.9-4.9a3.5 3.5 0 0 0 4.6-4.6l-2.1 2.1-2-2 2.1-2.1Z"
+      />
+    </svg>
+  );
+}
+
+export function UsersGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle {...iconStrokeProps()} cx="9" cy="8.5" r="2.5" />
+      <path {...iconStrokeProps()} d="M4.5 18a4.5 4.5 0 0 1 9 0" />
+      <path {...iconStrokeProps()} d="M15 8.5a2.3 2.3 0 1 1 2.5 3.7" />
+      <path {...iconStrokeProps()} d="M15.5 13.5c1.8.3 3 1.5 3.5 3.8" />
+    </svg>
+  );
+}
+
+export function TerminalGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect {...iconStrokeProps()} x="4" y="5" width="16" height="14" rx="1.5" />
+      <path {...iconStrokeProps()} d="m8 9.5 3 2.5-3 2.5" />
+      <path {...iconStrokeProps()} d="M12.5 14.5h4" />
+    </svg>
+  );
+}
+
 export function CodeGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>

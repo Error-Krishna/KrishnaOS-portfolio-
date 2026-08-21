@@ -625,6 +625,41 @@ export interface SkillGroup {
   skills: string[];
 }
 
+/**
+ * Header/eyebrow copy and the closing quote card for the Skills window.
+ * Kept as a small typed block (rather than inline JSX strings) so it
+ * follows the same "content lives in content.ts" rule as everything else
+ * on this page, per docs/08-content-apps.md. Stat-card numbers are NOT
+ * hardcoded here — SkillsApp derives them live from SKILLS_CONTENT /
+ * PROJECTS_CONTENT so they can never drift out of sync with the real data
+ * (same reasoning TERMINAL_COMMANDS.run functions read live rather than
+ * duplicating content).
+ */
+export interface SkillsPageContent {
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  tagline: string;
+  badges: string[];
+  quote: {
+    heading: string;
+    lines: string[];
+  };
+}
+
+export const SKILLS_PAGE_CONTENT: SkillsPageContent = {
+  eyebrow: 'Always Learning',
+  title: 'My',
+  titleAccent: 'Skills',
+  tagline:
+    "A toolkit I've built through curiosity, consistency, and real-world projects. Always exploring. Always improving.",
+  badges: ['Hands-on Experience', 'Problem Solver'],
+  quote: {
+    heading: 'I believe the best way to learn is by building.',
+    lines: ['Every project, every bug, every fix —', 'adds a new skill to the toolkit.'],
+  },
+};
+
 export const SKILLS_CONTENT: SkillGroup[] = [
   {
     id: 'languages',
@@ -732,6 +767,41 @@ export const SKILLS_CONTENT: SkillGroup[] = [
       'API Integration',
       'SaaS Architecture',
       'Product Architecture',
+    ],
+  },
+
+  {
+    id: 'developer-tools',
+
+    label: 'Developer Tools',
+
+    skills: [
+      'VS Code',
+      'Terminal',
+      'ESLint',
+      'Prettier',
+      'Jest',
+      'Postman',
+      'Thunder Client',
+      'GitHub Actions',
+      'NPM / Yarn',
+    ],
+  },
+
+  {
+    id: 'soft-skills',
+
+    label: 'Soft Skills',
+
+    skills: [
+      'Problem Solving',
+      'Critical Thinking',
+      'System Design',
+      'Adaptability',
+      'Continuous Learning',
+      'Team Collaboration',
+      'Communication',
+      'Ownership',
     ],
   },
 ];
