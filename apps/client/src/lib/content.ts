@@ -201,6 +201,127 @@ export const ABOUT_CONTENT: AboutContent = {
 };
 
 /* -------------------------------------------------------------------------- */
+/* ABOUT: JOURNEY PIPELINE                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A compact, scannable restatement of ABOUT_CONTENT.sections['journey'].body
+ * for the visual pipeline (icon nodes + connecting line). Every blurb below
+ * paraphrases a sentence Krishna already wrote in that section — nothing
+ * here introduces a new personal claim, it just reformats existing prose
+ * into a four-stage visual instead of three paragraphs of running text.
+ */
+export interface JourneyStage {
+  id: string;
+  title: string;
+  blurb: string;
+  detail: string;
+}
+
+export const ABOUT_JOURNEY_STAGES: JourneyStage[] = [
+  {
+    id: 'curiosity',
+    title: 'Curiosity',
+    blurb: 'Starting with "how do things work?"',
+    detail: 'Explored code, logic, and the basics.',
+  },
+  {
+    id: 'learning',
+    title: 'Learning',
+    blurb: 'From tutorials to real projects.',
+    detail: 'Built, broke, debugged, and learned deeply.',
+  },
+  {
+    id: 'building',
+    title: 'Building',
+    blurb: 'Turning ideas into working products.',
+    detail: 'Projects and systems that solve real problems.',
+  },
+  {
+    id: 'purpose',
+    title: 'Purpose',
+    blurb: 'Building technology that creates impact.',
+    detail: 'Helping businesses solve real-world problems.',
+  },
+];
+
+/**
+ * Lifted from ABOUT_CONTENT.sections['journey'].body[2] — the list of
+ * things Krishna named as his real teachers — split for the compact
+ * "Key Learnings" strip rather than re-parsing the paragraph at render
+ * time.
+ */
+export const ABOUT_KEY_LEARNINGS: string[] = [
+  'Broken deployments',
+  'Database connections',
+  'WebSockets',
+  'Dependency conflicts',
+  'Server errors',
+  'And what looked simple until I built it',
+];
+
+/* -------------------------------------------------------------------------- */
+/* ABOUT: AMBITION PILLARS                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Same principle as ABOUT_JOURNEY_STAGES — a scannable restatement of
+ * ABOUT_CONTENT.sections['ambition'].body, not new content.
+ */
+export interface AmbitionFocusItem {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export const ABOUT_AMBITION_FOCUS: AmbitionFocusItem[] = [
+  {
+    id: 'solve-real-problems',
+    title: 'Solve real problems',
+    description: 'Build products that users love and rely on.',
+  },
+  {
+    id: 'create-impact',
+    title: 'Create impact',
+    description: 'Technology that makes a difference.',
+  },
+  {
+    id: 'keep-improving',
+    title: 'Keep improving',
+    description: 'Always learning, always building better.',
+  },
+];
+
+export interface AmbitionPillar {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export const ABOUT_AMBITION_PILLARS: AmbitionPillar[] = [
+  {
+    id: 'engineer',
+    title: 'Engineer',
+    description: 'Take ideas from rough problem statements to real products.',
+  },
+  {
+    id: 'builder',
+    title: 'Builder',
+    description: 'Build from scratch, deal with real constraints, ship and iterate.',
+  },
+  {
+    id: 'problem-solver',
+    title: 'Problem Solver',
+    description: 'Understand deeply, solve thoughtfully, improve continuously.',
+  },
+  {
+    id: 'impact-maker',
+    title: 'Impact Maker',
+    description: 'Build technology that creates value and simplifies lives.',
+  },
+];
+
+/* -------------------------------------------------------------------------- */
 /* PROFILE LINKS                                                               */
 /* -------------------------------------------------------------------------- */
 

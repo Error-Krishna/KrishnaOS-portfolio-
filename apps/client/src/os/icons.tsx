@@ -271,6 +271,57 @@ export function TargetGlyph({ className }: IconProps) {
   );
 }
 
+export function CodeGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="m9 8-4 4 4 4" />
+      <path {...iconStrokeProps()} d="m15 8 4 4-4 4" />
+    </svg>
+  );
+}
+
+export function CompassGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle {...iconStrokeProps()} cx="12" cy="12" r="8" />
+      <path {...iconStrokeProps()} d="m14.5 9.5-1.5 4-4 1.5 1.5-4 4-1.5Z" />
+    </svg>
+  );
+}
+
+export function LayersGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect {...iconStrokeProps()} x="5" y="5" width="6" height="6" rx="1" />
+      <rect {...iconStrokeProps()} x="13" y="5" width="6" height="6" rx="1" />
+      <rect {...iconStrokeProps()} x="5" y="13" width="6" height="6" rx="1" />
+      <rect {...iconStrokeProps()} x="13" y="13" width="6" height="6" rx="1" />
+    </svg>
+  );
+}
+
+export function PuzzleGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M7 7h4a1.5 1.5 0 0 1 3 0h4v4a1.5 1.5 0 0 1 0 3v4h-4a1.5 1.5 0 0 1-3 0H7v-4a1.5 1.5 0 0 1 0-3V7Z"
+      />
+    </svg>
+  );
+}
+
+export function HeartGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M12 19s-6.5-4.2-8.5-8.2C2.3 8 3.6 5 6.5 5c1.7 0 3 .9 3.7 2.1C10.9 5.9 12.3 5 14 5c2.9 0 4.2 3 3 5.8C15 14.8 12 19 12 19Z"
+      />
+    </svg>
+  );
+}
+
 export function QuestionGlyph({ className }: IconProps) {
   return (
 
