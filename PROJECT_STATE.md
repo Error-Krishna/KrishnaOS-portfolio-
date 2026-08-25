@@ -1,9 +1,11 @@
 # Project State
 
-Last updated: 2026-08-18
+Last updated: 2026-08-22
 
 ## Current Work
 
+- Experience (Phase F) was rebuilt as a dashboard-style page (header card, real company link, badge row, tech-stack grid, vertical "My Journey" timeline, closing quote + traits) at Krishna's explicit request, again ahead of its documented roadmap position. The timeline is built generically over `EXPERIENCE_CONTENT` — it renders correctly with the current single real entry and will render any future entries Krishna adds himself with zero component changes. The reference's fabricated career history (3 additional roles) and unverifiable stats/percentage panels were explicitly declined rather than invented.
+- Skills (Phase E) was rebuilt as a dashboard-style page (header, stat cards, eight grouped skill cards, closing quote) at Krishna's explicit request, ahead of its documented roadmap position (`KRISHNAOS_HANDS_ON_CONTEXT.md` lists it after Projects/Achievements). This is a deliberate, flagged reordering, not a silent scope change — Phase B (About) below is still genuinely mid-build underneath it.
 - Phase B (About Me) is in an expanded scope, approved by Krishna: full visual redesign modeled on a reference screenshot (hero, icon-grid traits, journey pipeline, real command-driven terminal, richer closing section), built incrementally. Hero section and the terminal's command-table data layer are done; remaining pieces are queued.
 - Phase A (window fullscreen mode) is complete — implemented hands-on by Krishna per `KRISHNAOS_HANDS_ON_CONTEXT.md`, reviewed and debugged with AI mentoring rather than AI-authored.
 - Phase 7 shell polish is largely landed: theme switching, wallpaper variants, theme-aware icons, independently draggable widgets (six cards), and the responsive desktop/mobile shell are implemented.
@@ -11,6 +13,10 @@ Last updated: 2026-08-18
 - Phase/state docs are synced to the current code.
 
 ## Changes Made
+
+- Rebuilt Experience (`ExperienceApp.tsx`) as a dashboard-style page: header card (real role/company/badges, company link sourced from `PROJECTS_CONTENT`), a computed "Tech Stack I Use" grid (de-duplicated union of every real project's stack, no fabricated libraries), a generic vertical "My Journey" timeline built over the full `EXPERIENCE_CONTENT` array (currently one real entry — Udhyog Saathi — but ready for more without UI changes), and a closing quote + trait cards. Deliberately did not include the reference's fabricated 3-role career history, percentage skill bars, or unverifiable "Impact" stats. Added `EXPERIENCE_PAGE_CONTENT` to `content.ts`; widened the Experience window default from 640×480 to 960×680 in `appRegistry.ts`. See `docs/08-content-apps.md`'s "Experience: dashboard-style redesign" section.
+
+- Rebuilt Skills (`SkillsApp.tsx`) as a dashboard-style page: header (eyebrow/title/tagline/badges from new `SKILLS_PAGE_CONTENT`), a computed stat-card row (unique skill count, group count, project count — no hardcoded numbers), eight grouped skill-tag cards (six original groups plus confirmed-real `Developer Tools` and `Soft Skills`), and a closing quote card using Krishna's own wording. Added `DatabaseGlyph`/`WrenchGlyph`/`UsersGlyph`/`TerminalGlyph` to `os/icons.tsx`; widened the Skills window default from 560×420 to 920×640 in `appRegistry.ts`. See `docs/08-content-apps.md`'s "Skills: dashboard-style redesign" section.
 
 - Built About Me's hero section (`HeroSection.tsx`): `AboutContent` gained `badges: AboutBadge[]`, `welcomeBadge: string`, `status: AboutStatus`, `photoUrl: string`. Two-column responsive layout, photo in a reused `glass-panel` frame, decorative status dot, floating status card built as a sibling (not a child) of the photo's `overflow-hidden` box so it isn't clipped while overlapping the frame's edge. A `--clor-os-accent` typo and a non-existent `--color-os-text-muted` reference were caught in review (CSS custom-property lookups fail silently, not as build/type errors). See `docs/08-content-apps.md`'s "About: expanded visual redesign — hero section."
 - Built the terminal's command-table data layer (`TERMINAL_COMMANDS` in `content.ts`): a real, bounded set of commands (`whoami`, `skills`, `projects`, `help`, `clear`) whose `run()` functions read live from `ABOUT_CONTENT`/`SKILLS_CONTENT`/`FEATURED_PROJECTS` rather than duplicating content. Terminal UI component not yet built. See `docs/08-content-apps.md`'s "Terminal command table" section.
@@ -45,7 +51,9 @@ Last updated: 2026-08-18
 
 ## Next Step
 
-- Continue About Me's expanded visual redesign: icon-grid trait questions (replacing the current pill row for `curiosity`), the multi-stage journey pipeline, the terminal UI component (input + history + keyboard handling, wired to the now-complete `TERMINAL_COMMANDS` table), and the closing-section redesign (pill tags + avatar) — each its own focused step, same reviewed hands-on process.
+- Run `npm run typecheck && npm run build && npm run lint` to verify both the Skills and Experience redesigns (not yet run from this environment — both changes were made via filesystem tools, not a local dev session).
+- Manually check the Skills and Experience windows at a few widths/breakpoints and in both themes, since neither new layout was visually verified in a browser this session.
+- Resume About Me's expanded visual redesign where it left off: icon-grid trait questions (replacing the current pill row for `curiosity`), the multi-stage journey pipeline, the terminal UI component (input + history + keyboard handling, wired to the now-complete `TERMINAL_COMMANDS` table), and the closing-section redesign (pill tags + avatar) — each its own focused step, same reviewed hands-on process.
 - Once the visual pieces exist: scroll-in stagger motion (Framer Motion `whileInView`, reduced-motion aware, matching `StatusWidgets`/`Dock`'s existing pattern).
 - Confirm Phase A + Phase B with a green `npm run typecheck && npm run build && npm run lint` baseline (not yet run since any of these changes).
 - Mobile/responsive pass for the About page comes after the desktop visual redesign is complete.

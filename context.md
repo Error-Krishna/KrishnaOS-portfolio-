@@ -101,7 +101,9 @@ Per `krishnaos-coding-prompt.md`'s phase breakdown:
     (`ABOUT_CONTENT`, `PROJECTS_CONTENT`, `SKILLS_CONTENT`,
     `EXPERIENCE_CONTENT`, `EDUCATION_CONTENT`, `ACHIEVEMENTS_CONTENT`) —
     all placeholder copy, clearly marked as such, pending the content pass
-    noted in both source docs' open questions.
+    noted in both source docs' open questions. **Exception: `ABOUT_CONTENT`,
+    `SKILLS_CONTENT`, and `EXPERIENCE_CONTENT` now hold real content**
+    (see the Hands-on phases section below for all three).
   - ✅ All 7 content apps built: `AboutApp`, `ProjectsApp`, `SkillsApp`,
     `ExperienceApp`, `EducationApp`, `AchievementsApp`, `ContactApp` — each
     a pure render of its content slice, tokens-only, no owned scroll (the
@@ -200,6 +202,43 @@ not gaps to close now.
 
 - ✅ **Phase A — Window Fullscreen Mode.** See Phase 3's entry above and
   `docs/07-os-shell.md`'s "Fullscreen" section.
+- ✅ **Phase E — Skills**, built ahead of its documented roadmap position
+  (`KRISHNAOS_HANDS_ON_CONTEXT.md` lists Skills after Projects/Achievements)
+  at Krishna's explicit request. See `docs/08-content-apps.md`'s "Skills:
+  dashboard-style redesign" section for full detail.
+  - ✅ `SkillsApp.tsx` rebuilt as a dashboard-style page: eyebrow/title/
+    tagline header (`SKILLS_PAGE_CONTENT`, new), a stat-card row computed
+    live from `SKILLS_CONTENT`/`PROJECTS_CONTENT` (no hardcoded numbers),
+    eight grouped skill-tag cards, and a closing quote card using
+    Krishna's own wording.
+  - ✅ Two new `SKILLS_CONTENT` groups added — `Developer Tools` and
+    `Soft Skills` — confirmed real by Krishna before being added, since
+    neither existed in `krish_public.md` or the prior content.
+  - ✅ Four new icon glyphs added to `os/icons.tsx` (`DatabaseGlyph`,
+    `WrenchGlyph`, `UsersGlyph`, `TerminalGlyph`); Skills window default
+    size widened from 560×420 to 920×640 in `appRegistry.ts` to fit the
+    new 4-column layout.
+  - ⬜ Not yet done: motion/stagger-in animation, manual mobile/responsive
+    check, and a green typecheck/build/lint run (this change was made
+    outside a local dev session).
+- ✅ **Phase F — Experience**, built ahead of its documented roadmap
+  position (`KRISHNAOS_HANDS_ON_CONTEXT.md` lists Experience after
+  Achievements/Skills) at Krishna's explicit request. See
+  `docs/08-content-apps.md`'s "Experience: dashboard-style redesign"
+  section for full detail.
+  - ✅ `ExperienceApp.tsx` rebuilt: header card (real role/company, company
+    link sourced from `PROJECTS_CONTENT`, badges from new
+    `EXPERIENCE_PAGE_CONTENT`), a computed "Tech Stack I Use" grid
+    (de-duplicated union of every real project's stack), a generic
+    vertical "My Journey" timeline built over the full `EXPERIENCE_CONTENT`
+    array, and a closing quote + trait cards.
+  - ✅ The reference's fabricated 3-role career history, percentage skill
+    bars ("What I Do Best"), and unverifiable "Impact" stats panel were
+    all explicitly declined by Krishna rather than backfilled with
+    placeholder numbers — the timeline is built generically so real roles
+    can be added to `content.ts` later with zero component changes.
+  - ⬜ Not yet done: motion/stagger-in animation, manual mobile/responsive
+    check, and a green typecheck/build/lint run.
 - 🔶 **Phase B — About Me.** In progress — narrative content done, expanded
   visual redesign (hero, icon-grid traits, journey pipeline, terminal,
   closing section) in progress. See `docs/08-content-apps.md`'s "About:

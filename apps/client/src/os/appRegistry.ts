@@ -31,12 +31,12 @@ export interface AppDefinition {
 export const APP_REGISTRY: Record<AppId, AppDefinition> = {
   about: { id: 'about', title: 'About', shortLabel: 'About', defaultSize: { width: 560, height: 420 } },
   projects: { id: 'projects', title: 'Projects', shortLabel: 'Projects', defaultSize: { width: 800, height: 560 } },
-  skills: { id: 'skills', title: 'Skills', shortLabel: 'Skills', defaultSize: { width: 560, height: 420 } },
+  skills: { id: 'skills', title: 'Skills', shortLabel: 'Skills', defaultSize: { width: 920, height: 640 } },
   experience: {
     id: 'experience',
     title: 'Experience',
     shortLabel: 'Experience',
-    defaultSize: { width: 640, height: 480 },
+    defaultSize: { width: 960, height: 680 },
   },
   education: {
     id: 'education',

@@ -483,6 +483,43 @@ export const PROJECTS_CONTENT: Project[] = [
 /* EXPERIENCE                                                                  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Header/eyebrow copy, badge pills, and the closing quote+traits for the
+ * Experience window — same rationale as SkillsPageContent above: content
+ * lives here, not as inline JSX strings, and nothing here is invented.
+ * `badges` reuse Udhyog Saathi's real role/stack framing (SaaS, Full-Stack,
+ * Product) rather than a separate skills-rating claim, per Krishna's
+ * explicit choice over the reference's literal skill-percentage bars
+ * (see docs/08-content-apps.md's Experience section for why those were
+ * dropped entirely).
+ */
+export interface ExperiencePageContent {
+  eyebrow: string;
+  badges: string[];
+  quote: {
+    heading: string;
+    lines: string[];
+  };
+  traits: { title: string; description: string }[];
+}
+
+export const EXPERIENCE_PAGE_CONTENT: ExperiencePageContent = {
+  eyebrow: 'Current Role',
+  badges: ['SaaS', 'Full-Stack', 'Product', 'Problem Solver', 'Builder'],
+  quote: {
+    heading: 'I believe in building things that make a difference.',
+    lines: [
+      'From ideation to implementation, I enjoy turning complex problems',
+      'into simple, beautiful, and impactful products.',
+    ],
+  },
+  traits: [
+    { title: 'Curious Mind', description: 'Always exploring new technologies' },
+    { title: 'Builder at Heart', description: 'Love turning ideas into real products' },
+    { title: 'User Focused', description: 'Designing for real people & problems' },
+  ],
+};
+
 export const EXPERIENCE_CONTENT: Experience[] = [
   {
     id: 'exp-udhyog-saathi',

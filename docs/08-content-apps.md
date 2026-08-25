@@ -401,3 +401,260 @@ History/current-input state for that component is planned as local
 `useState`, not a new Zustand store, per the same reasoning
 `ContactApp.tsx`'s status state already established: nothing outside a
 single self-contained widget needs to read or coordinate with it.
+
+## Skills: dashboard-style redesign (hands-on Phase E)
+
+Built out of the documented roadmap order (`KRISHNAOS_HANDS_ON_CONTEXT.md`
+lists Skills after Projects/Achievements) at Krishna's explicit request,
+modeled on a reference screenshot: an eyebrow/title/tagline header, a row
+of stat cards, several grouped skill-tag cards, and a closing quote card.
+The original `SkillsApp.tsx` (a heading + flat pill list per group) is
+replaced; `SKILLS_CONTENT`'s shape and the six original groups are
+unchanged, so nothing that already read `SKILLS_CONTENT` elsewhere (the
+`skills` terminal command, Recruiter Mode if it ever adds a skills tile)
+needed to change.
+
+**Two new groups were added to `SKILLS_CONTENT`, confirmed by Krishna as
+real rather than invented:** `Developer Tools` (VS Code, Terminal, ESLint,
+Prettier, Jest, Postman, Thunder Client, GitHub Actions, NPM / Yarn) and
+`Soft Skills` (Problem Solving, Critical Thinking, System Design,
+Adaptability, Continuous Learning, Team Collaboration, Communication,
+Ownership) — bringing the total to eight groups. Per this file's
+established pattern (see the About sections above), content this
+substantive is not invented silently; Krishna was asked directly whether
+he actually uses/has these before they were added, since neither list
+existed anywhere in `krish_public.md` or the prior `content.ts`.
+
+**A new `SkillsPageContent` type + `SKILLS_PAGE_CONTENT` export holds the
+header/tagline/quote copy**, following the same "content lives in
+`content.ts`, not inline JSX strings" rule as everything else on this
+page:
+
+```ts
+export interface SkillsPageContent {
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  tagline: string;
+  badges: string[];
+  quote: {
+    heading: string;
+    lines: string[];
+  };
+}
+```
+
+The quote card's wording (`"I believe the best way to learn is by
+building."` + supporting lines) is Krishna's own, given directly rather
+than drafted by the AI — the same non-negotiable rule
+`KRISHNAOS_HANDS_ON_CONTEXT.md` applies to About's narrative sections
+applies here: a first-person quote is a personal claim, not filler copy an
+AI can safely originate.
+
+**Stat-card numbers are computed, not hardcoded**, specifically because
+the reference image's numbers ("20+ Technologies", "7 Project Domains",
+"10+ Major Projects") aren't independently verifiable against real
+content:
+
+```ts
+const uniqueSkillCount = new Set(SKILLS_CONTENT.flatMap((g) => g.skills)).size;
+const groupCount = SKILLS_CONTENT.length;
+const projectCount = PROJECTS_CONTENT.length;
+```
+
+"Technologies" is a de-duplicated count across every group (some skills,
+like WebSockets, legitimately appear in more than one group, so a naive
+sum would double-count). The reference's "Project Domains" stat had no
+honest equivalent in existing content — inventing a count to match the
+picture would have reintroduced exactly the fabricated-number problem
+this file's own "no invented personal content" principle exists to avoid —
+so it was relabeled "Skill Areas" and backed by `SKILLS_CONTENT.length`
+instead of forcing a number the data doesn't actually support. "Major
+Projects" reads `PROJECTS_CONTENT.length` directly, the same array
+`ProjectsApp` and `FEATURED_PROJECTS` already treat as the one source of
+truth for project data.
+
+**The reference's "Currently Exploring" tag row and the fourth
+stat-card's exact framing were both explicitly decided, not assumed:**
+Krishna asked to skip "Currently Exploring" for now (no confirmed list
+existed), so it isn't in this build; "Always Learning" appears only as
+the existing eyebrow badge copy and the fourth stat card's fixed label,
+never as a numeric claim.
+
+**Icons and tints are a parallel, index-matched array to `SKILLS_CONTENT`**
+rather than a field on `SkillGroup` itself:
+
+```ts
+const GROUP_ICONS = [CodeGlyph, LayersGlyph, ServerGlyph, DatabaseGlyph, WrenchGlyph, CompassGlyph, TerminalGlyph, UsersGlyph];
+const GROUP_TINTS = ['#a78bfa', '#38bdf8', '#818cf8', '#38bdf8', '#a78bfa', '#818cf8', '#38bdf8', '#4ade80'];
+```
+
+This mirrors `AmbitionGrid.tsx`'s existing `PILLAR_ICONS`/`PILLAR_TINTS`
+pattern exactly, for the same reason given there: icon/tint choice is a
+purely visual decision that doesn't belong on the content type itself
+(`SkillGroup` has no icon field, and none was added). A defensive
+fallback (`GROUP_ICONS[i] ?? GROUP_ICONS[GROUP_ICONS.length - 1]`) exists
+so that if a future group is appended to `SKILLS_CONTENT` without a
+matching icon/tint entry, the card still renders with a repeated icon
+instead of crashing.
+
+**Two new icon glyphs were added to `os/icons.tsx`** (`DatabaseGlyph`,
+`WrenchGlyph`, `UsersGlyph`, `TerminalGlyph`) rather than forcing existing
+Dock/app icons into a mismatched role, following the same reasoning as
+`AboutApp.tsx`'s hero section: the existing `AppId`-keyed icon registry in
+`os/icons.tsx` is for Dock/Spotlight/title-bar icons and is deliberately
+not extended for one-off content icons; these new glyphs are plain
+exports alongside the existing ones, matching how `CompassGlyph`/
+`LayersGlyph`/`PuzzleGlyph`/`HeartGlyph` already work for `AmbitionGrid`.
+
+**The Skills window's default size grew from 560×420 to 920×640**
+(`os/appRegistry.ts`). The original size fit a simple pill-list layout;
+the new 4-column stat-card row and `xl:grid-cols-4` skill-group grid need
+real width to avoid cramming into a single narrow column by default. This
+is a window *default* only — `useWindowStore`'s existing resize/fullscreen
+behavior (Phase A) is untouched, so a visitor can still resize or
+fullscreen the window exactly as before.
+
+**Not yet done:** no motion/stagger-in animation was added (matches the
+current state of the rest of Skills' siblings — Projects/Achievements/
+Experience don't have entrance animation yet either); mobile/responsive
+verification beyond the existing `sm:`/`xl:` Tailwind breakpoints hasn't
+been manually checked on a real device.
+
+## Experience: dashboard-style redesign (hands-on Phase F)
+
+Built directly after Skills, again ahead of the documented roadmap order
+(`KRISHNAOS_HANDS_ON_CONTEXT.md` lists Experience after Achievements/
+Skills) at Krishna's explicit request, modeled on a reference screenshot:
+a current-role header card, a real company link, a badge row, a "Tech
+Stack I Use" grid, a "My Journey" vertical timeline, and a closing quote +
+trait-card section. The original `ExperienceApp.tsx` (a plain bordered
+list with a bullet-point per highlight) is replaced; `EXPERIENCE_CONTENT`'s
+shape and its one real entry are unchanged.
+
+**The reference invents an entire career history that doesn't exist in
+real content** — three additional timeline entries (2023–24 freelance
+work, 2022–23 internship, 2021–22 "personal projects" era) beyond the one
+real `EXPERIENCE_CONTENT` entry (Udhyog Saathi, 2024–present). Per this
+file's "no invented personal content" principle, none of those three
+entries were added. Krishna's explicit instruction was to build the *UI*
+generically over `EXPERIENCE_CONTENT` (so it correctly renders one entry
+now and however many entries he adds to `content.ts` himself later,
+without any component changes) rather than have the AI invent placeholder
+history to match the picture. `ExperienceApp.tsx` therefore always
+`.map()`s the full array — it was never hardcoded to assume exactly one
+entry.
+
+**Two sections in the reference were dropped entirely, not just toned
+down:** a "What I Do Best" panel showing skill categories as percentage
+progress bars (Frontend Development 95%, UI/UX 90%, etc.), and an "Impact
+at Udhyog Saathi" stats panel (10+ Modules Built, 20+ Active Features, 50+
+Users Onboarded, 90% Manual Work Reduced). Neither had honest data behind
+it — no module count, feature count, user count, or productivity metric
+exists anywhere in `krish_public.md`/`krish_private.md`/`content.ts` — and
+`KRISHNAOS_HANDS_ON_CONTEXT.md`'s Phase E section explicitly names
+percentage-based skill ratings as a pattern to avoid ("These numbers are
+subjective and usually add little value"). Krishna confirmed both should
+be skipped rather than backfilled with placeholder numbers.
+
+**A new `ExperiencePageContent` type + `EXPERIENCE_PAGE_CONTENT` export**
+holds the eyebrow/badges/quote/traits copy, mirroring `SkillsPageContent`
+exactly:
+
+```ts
+export interface ExperiencePageContent {
+  eyebrow: string;
+  badges: string[];
+  quote: { heading: string; lines: string[] };
+  traits: { title: string; description: string }[];
+}
+```
+
+The header's badge row (`SaaS`, `Full-Stack`, `Product`, `Problem Solver`,
+`Builder`) is Krishna's own framing of his real Udhyog Saathi role —
+confirmed explicitly as the sourcing method during this build, rather than
+a literal skill-rating claim the way the reference's percentage bars
+were. The closing quote (`"I believe in building things that make a
+difference..."`) and the three trait cards (Curious Mind / Builder at
+Heart / User Focused) are the reference's wording, which Krishna reviewed
+and chose to keep as his own rather than rewrite — the same "a first-
+person quote is a personal claim, not filler copy an AI can safely
+originate" rule from the Skills section applies here, satisfied by
+explicit confirmation rather than by the AI drafting new wording.
+
+**The company link and tech-stack grid are both derived, not
+hand-typed**, to avoid creating a second, driftable copy of data that
+already exists once:
+
+```ts
+const companyProject = PROJECTS_CONTENT.find((p) => p.title === current.company);
+const companyLink = companyProject?.links.live;
+
+const techStack = Array.from(new Set(PROJECTS_CONTENT.flatMap((p) => p.stack))).sort();
+```
+
+`Experience` (the shared type) has no `link` field, and none was added —
+Udhyog Saathi's canonical live URL already exists once on its matching
+`PROJECTS_CONTENT` entry, so `ExperienceApp` looks it up by matching
+`company`/`title` rather than duplicating the URL as a new field, the same
+reasoning `FEATURED_PROJECTS` already established for not maintaining a
+second project list. The tech-stack grid is the de-duplicated union of
+every real project's `stack` array — this deliberately excludes a few
+libraries the reference image shows (Redux Toolkit, React Query) that
+aren't recorded as used in any real project entry, rather than trusting
+the picture over the actual data.
+
+**Highlights render as prose or as a pill, decided per-string, not by a
+fixed content shape:**
+
+```ts
+function isPillLike(text: string) {
+  return text.length <= 40 && !text.endsWith('.');
+}
+```
+
+The reference's timeline cards show short tag-style labels ("Dashboard &
+Analytics", "Inventory Management"). Krishna's real
+`EXPERIENCE_CONTENT[0].highlights` are full sentences he wrote for the
+prior narrative pass (Phase 4), not short labels — forcing a full sentence
+into a cramped pill would visually mangle it. Rather than silently
+changing Krishna's existing sentences to fit the picture, or asking him to
+rewrite already-real content a second time, each highlight is classified
+at render time: long, period-ending strings render as wrapped paragraph
+text (which is what all four of the current real highlights are, so today
+the pill row simply doesn't appear), while any future highlight written as
+a short label (as the reference intends) renders as a pill automatically.
+This means the component is ready for either style of content without
+needing a schema change or a second field.
+
+**The vertical "My Journey" timeline reuses `JourneyPipeline.tsx`'s visual
+language rather than inventing a new one** — a repeating-gradient dashed
+rail line with per-entry dot markers, index-matched tint array
+(`TIMELINE_TINTS`, same pattern as `STAGE_TINTS`/`PILLAR_TINTS`), the
+current entry's dot filled solid while earlier entries (once they exist)
+would render hollow. The rail is vertical here instead of horizontal,
+which is a genuinely new layout (About's pipeline has no vertical
+precedent in this codebase), but the *device* — dashed line + circular
+node + tint cycling — is the same one already established, not a
+four-th distinct visual system for the same underlying idea.
+
+**Negative dot-offset positioning follows the codebase's existing
+convention of a raw arbitrary bracket value** (`left-[-1.5rem]`), matching
+`HeroSection.tsx`'s `right-[-1rem]` for its floating status card, rather
+than an untested negative custom-spacing utility (`-left-os-6`) that isn't
+used anywhere else in this codebase and wasn't worth introducing as a new,
+unverified pattern for one offset.
+
+**The Experience window's default size grew from 640×480 to 960×680**
+(`os/appRegistry.ts`), for the same reason Skills' window grew — the
+original size fit a simple bulleted list; the new two-column header +
+tech-stack grid + timeline need more room by default. Window resize/
+fullscreen behavior (Phase A) is untouched.
+
+**Not yet done:** no motion/stagger-in animation; mobile/responsive
+verification beyond existing Tailwind breakpoints hasn't been manually
+checked; a second `EXPERIENCE_CONTENT` entry (freelance work, internship,
+or earlier roles, if Krishna has real ones to add) would be a pure
+content.ts edit with no component changes required, per the generic
+timeline `.map()`.
+
