@@ -658,3 +658,227 @@ or earlier roles, if Krishna has real ones to add) would be a pure
 content.ts edit with no component changes required, per the generic
 timeline `.map()`.
 
+## Education: deliberately kept simple (hands-on Phase G)
+
+Built in the same session as Achievements/Contact, from a reference
+screenshot showing Education as a decorated dashboard: a large hero
+illustration, per-entry subject-tag pills (Algorithms, Data Structures,
+DBMS...), an institution logo tile, and a stat footer (8+ Core Subjects,
+50+ Concepts Learned, ∞ Curiosity). This is the one page in this batch
+where the reference was **not** matched, on purpose.
+
+**`KRISHNAOS_HANDS_ON_CONTEXT.md`'s Phase G section is explicit and
+unambiguous:** *"Do NOT make Education a flashy OS animation showcase...
+KrishnaOS demonstrates engineering through interaction where interaction
+adds value, while simple information stays simple."* This directly
+conflicts with the reference image, which is one of the more decorated
+dashboards in the whole app. Rather than silently picking a side, this
+tension was surfaced to Krishna directly; he confirmed keeping Education
+minimal over matching the fuller reference design. This is the same
+"surface tension, don't silently resolve it" pattern already used for
+HeroSection's glass/glow decision and Experience's fabricated-history
+refusal — the difference here is Krishna sided with the project's own
+stated principle rather than the reference image.
+
+**What was actually built:** a small header (`EducationPageContent` —
+eyebrow, tagline, and a `closingNote` for the bottom line, mirroring
+`SkillsPageContent`'s content-lives-in-content.ts rule), and the existing
+institution/degree/date list dressed up only as far as a small connecting
+timeline rail — reusing the exact dashed-line-plus-dot device already
+established in `ExperienceApp.tsx`'s "My Journey" timeline, not a new
+visual system. `EDUCATION_CONTENT` itself is completely unchanged.
+
+**Deliberately NOT included, matching the explicit decision:** per-entry
+subject-tag pills, an institution logo/icon tile, and a stat footer.
+None of these exist as real content (`EducationEntry` has no `field`/
+`tags`/`grade` properties, and adding them would have meant inventing
+subject lists for entries Krishna hasn't specified), and building them
+anyway would have been exactly the "flashy dashboard" Phase G warns
+against — not a content gap to backfill later, but a page that's
+intentionally simpler than its sibling apps.
+
+## Achievements: dashboard-style redesign (hands-on Phase D)
+
+Built in the same session as Education/Contact, modeled on a reference
+screenshot: header, a computed stat row, a two-column grid of achievement
+tiles, and a closing quote card with a CTA. Unlike Education, this page
+isn't covered by `KRISHNAOS_HANDS_ON_CONTEXT.md`'s "keep it simple"
+instruction, so it follows the richer dashboard treatment already
+established for Skills/Experience. The original `AchievementsApp.tsx`
+(presumably a simpler list, superseded here) is replaced.
+
+**Two new achievements were added to `ACHIEVEMENTS_CONTENT`** — `Open
+Source Contributor` (2024) and `Continuous Learner` (`Always`) — bringing
+the real total from 4 to 6, matching the reference's tile count exactly.
+Unlike Skills'/Experience's refusals to invent unconfirmed content, Krishna
+explicitly confirmed both entries as real and asked to use the
+reference's exact wording for both title and description, so neither
+required the AI to draft new copy.
+
+**A new `AchievementsPageContent` type + `ACHIEVEMENTS_PAGE_CONTENT`
+export** holds the eyebrow/tagline/quote/CTA-label copy, following the
+same pattern as `SkillsPageContent`/`ExperiencePageContent`:
+
+```ts
+export interface AchievementsPageContent {
+  eyebrow: string;
+  tagline: string;
+  quote: { heading: string; lines: string[] };
+  ctaLabel: string;
+}
+```
+
+The closing quote (`"Achievements are temporary, but the learnings stay
+forever. I focus on growth, not just glory."`) is the reference's wording,
+which Krishna explicitly chose to keep rather than rewrite — the same
+"personal claim, satisfied by confirmation rather than AI-drafted
+wording" pattern already used for Experience's closing quote.
+
+**Stat numbers are computed, not copied from the reference image:**
+
+```ts
+const achievementCount = ACHIEVEMENTS_CONTENT.length;
+const certificationCount = CERTIFICATIONS_CONTENT.length;
+const hackathonCount = ACHIEVEMENTS_CONTENT.filter((a) =>
+  /hackathon|techathon/i.test(a.title),
+).length;
+```
+
+"Achievements" and "Certifications" read real array lengths directly (6
+and 2). "Hackathons" deliberately does **not** hardcode the reference's
+"3" — it live-counts titles matching `/hackathon|techathon/i`, which today
+evaluates to 2 (EY Techathon 5.0 + Smart India Hackathon 2023). This is
+honestly lower than the reference's number, and that's the point: the
+stat reflects what's actually recorded in `ACHIEVEMENTS_CONTENT` rather
+than a number picked to match the picture, and it will correctly become 3
+the moment a third hackathon-type entry is ever added — no component
+change needed. "Learning" uses the fixed label `"∞"`, matching Skills'
+"Always" stat card convention of a qualitative label rather than a
+fabricated number for an open-ended claim.
+
+**The closing "Let's build more →" CTA is a real button, not decorative
+text styled to look clickable:**
+
+```ts
+const openWindow = useWindowStore((s) => s.openWindow);
+// ...
+<button type="button" onClick={() => openWindow('projects')}>{ctaLabel}</button>
+```
+
+The reference doesn't specify what this button links to. Rendering it as
+inert-looking `<span>` text styled like a button would have been
+misleading UI — a person would reasonably expect it to do something on
+click. Projects is the natural real destination for "see more of what
+I've built," and `useWindowStore.openWindow` is the same real, existing
+action the Dock/Spotlight/Recruiter Mode already use to open windows, not
+a new navigation mechanism invented for this one button.
+
+**Not yet done:** no motion/stagger-in animation; mobile/responsive
+verification beyond existing Tailwind breakpoints hasn't been manually
+checked.
+
+## Contact: real Subject field + info-card redesign (hands-on Phase, contact enrichment)
+
+Built in the same session as Education/Achievements, from a reference
+screenshot showing a "Get In Touch" header, a 2×2 info-card grid
+(Email/Phone/Location/LinkedIn), an "open to opportunities" tag row, and
+a contact form with an added Subject field. The existing working
+Name/Email/Message → MongoDB flow (`docs/08-content-apps.md`'s earlier
+"Contact: the real backend-flex moment" section, still accurate) is
+preserved exactly — this section only covers what was added on top of it.
+
+**Subject is a genuine cross-stack schema addition, not just a new
+`<input>` with nowhere for the value to go.** Krishna explicitly confirmed
+this should touch the real backend rather than be a decorative extra
+field the form silently drops. Four files changed together:
+
+```ts
+// packages/shared-types/src/contact.ts
+export interface ContactPayload {
+  name: string;
+  email: string;
+  subject?: string;  // optional, per Krishna's explicit choice
+  message: string;
+}
+```
+
+```ts
+// apps/server/src/models/ContactSubmission.ts
+subject: { type: String, required: false, trim: true, maxlength: 200 },
+```
+
+`contactController.ts`'s `validateContactPayload` gained matching
+optional-field validation (type-checks `subject` only if present, caps it
+at 200 characters, omits the key entirely from the saved payload if
+empty/whitespace-only rather than persisting an empty string) and the
+response-mapping in `submitContact` was updated to include `subject` in
+the returned `ContactSubmission` when present — without that second
+change, a saved subject would have silently vanished from the API
+response even though it was correctly persisted to MongoDB.
+
+**Client-side validation and the submit call were extended to match,
+keeping the existing mirroring convention** (client validation duplicates
+the server's checks for instant UX feedback; the server remains the real
+source of truth, per this file's existing note on why that duplication
+isn't a security boundary being duplicated insecurely). `subject` is only
+included in the submitted payload when non-empty, matching the server's
+same "omit rather than send empty string" behavior:
+
+```ts
+const trimmedSubject = subject.trim();
+const res = await submitContactForm({
+  name: name.trim(),
+  email: email.trim(),
+  ...(trimmedSubject.length > 0 ? { subject: trimmedSubject } : {}),
+  message: message.trim(),
+});
+```
+
+`apps/client/src/lib/apiClient.ts`'s `submitContactForm` needed **no
+changes** — it already accepted a generic `ContactPayload`, so the new
+optional field flows through automatically once the shared type gained it.
+
+**Phone and Location are real facts that were previously private-only,
+now shown publicly by explicit confirmation.** The phone number
+(`+91 9064700906`) exists in `krish_private.md`, marked private; Krishna
+explicitly confirmed showing it on this public-facing page during this
+session — it was not assumed safe to surface just because a reference
+image showed a phone card. Location is deliberately shown at
+country-level only (`"India"`), Krishna's own choice over the more
+specific state/institution-level detail also on file privately. Both live
+in a new `ContactPageContent` (`content.ts`), alongside the opportunity-
+tag row (`Open Source` / `Freelance` / `Full-time` / `Internships`,
+Krishna confirmed using the reference's exact tags and label wording) and
+the header tagline — the tagline was initially drafted directly in JSX
+during the build and caught in self-review as a violation of this file's
+own "content lives in `content.ts`" rule before being moved into
+`ContactPageContent` where it belongs.
+
+**Email and LinkedIn info cards reuse `PROFILE_LINKS` rather than storing
+a second copy of those URLs** — the same "one source of truth" reasoning
+already applied to Experience's company-link lookup. A dedicated
+`PhoneGlyph` and `MapPinGlyph` were added to `os/icons.tsx` for the two
+new info cards rather than reusing a thematically-mismatched existing
+icon (an earlier draft used `TargetGlyph` for Phone and `UsersGlyph` for
+Location before this was caught in review and corrected) — consistent
+with this file's existing principle that a new icon is added when no
+existing one genuinely fits, rather than forcing a visual mismatch.
+
+**The Contact window's default size grew from 480×440 to 840×560**
+(`os/appRegistry.ts`), for the same reason every other redesigned window
+grew this session — the original size fit a single-column form; the new
+two-column (info cards + form) layout needs more room by default. Window
+resize/fullscreen behavior (Phase A) is untouched.
+
+**`RecruiterRoot.tsx` was checked and needed no changes** — it opens the
+real `ContactApp` window via `useWindowStore.openWindow('contact')`
+rather than rendering a second, duplicate contact form, so the Subject
+field addition required no changes there.
+
+**Not yet done:** no motion/stagger-in animation; mobile/responsive
+verification beyond existing Tailwind breakpoints hasn't been manually
+checked; existing contact submissions already in MongoDB predate the
+`subject` field and simply won't have it (Mongoose's `required: false`
+means this is non-breaking, but worth a quick sanity check against the
+real database).
+

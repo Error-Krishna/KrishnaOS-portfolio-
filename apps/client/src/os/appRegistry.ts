@@ -42,15 +42,15 @@ export const APP_REGISTRY: Record<AppId, AppDefinition> = {
     id: 'education',
     title: 'Education',
     shortLabel: 'Education',
-    defaultSize: { width: 560, height: 400 },
+    defaultSize: { width: 640, height: 480 },
   },
   achievements: {
     id: 'achievements',
     title: 'Achievements',
     shortLabel: 'Achievements',
-    defaultSize: { width: 560, height: 420 },
+    defaultSize: { width: 880, height: 620 },
   },
-  contact: { id: 'contact', title: 'Contact', shortLabel: 'Contact', defaultSize: { width: 480, height: 440 } },
+  contact: { id: 'contact', title: 'Contact', shortLabel: 'Contact', defaultSize: { width: 840, height: 560 } },
 };
 
 export const APP_ORDER: AppId[] = ['about', 'projects', 'skills', 'experience', 'education', 'achievements', 'contact'];

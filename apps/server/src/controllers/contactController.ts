@@ -8,13 +8,19 @@ function validateContactPayload(body: unknown): { valid: true; payload: ContactP
   if (typeof body !== 'object' || body === null) {
     return { valid: false, message: 'Request body must be an object.' };
   }
-  const { name, email, message } = body as Record<string, unknown>;
+  const { name, email, subject, message } = body as Record<string, unknown>;
 
   if (typeof name !== 'string' || name.trim().length < 1) {
     return { valid: false, message: 'Name is required.' };
   }
   if (typeof email !== 'string' || !EMAIL_RE.test(email)) {
     return { valid: false, message: 'A valid email is required.' };
+  }
+  if (subject !== undefined && typeof subject !== 'string') {
+    return { valid: false, message: 'Subject must be text.' };
+  }
+  if (typeof subject === 'string' && subject.length > 200) {
+    return { valid: false, message: 'Subject is too long (max 200 characters).' };
   }
   if (typeof message !== 'string' || message.trim().length < 1) {
     return { valid: false, message: 'Message is required.' };
@@ -23,7 +29,17 @@ function validateContactPayload(body: unknown): { valid: true; payload: ContactP
     return { valid: false, message: 'Message is too long (max 5000 characters).' };
   }
 
-  return { valid: true, payload: { name: name.trim(), email: email.trim().toLowerCase(), message: message.trim() } };
+  const trimmedSubject = typeof subject === 'string' ? subject.trim() : '';
+
+  return {
+    valid: true,
+    payload: {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      ...(trimmedSubject.length > 0 ? { subject: trimmedSubject } : {}),
+      message: message.trim(),
+    },
+  };
 }
 
 export async function submitContact(req: Request, res: Response<ApiResponse<ContactSubmission>>) {
@@ -44,6 +60,7 @@ export async function submitContact(req: Request, res: Response<ApiResponse<Cont
         id: doc._id.toString(),
         name: doc.name,
         email: doc.email,
+        ...(doc.subject ? { subject: doc.subject } : {}),
         message: doc.message,
         createdAt: doc.createdAt?.toISOString() ?? new Date().toISOString(),
       },

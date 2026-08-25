@@ -333,6 +333,32 @@ export const PROFILE_LINKS = {
   portfolio: 'https://personal-portfolio-whoami-1.onrender.com',
 } as const;
 
+/**
+ * Contact window's info-card copy (phone/location) and the "open to
+ * opportunities" tag row. Kept separate from PROFILE_LINKS since these
+ * aren't links to follow, just display facts. The phone number is real
+ * (from krish_private.md) but was private-only until Krishna explicitly
+ * confirmed showing it publicly here; location is deliberately
+ * country-level only ("India"), not the more specific
+ * state/institution-level detail also in the private notes, per Krishna's
+ * own choice on how specific to be.
+ */
+export interface ContactPageContent {
+  tagline: string;
+  phone: string;
+  location: string;
+  opportunityLabel: string;
+  opportunityTags: string[];
+}
+
+export const CONTACT_PAGE_CONTENT: ContactPageContent = {
+  tagline: "Have a project in mind, want to collaborate, or just say hi? I'd love to hear from you!",
+  phone: '+91 9064700906',
+  location: 'India',
+  opportunityLabel: 'Open to exciting opportunities and meaningful collaborations.',
+  opportunityTags: ['Open Source', 'Freelance', 'Full-time', 'Internships'],
+};
+
 /* -------------------------------------------------------------------------- */
 /* PROJECTS                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -548,6 +574,29 @@ export const EXPERIENCE_CONTENT: Experience[] = [
 /* EDUCATION                                                                   */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Header copy only — no stat footer, no subject tags, no decorative hero
+ * illustration. KRISHNAOS_HANDS_ON_CONTEXT.md's Phase G is explicit that
+ * Education should stay simple rather than become another dashboard
+ * ("KrishnaOS demonstrates engineering through interaction where
+ * interaction adds value, while simple information stays simple"), and
+ * Krishna confirmed keeping it minimal over matching a decorated reference
+ * design. This type exists only so the small header follows the same
+ * "content lives in content.ts" rule as every other app, not to set up a
+ * bigger page than what's actually being built.
+ */
+export interface EducationPageContent {
+  eyebrow: string;
+  tagline: string;
+  closingNote: string;
+}
+
+export const EDUCATION_PAGE_CONTENT: EducationPageContent = {
+  eyebrow: 'Always Learning',
+  tagline: 'The foundation that shaped my thinking, problem-solving approach, and passion for building impactful products.',
+  closingNote: "Education is not just about degrees, it's about understanding how things work and why.",
+};
+
 export const EDUCATION_CONTENT: EducationEntry[] = [
   {
     id: 'edu-vit-ap',
@@ -622,7 +671,54 @@ export const ACHIEVEMENTS_CONTENT: Achievement[] = [
 
     date: '2024',
   },
+
+  {
+    id: 'achievement-open-source-contributor',
+
+    title: 'Open Source Contributor',
+
+    description: 'Contributed to open source projects and collaborated with amazing developers.',
+
+    date: '2024',
+  },
+
+  {
+    id: 'achievement-continuous-learner',
+
+    title: 'Continuous Learner',
+
+    description: 'Consistently learning new technologies, tools, and best practices.',
+
+    date: 'Always',
+  },
 ];
+
+/**
+ * Header/eyebrow copy, stat labels, and the closing quote for the
+ * Achievements window — same content.ts-first rule as every other page.
+ * Stat numbers are NOT hardcoded here; AchievementsApp derives them live
+ * from ACHIEVEMENTS_CONTENT so "10+ Achievements"-style counts can never
+ * drift from the real array length.
+ */
+export interface AchievementsPageContent {
+  eyebrow: string;
+  tagline: string;
+  quote: {
+    heading: string;
+    lines: string[];
+  };
+  ctaLabel: string;
+}
+
+export const ACHIEVEMENTS_PAGE_CONTENT: AchievementsPageContent = {
+  eyebrow: 'Milestones & Beyond',
+  tagline: 'Recognition of my efforts, consistency, and passion for building and solving.',
+  quote: {
+    heading: 'Achievements are temporary, but the learnings stay forever.',
+    lines: ['I focus on growth, not just glory.'],
+  },
+  ctaLabel: "Let's build more →",
+};
 
 /* -------------------------------------------------------------------------- */
 /* CERTIFICATIONS                                                              */

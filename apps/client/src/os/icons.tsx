@@ -412,7 +412,27 @@ function ExperienceGlyph({ className }: IconProps) {
   );
 }
 
-function EducationGlyph({ className }: IconProps) {
+export function MapPinGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M12 21s-6.5-5.6-6.5-10.5a6.5 6.5 0 1 1 13 0C18.5 15.4 12 21 12 21Z" />
+      <circle {...iconStrokeProps()} cx="12" cy="10.3" r="2" />
+    </svg>
+  );
+}
+
+export function PhoneGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        {...iconStrokeProps()}
+        d="M7 4.5h2.5l1 3.5-1.7 1.5a10 10 0 0 0 4.7 4.7l1.5-1.7 3.5 1v2.5c0 1-.8 1.8-1.8 1.7A15 15 0 0 1 5.3 6.3c-.1-1 .7-1.8 1.7-1.8Z"
+      />
+    </svg>
+  );
+}
+
+export function EducationGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
       <path {...iconStrokeProps()} d="m12 5 8 4-8 4-8-4 8-4Z" />
@@ -421,7 +441,7 @@ function EducationGlyph({ className }: IconProps) {
   );
 }
 
-function AchievementsGlyph({ className }: IconProps) {
+export function AchievementsGlyph({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
       <path {...iconStrokeProps()} d="M9 4.5h6v4a3 3 0 0 1-6 0v-4Z" />
