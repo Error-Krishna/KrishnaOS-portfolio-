@@ -1,6 +1,12 @@
 import type { Project } from '@krishnaos/shared-types';
 import { RunnerComingSoon } from '../ProjectRunnerShell';
-import { UdhyogSaathiRuntime } from './embedded/UdhyogSaathiRuntime';
+import { lazy, Suspense } from 'react';
+
+const UdhyogSaathiRuntime = lazy(
+  () => import('./embedded/UdhyogSaathiRuntime').then((module) => ({
+    default: module.UdhyogSaathiRuntime,
+  })),
+);
 
 interface ProjectRuntimeProps {
   project: Project;
@@ -69,7 +75,19 @@ function RemoteProjectRuntime({ project }: ProjectRuntimeProps) {
 function EmbeddedProjectRuntime({ project }: ProjectRuntimeProps) {
   switch (project.runtime?.entry) {
     case 'udhyog-saathi':
-      return <UdhyogSaathiRuntime project={project} />;
+      return (
+        <Suspense
+          fallback={
+            <div className="flex min-h-[320px] items-center justify-center rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-6">
+              <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+                Loading project runtime…
+              </p>
+            </div>
+          }
+        >
+          <UdhyogSaathiRuntime project={project} />
+        </Suspense>
+      );
 
     default:
       return <RunnerComingSoon project={project} />;

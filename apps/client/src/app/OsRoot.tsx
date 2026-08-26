@@ -1,8 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { lazy, Suspense } from 'react';
 import { BootSequence } from '@/boot/BootSequence';
 import { WelcomeScreen } from '@/welcome/WelcomeScreen';
-import { Desktop } from '@/os/desktop/Desktop';
-import { RecruiterRoot } from '@/recruiter/RecruiterRoot';
 import { Wallpaper } from '@/os/theme/Wallpaper';
 import { TourController } from '@/tour/TourController';
 import { useBootStore } from '@/store/useBootStore';
@@ -25,6 +24,20 @@ import { useModeStore } from '@/store/useModeStore';
  * mounts alongside it only in tour mode, driving which window is
  * open/focused per step and rendering the tour-bar on top.
  */
+const DesktopRoute = lazy(
+  () =>
+    import('@/os/desktop/Desktop').then((module) => ({
+      default: module.Desktop,
+    })),
+);
+
+const RecruiterRoute = lazy(
+  () =>
+    import('@/recruiter/RecruiterRoot').then((module) => ({
+      default: module.RecruiterRoot,
+    })),
+);
+
 export function OsRoot() {
   const isBootComplete = useBootStore((s) => s.isBootComplete);
   const completeBoot = useBootStore((s) => s.completeBoot);
@@ -52,12 +65,34 @@ export function OsRoot() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <Desktop />
+            <Suspense
+              fallback={
+                <div className="flex h-full w-full items-center justify-center">
+                  <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+                    Loading desktop…
+                  </p>
+                </div>
+              }
+            >
+              <DesktopRoute />
+            </Suspense>
             {mode === 'tour' && <TourController />}
           </motion.div>
         )}
 
-        {isBootComplete && mode === 'recruiter' && <RecruiterRoot key={mode} />}
+        {isBootComplete && mode === 'recruiter' && (
+          <Suspense
+            fallback={
+              <div className="flex h-full w-full items-center justify-center">
+                <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+                  Loading recruiter mode…
+                </p>
+              </div>
+            }
+          >
+            <RecruiterRoute />
+          </Suspense>
+        )}
       </AnimatePresence>
     </div>
   );
