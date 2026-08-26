@@ -17,31 +17,31 @@ const service = new UdhyogSaathiService();
 
 udhyogSaathiRouter.get(
   '/dashboard',
-  (_req, res: Response<ApiResponse<UdhyogSaathiDemoDashboard>>) => {
+  async (_req, res: Response<ApiResponse<UdhyogSaathiDemoDashboard>>) => {
     res.json({
       success: true,
-      data: service.getDashboard(),
+      data: await service.getDashboard(),
     });
   },
 );
 
 udhyogSaathiRouter.get(
   '/bills',
-  (_req, res: Response<ApiResponse<UdhyogSaathiDemoBill[]>>) => {
+  async (_req, res: Response<ApiResponse<UdhyogSaathiDemoBill[]>>) => {
     res.json({
       success: true,
-      data: service.getBills(),
+      data: await service.getBills(),
     });
   },
 );
 
 udhyogSaathiRouter.post(
   '/bills',
-  (
+  async (
     req: Request<unknown, unknown, UdhyogSaathiCreateDemoBillPayload>,
     res: Response<ApiResponse<UdhyogSaathiDemoBill>>,
   ) => {
-    const bill = service.createBill(req.body);
+    const bill = await service.createBill(req.body);
 
     res.status(201).json({
       success: true,
@@ -52,7 +52,7 @@ udhyogSaathiRouter.post(
 
 udhyogSaathiRouter.put(
   '/bills/:id',
-  (
+  async (
     req: Request<
       { id: string },
       unknown,
@@ -60,7 +60,7 @@ udhyogSaathiRouter.put(
     >,
     res: Response<ApiResponse<UdhyogSaathiDemoBill>>,
   ) => {
-    const bill = service.updateBill(req.params.id, req.body);
+    const bill = await service.updateBill(req.params.id, req.body);
 
     if (!bill) {
       res.status(404).json({
@@ -110,11 +110,11 @@ udhyogSaathiRouter.delete(
 
 udhyogSaathiRouter.post(
   '/inventory',
-  (
+  async (
     req: Request<unknown, unknown, UdhyogSaathiCreateDemoInventoryItemPayload>,
     res: Response<ApiResponse<UdhyogSaathiDemoInventoryItem>>,
   ) => {
-    const item = service.createInventoryItem(req.body);
+    const item = await service.createInventoryItem(req.body);
 
     res.status(201).json({
       success: true,
@@ -125,7 +125,7 @@ udhyogSaathiRouter.post(
 
 udhyogSaathiRouter.put(
   '/inventory/:id',
-  (
+  async (
     req: Request<
       { id: string },
       unknown,
@@ -133,7 +133,7 @@ udhyogSaathiRouter.put(
     >,
     res: Response<ApiResponse<UdhyogSaathiDemoInventoryItem>>,
   ) => {
-    const item = service.updateInventoryItem(req.params.id, req.body);
+    const item = await service.updateInventoryItem(req.params.id, req.body);
 
     if (!item) {
       res.status(404).json({
@@ -183,10 +183,10 @@ udhyogSaathiRouter.delete(
 
 udhyogSaathiRouter.get(
   '/inventory',
-  (_req, res: Response<ApiResponse<UdhyogSaathiDemoInventoryItem[]>>) => {
+  async (_req, res: Response<ApiResponse<UdhyogSaathiDemoInventoryItem[]>>) => {
     res.json({
       success: true,
-      data: service.getInventory(),
+      data: await service.getInventory(),
     });
   },
 );

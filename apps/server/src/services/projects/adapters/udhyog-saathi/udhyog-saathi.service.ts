@@ -7,78 +7,51 @@ import type {
   UdhyogSaathiUpdateDemoBillPayload,
   UdhyogSaathiUpdateDemoInventoryItemPayload,
 } from '@krishnaos/shared-types';
+import { UdhyogSaathiStore } from './udhyog-saathi.store.js';
 
 export class UdhyogSaathiService {
-  private readonly bills: UdhyogSaathiDemoBill[] = [
-    {
-      id: 'demo-bill-001',
-      type: 'pakka',
-      clientName: 'Acme Manufacturing',
-      total: 18500,
-      createdAt: '2026-08-20T10:00:00.000Z',
-    },
-    {
-      id: 'demo-bill-002',
-      type: 'pakka',
-      clientName: 'Sharma Industries',
-      total: 12400,
-      createdAt: '2026-08-21T11:30:00.000Z',
-    },
-    {
-      id: 'demo-bill-003',
-      type: 'kaccha',
-      clientName: 'Demo Retailer',
-      total: 7600,
-      createdAt: '2026-08-22T09:15:00.000Z',
-    },
-  ];
+  constructor(
+    private readonly store = new UdhyogSaathiStore(),
+  ) {}
 
-  private readonly inventory: UdhyogSaathiDemoInventoryItem[] = [
-    {
-      id: 'demo-finished-001',
-      name: 'Steel Cabinet',
-      type: 'finished',
-      quantity: 42,
-    },
-    {
-      id: 'demo-finished-002',
-      name: 'Industrial Table',
-      type: 'finished',
-      quantity: 32,
-    },
-    {
-      id: 'demo-raw-001',
-      name: 'Steel Sheet',
-      type: 'raw',
-      quantity: 36,
-    },
-    {
-      id: 'demo-raw-002',
-      name: 'Aluminium Rod',
-      type: 'raw',
-      quantity: 18,
-    },
-  ];
+  async getDashboard(): Promise<UdhyogSaathiDemoDashboard> {
+    const data = await this.store.load();
 
-  getDashboard(): UdhyogSaathiDemoDashboard {
+    const revenue = data.bills.reduce(
+      (sum, bill) => sum + bill.total,
+      0,
+    );
+
     return {
       projectId: 'project-udhyog-saathi',
       source: 'demo',
       metrics: [
-        { label: 'Bills', value: '24' },
-        { label: 'Inventory Items', value: '128' },
-        { label: 'Revenue', value: '₹1.24L' },
+        {
+          label: 'Bills',
+          value: String(data.bills.length),
+        },
+        {
+          label: 'Inventory Items',
+          value: String(data.inventory.length),
+        },
+        {
+          label: 'Revenue',
+          value: this.formatCurrency(revenue),
+        },
       ],
     };
   }
 
-  getBills(): UdhyogSaathiDemoBill[] {
-    return [...this.bills];
+  async getBills(): Promise<UdhyogSaathiDemoBill[]> {
+    const data = await this.store.load();
+    return [...data.bills];
   }
 
-  createBill(
+  async createBill(
     payload: UdhyogSaathiCreateDemoBillPayload,
-  ): UdhyogSaathiDemoBill {
+  ): Promise<UdhyogSaathiDemoBill> {
+    const data = await this.store.load();
+
     const bill: UdhyogSaathiDemoBill = {
       id: `demo-bill-${Date.now()}`,
       type: payload.type,
@@ -87,51 +60,60 @@ export class UdhyogSaathiService {
       createdAt: new Date().toISOString(),
     };
 
-    this.bills.unshift(bill);
+    data.bills.unshift(bill);
+    await this.store.save(data);
 
     return bill;
   }
 
-  updateBill(
+  async updateBill(
     id: string,
     payload: UdhyogSaathiUpdateDemoBillPayload,
-  ): UdhyogSaathiDemoBill | undefined {
-    const index = this.bills.findIndex((bill) => bill.id === id);
+  ): Promise<UdhyogSaathiDemoBill | undefined> {
+    const data = await this.store.load();
+    const index = data.bills.findIndex((bill) => bill.id === id);
 
     if (index === -1) {
       return undefined;
     }
 
     const updatedBill: UdhyogSaathiDemoBill = {
-      ...this.bills[index],
+      ...data.bills[index],
       clientName: payload.clientName,
       type: payload.type,
       total: payload.total,
     };
 
-    this.bills[index] = updatedBill;
+    data.bills[index] = updatedBill;
+    await this.store.save(data);
 
     return updatedBill;
   }
 
-  deleteBill(id: string): boolean {
-    const index = this.bills.findIndex((bill) => bill.id === id);
+  async deleteBill(id: string): Promise<boolean> {
+    const data = await this.store.load();
+    const index = data.bills.findIndex((bill) => bill.id === id);
 
     if (index === -1) {
       return false;
     }
 
-    this.bills.splice(index, 1);
+    data.bills.splice(index, 1);
+    await this.store.save(data);
+
     return true;
   }
 
-  getInventory(): UdhyogSaathiDemoInventoryItem[] {
-    return [...this.inventory];
+  async getInventory(): Promise<UdhyogSaathiDemoInventoryItem[]> {
+    const data = await this.store.load();
+    return [...data.inventory];
   }
 
-  createInventoryItem(
+  async createInventoryItem(
     payload: UdhyogSaathiCreateDemoInventoryItemPayload,
-  ): UdhyogSaathiDemoInventoryItem {
+  ): Promise<UdhyogSaathiDemoInventoryItem> {
+    const data = await this.store.load();
+
     const item: UdhyogSaathiDemoInventoryItem = {
       id: `demo-inventory-${Date.now()}`,
       name: payload.name,
@@ -139,42 +121,57 @@ export class UdhyogSaathiService {
       quantity: payload.quantity,
     };
 
-    this.inventory.unshift(item);
+    data.inventory.unshift(item);
+    await this.store.save(data);
 
     return item;
   }
 
-  updateInventoryItem(
+  async updateInventoryItem(
     id: string,
     payload: UdhyogSaathiUpdateDemoInventoryItemPayload,
-  ): UdhyogSaathiDemoInventoryItem | null {
-    const index = this.inventory.findIndex((item) => item.id === id);
+  ): Promise<UdhyogSaathiDemoInventoryItem | null> {
+    const data = await this.store.load();
+    const item = data.inventory.find((entry) => entry.id === id);
 
-    if (index === -1) {
+    if (!item) {
       return null;
     }
 
-    const updatedItem: UdhyogSaathiDemoInventoryItem = {
-      ...this.inventory[index],
-      name: payload.name,
-      type: payload.type,
-      quantity: payload.quantity,
-    };
+    item.name = payload.name;
+    item.type = payload.type;
+    item.quantity = payload.quantity;
 
-    this.inventory[index] = updatedItem;
+    await this.store.save(data);
 
-    return updatedItem;
+    return item;
   }
 
-  deleteInventoryItem(id: string): boolean {
-    const index = this.inventory.findIndex((item) => item.id === id);
+  async deleteInventoryItem(id: string): Promise<boolean> {
+    const data = await this.store.load();
+    const index = data.inventory.findIndex(
+      (entry) => entry.id === id,
+    );
 
     if (index === -1) {
       return false;
     }
 
-    this.inventory.splice(index, 1);
+    data.inventory.splice(index, 1);
+    await this.store.save(data);
 
     return true;
+  }
+
+  private formatCurrency(value: number): string {
+    if (value >= 100000) {
+      return `₹${(value / 100000).toFixed(2)}L`;
+    }
+
+    if (value >= 1000) {
+      return `₹${(value / 1000).toFixed(1)}K`;
+    }
+
+    return `₹${value.toLocaleString('en-IN')}`;
   }
 }
