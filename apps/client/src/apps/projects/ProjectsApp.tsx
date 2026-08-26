@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { PROJECTS_CONTENT, PROJECTS_PAGE_CONTENT } from '@/lib/content';
+import { PROJECTS_PAGE_CONTENT } from '@/lib/content';
 import { useWindowStore } from '@/store/useWindowStore';
 import { LightbulbGlyph } from '@/os/icons';
 import { ProjectCard } from './ProjectCard';
 import { ProjectRunnerShell, RunnerComingSoon } from './ProjectRunnerShell';
-import { PROJECT_CATEGORIES, PROJECT_RUNNERS, type ProjectCategory } from './runnerRegistry';
+import {
+  PROJECT_CATEGORIES,
+  PROJECT_RUNNERS,
+  type ProjectCategory,
+} from './runnerRegistry';
+import { useProjectCatalog } from './useProjectCatalog';
 
 /**
  * Projects window — a Finder-style, dashboard-style gallery (per the
@@ -32,9 +37,21 @@ export function ProjectsApp() {
   const [openProjectId, setOpenProjectId] = useState<string | null>(null);
   const openWindow = useWindowStore((s) => s.openWindow);
 
-  const { eyebrow, title, titleAccent, tagline, calloutHeading, calloutBody, closing } = PROJECTS_PAGE_CONTENT;
+  const { projects, loading, error } = useProjectCatalog();
 
-  const openProject = openProjectId ? PROJECTS_CONTENT.find((p) => p.id === openProjectId) : undefined;
+  const {
+    eyebrow,
+    title,
+    titleAccent,
+    tagline,
+    calloutHeading,
+    calloutBody,
+    closing,
+  } = PROJECTS_PAGE_CONTENT;
+
+  const openProject = openProjectId
+    ? projects.find((project) => project.id === openProjectId)
+    : undefined;
 
   if (openProject) {
     return (
@@ -46,8 +63,44 @@ export function ProjectsApp() {
 
   const filteredProjects =
     activeCategory === 'All'
-      ? PROJECTS_CONTENT
-      : PROJECTS_CONTENT.filter((p) => PROJECT_RUNNERS[p.id]?.category === activeCategory);
+      ? projects
+      : projects.filter(
+          (project) =>
+            PROJECT_RUNNERS[project.id]?.category === activeCategory,
+        );
+
+  if (loading) {
+    return (
+      <div className="flex min-h-64 items-center justify-center">
+        <p
+          className="text-os-caption text-[color:var(--color-os-text-tertiary)]"
+          aria-live="polite"
+        >
+          Loading projects…
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-os-3 py-os-12 text-center">
+        <p className="text-os-body font-semibold text-[color:var(--color-os-text-primary)]">
+          Unable to load projects
+        </p>
+        <p className="max-w-md text-os-caption text-[color:var(--color-os-text-tertiary)]">
+          {error}
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="rounded-os-full bg-[color:var(--color-os-accent)] px-os-4 py-os-2 text-os-caption font-medium text-white hover:opacity-90"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-os-5">

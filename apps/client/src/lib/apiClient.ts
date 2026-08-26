@@ -1,4 +1,9 @@
-import type { ApiResponse, ContactPayload, ContactSubmission } from '@krishnaos/shared-types';
+import type {
+  ApiResponse,
+  ContactPayload,
+  ContactSubmission,
+  ProjectCatalog,
+} from '@krishnaos/shared-types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000';
 
@@ -27,4 +32,8 @@ export function submitContactForm(payload: ContactPayload) {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+}
+
+export function getProjectCatalog() {
+  return request<ProjectCatalog>('/api/projects');
 }
