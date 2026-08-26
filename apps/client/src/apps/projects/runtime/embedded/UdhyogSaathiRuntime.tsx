@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type {
   Project,
   UdhyogSaathiDemoBill,
@@ -11,12 +11,10 @@ import {
   updateUdhyogSaathiInventoryItem,
   deleteUdhyogSaathiInventoryItem,
   deleteUdhyogSaathiDemoBill,
-  getUdhyogSaathiBills,
-  getUdhyogSaathiDashboard,
-  getUdhyogSaathiInventory,
   updateUdhyogSaathiDemoBill,
 } from '@/lib/apiClient';
 import { RunnerLoadingSkeleton } from '../../ProjectRunnerShell';
+import { useUdhyogSaathiRuntime } from './udhyog-saathi/useUdhyogSaathiRuntime';
 
 interface UdhyogSaathiRuntimeProps {
   project: Project;
@@ -28,105 +26,17 @@ export function UdhyogSaathiRuntime({
   project,
 }: UdhyogSaathiRuntimeProps) {
   const [view, setView] = useState<View>('dashboard');
-  const [dashboard, setDashboard] =
-    useState<UdhyogSaathiDemoDashboard | null>(null);
-  const [bills, setBills] = useState<UdhyogSaathiDemoBill[]>([]);
-  const [inventory, setInventory] =
-    useState<UdhyogSaathiDemoInventoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
 
-  async function syncRuntime() {
-    setRefreshing(true);
-    setRefreshError(null);
-
-    try {
-      const [
-        dashboardResponse,
-        billsResponse,
-        inventoryResponse,
-      ] = await Promise.all([
-        getUdhyogSaathiDashboard(),
-        getUdhyogSaathiBills(),
-        getUdhyogSaathiInventory(),
-      ]);
-
-      if (!dashboardResponse.success) {
-        throw new Error(dashboardResponse.error.message);
-      }
-
-      if (!billsResponse.success) {
-        throw new Error(billsResponse.error.message);
-      }
-
-      if (!inventoryResponse.success) {
-        throw new Error(inventoryResponse.error.message);
-      }
-
-      setDashboard(dashboardResponse.data);
-      setBills(billsResponse.data);
-      setInventory(inventoryResponse.data);
-    } catch (syncError) {
-      setRefreshError(
-        syncError instanceof Error
-          ? syncError.message
-          : 'Unable to synchronize Udhyog Saathi.',
-      );
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-
-      const [dashboardResponse, billsResponse, inventoryResponse] =
-        await Promise.all([
-          getUdhyogSaathiDashboard(),
-          getUdhyogSaathiBills(),
-          getUdhyogSaathiInventory(),
-        ]);
-
-      if (cancelled) {
-        return;
-      }
-
-      if (!dashboardResponse.success) {
-        setError(dashboardResponse.error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!billsResponse.success) {
-        setError(billsResponse.error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!inventoryResponse.success) {
-        setError(inventoryResponse.error.message);
-        setLoading(false);
-        return;
-      }
-
-      setDashboard(dashboardResponse.data);
-      setBills(billsResponse.data);
-      setInventory(inventoryResponse.data);
-      setLoading(false);
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const {
+    dashboard,
+    bills,
+    inventory,
+    loading,
+    refreshing,
+    error,
+    refreshError,
+    syncRuntime,
+  } = useUdhyogSaathiRuntime();
 
   if (loading) {
     return (
