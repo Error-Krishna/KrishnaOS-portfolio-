@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Project } from '@krishnaos/shared-types';
 import { RunnerComingSoon } from '../ProjectRunnerShell';
 import { EMBEDDED_RUNTIMES } from './embeddedRuntimeRegistry';
+import { SANDBOX_RUNTIMES } from './sandboxRuntimeRegistry';
 
 interface ProjectRuntimeProps {
   project: Project;
@@ -86,7 +87,26 @@ function EmbeddedProjectRuntime({ project }: ProjectRuntimeProps) {
 }
 
 function SandboxProjectRuntime({ project }: ProjectRuntimeProps) {
-  return <RunnerComingSoon project={project} />;
+  const entry = project.runtime?.entry;
+  const Runtime = entry ? SANDBOX_RUNTIMES[entry] : undefined;
+
+  if (!Runtime) {
+    return <RunnerComingSoon project={project} />;
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[320px] items-center justify-center rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-6">
+          <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            Loading project runtime…
+          </p>
+        </div>
+      }
+    >
+      <Runtime project={project} />
+    </Suspense>
+  );
 }
 
 function StaticProjectRuntime({ project }: ProjectRuntimeProps) {
