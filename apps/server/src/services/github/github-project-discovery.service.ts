@@ -45,7 +45,7 @@ export class GitHubProjectDiscoveryService {
       (await response.json()) as GitHubRepositoryResponse[];
 
     return repositories
-      .filter((repository) => !repository.fork && !repository.archived)
+      .filter((repository) => !repository.archived)
       .map((repository) => ({
         owner: this.owner!,
         name: repository.name,
