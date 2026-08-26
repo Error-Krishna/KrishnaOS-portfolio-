@@ -3,7 +3,8 @@ import { PROJECTS_PAGE_CONTENT } from '@/lib/content';
 import { useWindowStore } from '@/store/useWindowStore';
 import { LightbulbGlyph } from '@/os/icons';
 import { ProjectCard } from './ProjectCard';
-import { ProjectRunnerShell, RunnerComingSoon } from './ProjectRunnerShell';
+import { ProjectRunnerShell } from './ProjectRunnerShell';
+import { ProjectRuntime } from './runtime/ProjectRuntime';
 import {
   PROJECT_CATEGORIES,
   PROJECT_RUNNERS,
@@ -56,7 +57,7 @@ export function ProjectsApp() {
   if (openProject) {
     return (
       <ProjectRunnerShell project={openProject} onBack={() => setOpenProjectId(null)}>
-        <RunnerComingSoon project={openProject} />
+        <ProjectRuntime project={openProject} />
       </ProjectRunnerShell>
     );
   }
