@@ -84,6 +84,34 @@ export class ProjectManifestService {
       throw new Error(`Manifest name is required in ${repository.fullName}`);
     }
 
+    if (value.description !== undefined && typeof value.description !== 'string') {
+      throw new Error(
+        `Manifest description is invalid in ${repository.fullName}`,
+      );
+    }
+
+    if (value.version !== undefined && typeof value.version !== 'string') {
+      throw new Error(
+        `Manifest version is invalid in ${repository.fullName}`,
+      );
+    }
+
+    if (value.role !== undefined && typeof value.role !== 'string') {
+      throw new Error(
+        `Manifest role is invalid in ${repository.fullName}`,
+      );
+    }
+
+    if (
+      value.stack !== undefined &&
+      (!Array.isArray(value.stack) ||
+        value.stack.some((technology) => typeof technology !== 'string'))
+    ) {
+      throw new Error(
+        `Manifest stack is invalid in ${repository.fullName}`,
+      );
+    }
+
     if (
       !this.isRecord(value.visibility) ||
       typeof value.visibility.showInKrishnaOS !== 'boolean'

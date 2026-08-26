@@ -36,6 +36,16 @@ export interface ProjectManifest {
    */
   version?: string;
 
+  /**
+   * Role performed on the project.
+   */
+  role?: string;
+
+  /**
+   * Technologies used by the project.
+   */
+  stack?: string[];
+
   visibility: ProjectManifestVisibility;
 
   runtime: ProjectRuntimeConfig;
