@@ -7,6 +7,7 @@ import type {
   UdhyogSaathiDemoBill,
   UdhyogSaathiDemoInventoryItem,
   UdhyogSaathiCreateDemoBillPayload,
+  UdhyogSaathiUpdateDemoBillPayload,
 } from '@krishnaos/shared-types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000';
@@ -69,6 +70,29 @@ export function createUdhyogSaathiDemoBill(
     {
       method: 'POST',
       body: JSON.stringify(payload),
+    },
+  );
+}
+
+
+export function updateUdhyogSaathiDemoBill(
+  id: string,
+  payload: UdhyogSaathiUpdateDemoBillPayload,
+) {
+  return request<UdhyogSaathiDemoBill>(
+    `/api/projects/udhyog-saathi/bills/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteUdhyogSaathiDemoBill(id: string) {
+  return request<{ id: string }>(
+    `/api/projects/udhyog-saathi/bills/${id}`,
+    {
+      method: 'DELETE',
     },
   );
 }

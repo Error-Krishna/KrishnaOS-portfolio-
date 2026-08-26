@@ -7,9 +7,11 @@ import type {
 } from '@krishnaos/shared-types';
 import {
   createUdhyogSaathiDemoBill,
+  deleteUdhyogSaathiDemoBill,
   getUdhyogSaathiBills,
   getUdhyogSaathiDashboard,
   getUdhyogSaathiInventory,
+  updateUdhyogSaathiDemoBill,
 } from '@/lib/apiClient';
 import { RunnerLoadingSkeleton } from '../../ProjectRunnerShell';
 
@@ -164,6 +166,18 @@ export function UdhyogSaathiRuntime({
               onBillCreated={(bill) =>
                 setBills((current) => [bill, ...current])
               }
+              onBillUpdated={(bill) =>
+                setBills((current) =>
+                  current.map((item) =>
+                    item.id === bill.id ? bill : item,
+                  ),
+                )
+              }
+              onBillDeleted={(id) =>
+                setBills((current) =>
+                  current.filter((item) => item.id !== id),
+                )
+              }
             />
           )}
 
@@ -220,15 +234,27 @@ function DashboardView({
 function BillingView({
   bills,
   onBillCreated,
+  onBillUpdated,
+  onBillDeleted,
 }: {
   bills: UdhyogSaathiDemoBill[];
   onBillCreated: (bill: UdhyogSaathiDemoBill) => void;
+  onBillUpdated: (bill: UdhyogSaathiDemoBill) => void;
+  onBillDeleted: (id: string) => void;
 }) {
   const [clientName, setClientName] = useState('');
   const [type, setType] = useState<'pakka' | 'kaccha'>('pakka');
   const [total, setTotal] = useState('');
+
+  const [editingBill, setEditingBill] =
+    useState<UdhyogSaathiDemoBill | null>(null);
+
   const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const [createError, setCreateError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const pakkaBills = bills.filter((bill) => bill.type === 'pakka');
   const kacchaBills = bills.filter((bill) => bill.type === 'kaccha');
@@ -273,24 +299,134 @@ function BillingView({
     setCreating(false);
   }
 
+  function startEditing(bill: UdhyogSaathiDemoBill) {
+    setEditingBill(bill);
+    setClientName(bill.clientName);
+    setType(bill.type);
+    setTotal(String(bill.total));
+    setEditError(null);
+  }
+
+  function cancelEditing() {
+    setEditingBill(null);
+    setClientName('');
+    setType('pakka');
+    setTotal('');
+    setEditError(null);
+  }
+
+  async function handleUpdateBill(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    if (!editingBill) {
+      return;
+    }
+
+    const trimmedClientName = clientName.trim();
+    const numericTotal = Number(total);
+
+    if (!trimmedClientName) {
+      setEditError('Client name is required.');
+      return;
+    }
+
+    if (!Number.isFinite(numericTotal) || numericTotal <= 0) {
+      setEditError('Enter a valid bill amount.');
+      return;
+    }
+
+    setSaving(true);
+    setEditError(null);
+
+    const response = await updateUdhyogSaathiDemoBill(
+      editingBill.id,
+      {
+        clientName: trimmedClientName,
+        type,
+        total: numericTotal,
+      },
+    );
+
+    if (!response.success) {
+      setEditError(response.error.message);
+      setSaving(false);
+      return;
+    }
+
+    onBillUpdated(response.data);
+    cancelEditing();
+    setSaving(false);
+  }
+
+  async function handleDeleteBill(id: string) {
+    const bill = bills.find((item) => item.id === id);
+
+    if (!bill) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete the bill for ${bill.clientName}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(id);
+
+    const response = await deleteUdhyogSaathiDemoBill(id);
+
+    if (!response.success) {
+      window.alert(response.error.message);
+      setDeletingId(null);
+      return;
+    }
+
+    if (editingBill?.id === id) {
+      cancelEditing();
+    }
+
+    onBillDeleted(id);
+    setDeletingId(null);
+  }
+
+  const formTitle = editingBill
+    ? `Edit ${editingBill.clientName}`
+    : 'Create Demo Bill';
+
   return (
     <div className="flex flex-col gap-os-4">
-      <div>
-        <p className="text-os-title font-bold text-[color:var(--color-os-text-primary)]">
-          Billing
-        </p>
+      <div className="flex items-start justify-between gap-os-3">
+        <div>
+          <p className="text-os-title font-bold text-[color:var(--color-os-text-primary)]">
+            Billing
+          </p>
 
-        <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
-          Demo invoices from Udhyog Saathi.
-        </p>
+          <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
+            Demo invoices from Udhyog Saathi.
+          </p>
+        </div>
+
+        {editingBill && (
+          <button
+            type="button"
+            onClick={cancelEditing}
+            className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-4 py-os-2 text-os-caption font-medium text-[color:var(--color-os-text-secondary)] hover:bg-[color:var(--color-os-surface-elevated)]"
+          >
+            Cancel edit
+          </button>
+        )}
       </div>
 
       <form
-        onSubmit={handleCreateBill}
+        onSubmit={editingBill ? handleUpdateBill : handleCreateBill}
         className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4"
       >
         <p className="text-os-caption font-semibold text-[color:var(--color-os-text-primary)]">
-          Create Demo Bill
+          {formTitle}
         </p>
 
         <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-3">
@@ -323,18 +459,24 @@ function BillingView({
           />
         </div>
 
-        {createError && (
+        {(createError || editError) && (
           <p className="text-os-caption text-red-500">
-            {createError}
+            {createError ?? editError}
           </p>
         )}
 
         <button
           type="submit"
-          disabled={creating}
+          disabled={creating || saving}
           className="w-fit rounded-os-full bg-[color:var(--color-os-accent)] px-os-4 py-os-2 text-os-caption font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {creating ? 'Creating…' : 'Create Demo Bill'}
+          {editingBill
+            ? saving
+              ? 'Saving…'
+              : 'Save Changes'
+            : creating
+              ? 'Creating…'
+              : 'Create Demo Bill'}
         </button>
       </form>
 
@@ -351,18 +493,25 @@ function BillingView({
       </div>
 
       <div className="overflow-hidden rounded-os-lg border border-[color:var(--color-os-glass-border)]">
-        <div className="grid grid-cols-[1fr_auto_auto] gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 text-os-caption font-semibold text-[color:var(--color-os-text-tertiary)]">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 text-os-caption font-semibold text-[color:var(--color-os-text-tertiary)]">
           <span>Client</span>
           <span>Type</span>
           <span>Total</span>
+          <span>Actions</span>
         </div>
+
+        {bills.length === 0 && (
+          <div className="px-os-4 py-os-8 text-center text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            No demo bills yet.
+          </div>
+        )}
 
         {bills.map((bill) => (
           <div
             key={bill.id}
-            className="grid grid-cols-[1fr_auto_auto] gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 last:border-b-0"
+            className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 last:border-b-0"
           >
-            <span className="text-os-caption text-[color:var(--color-os-text-primary)]">
+            <span className="min-w-0 truncate text-os-caption text-[color:var(--color-os-text-primary)]">
               {bill.clientName}
             </span>
 
@@ -373,6 +522,26 @@ function BillingView({
             <span className="text-os-caption font-medium text-[color:var(--color-os-text-primary)]">
               ₹{bill.total.toLocaleString('en-IN')}
             </span>
+
+            <div className="flex items-center gap-os-2">
+              <button
+                type="button"
+                onClick={() => startEditing(bill)}
+                disabled={deletingId === bill.id}
+                className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-3 py-1 text-os-caption font-medium text-[color:var(--color-os-text-secondary)] hover:bg-[color:var(--color-os-surface-elevated)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleDeleteBill(bill.id)}
+                disabled={deletingId === bill.id}
+                className="rounded-os-full border border-red-500/30 px-os-3 py-1 text-os-caption font-medium text-red-500 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deletingId === bill.id ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
           </div>
         ))}
       </div>

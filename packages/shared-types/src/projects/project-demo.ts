@@ -29,3 +29,9 @@ export interface UdhyogSaathiCreateDemoBillPayload {
   type: 'pakka' | 'kaccha';
   total: number;
 }
+
+export interface UdhyogSaathiUpdateDemoBillPayload {
+  clientName: string;
+  type: 'pakka' | 'kaccha';
+  total: number;
+}

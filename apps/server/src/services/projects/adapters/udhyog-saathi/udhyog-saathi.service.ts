@@ -1,5 +1,6 @@
 import type {
   UdhyogSaathiCreateDemoBillPayload,
+  UdhyogSaathiUpdateDemoBillPayload,
   UdhyogSaathiDemoBill,
   UdhyogSaathiDemoDashboard,
   UdhyogSaathiDemoInventoryItem,
@@ -60,6 +61,39 @@ export class UdhyogSaathiService {
     this.bills.unshift(bill);
 
     return bill;
+  }
+
+  updateBill(
+    id: string,
+    payload: UdhyogSaathiUpdateDemoBillPayload,
+  ): UdhyogSaathiDemoBill | undefined {
+    const index = this.bills.findIndex((bill) => bill.id === id);
+
+    if (index === -1) {
+      return undefined;
+    }
+
+    const updatedBill: UdhyogSaathiDemoBill = {
+      ...this.bills[index],
+      clientName: payload.clientName,
+      type: payload.type,
+      total: payload.total,
+    };
+
+    this.bills[index] = updatedBill;
+
+    return updatedBill;
+  }
+
+  deleteBill(id: string): boolean {
+    const index = this.bills.findIndex((bill) => bill.id === id);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.bills.splice(index, 1);
+    return true;
   }
 
   getInventory(): UdhyogSaathiDemoInventoryItem[] {
