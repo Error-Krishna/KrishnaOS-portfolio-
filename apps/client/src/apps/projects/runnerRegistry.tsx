@@ -1,59 +1,55 @@
-import type { ComponentType } from 'react';
-import { UdhyogSaathiRunner } from './runners/UdhyogSaathiRunner';
-import { HotReloadRunner } from './runners/HotReloadRunner';
-import { InsightLoopRunner } from './runners/InsightLoopRunner';
-import { PersonalFinanceRunner } from './runners/PersonalFinanceRunner';
-import { JobAutomationRunner } from './runners/JobAutomationRunner';
+import type { ProjectRuntimeType } from '@krishnaos/shared-types';
 
-export type ProjectCategory = 'SaaS' | 'Web Apps' | 'Developer Tools' | 'Automation';
+export type ProjectCategory =
+  | 'SaaS'
+  | 'Web Apps'
+  | 'Developer Tools'
+  | 'Automation';
 
-interface ProjectRunnerEntry {
+export interface ProjectRunnerEntry {
   category: ProjectCategory;
-  /** Short tag shown on the project card (e.g. "Live dashboard demo"). */
   demoLabel: string;
-  Runner: ComponentType;
+  runtimeType: ProjectRuntimeType;
 }
 
 /**
- * Single source of truth mapping a real `PROJECTS_CONTENT` entry (by id)
- * to its category (drives the filter pills) and its in-OS interactive
- * demo component (drives what renders when a visitor presses "Try Live").
+ * Compatibility metadata for the existing project gallery.
  *
- * This is the "reusable project-window component" registry: adding a new
- * project's live demo later is exactly one new entry here plus one new
- * file in `runners/` — `ProjectsApp.tsx`, `ProjectCard.tsx`, and
- * `ProjectRunnerShell.tsx` never need to change. A project id with no
- * entry here isn't hidden or broken — `ProjectsApp` falls back to
- * `RunnerComingSoon` (see `ProjectRunnerShell.tsx`), an honest "not wired
- * up yet" state, per `AGENTS.md`'s "don't build fake/placeholder UI that
- * looks finished" rule.
+ * This intentionally contains no project-specific React components.
+ * Interactive execution will be resolved by the generic project runtime
+ * architecture rather than by importing one runner per project.
  */
 export const PROJECT_RUNNERS: Record<string, ProjectRunnerEntry> = {
   'project-udhyog-saathi': {
     category: 'SaaS',
     demoLabel: 'Live dashboard demo',
-    Runner: UdhyogSaathiRunner,
+    runtimeType: 'embedded',
   },
   'project-hotreload': {
     category: 'Developer Tools',
     demoLabel: 'CLI simulator',
-    Runner: HotReloadRunner,
+    runtimeType: 'embedded',
   },
   'project-insightloop': {
     category: 'Web Apps',
     demoLabel: 'Live analytics demo',
-    Runner: InsightLoopRunner,
+    runtimeType: 'embedded',
   },
   'project-personal-finance-tracker': {
     category: 'Web Apps',
     demoLabel: 'Working expense tracker',
-    Runner: PersonalFinanceRunner,
+    runtimeType: 'embedded',
   },
   'project-job-automation': {
     category: 'Automation',
     demoLabel: 'Automation pipeline demo',
-    Runner: JobAutomationRunner,
+    runtimeType: 'embedded',
   },
 };
 
-export const PROJECT_CATEGORIES: ProjectCategory[] = ['SaaS', 'Web Apps', 'Developer Tools', 'Automation'];
+export const PROJECT_CATEGORIES: ProjectCategory[] = [
+  'SaaS',
+  'Web Apps',
+  'Developer Tools',
+  'Automation',
+];

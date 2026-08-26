@@ -37,11 +37,9 @@ export function ProjectsApp() {
   const openProject = openProjectId ? PROJECTS_CONTENT.find((p) => p.id === openProjectId) : undefined;
 
   if (openProject) {
-    const runnerEntry = PROJECT_RUNNERS[openProject.id];
-    const Runner = runnerEntry?.Runner;
     return (
       <ProjectRunnerShell project={openProject} onBack={() => setOpenProjectId(null)}>
-        {Runner ? <Runner /> : <RunnerComingSoon project={openProject} />}
+        <RunnerComingSoon project={openProject} />
       </ProjectRunnerShell>
     );
   }

@@ -4,7 +4,6 @@ import { Dock } from '@/os/dock/Dock';
 import { WindowManager } from '@/os/window-manager/WindowManager';
 import { Spotlight } from '@/os/spotlight/Spotlight';
 import { Wallpaper } from '@/os/theme/Wallpaper';
-import { StatusWidgets } from '@/os/widgets/StatusWidgets';
 import type { AppId } from '@/os/appRegistry';
 import { AboutApp } from '@/apps/about/AboutApp';
 import { ProjectsApp } from '@/apps/projects/ProjectsApp';
