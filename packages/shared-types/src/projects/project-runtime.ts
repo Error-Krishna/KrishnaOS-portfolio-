@@ -30,6 +30,11 @@ export interface ProjectRuntimeConfig {
   url?: string;
 
   /**
+   * Public API base URL used by embedded project adapters.
+   */
+  apiBaseUrl?: string;
+
+  /**
    * Optional port used by a sandboxed project runtime.
    */
   port?: number;

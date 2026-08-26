@@ -1,5 +1,6 @@
 import type { Project } from '@krishnaos/shared-types';
-import { RunnerComingSoon, RunnerLoadingSkeleton } from '../ProjectRunnerShell';
+import { RunnerComingSoon } from '../ProjectRunnerShell';
+import { UdhyogSaathiRuntime } from './embedded/UdhyogSaathiRuntime';
 
 interface ProjectRuntimeProps {
   project: Project;
@@ -66,19 +67,13 @@ function RemoteProjectRuntime({ project }: ProjectRuntimeProps) {
 }
 
 function EmbeddedProjectRuntime({ project }: ProjectRuntimeProps) {
-  return (
-    <div className="flex flex-col gap-os-3 rounded-os-lg border border-dashed border-[color:var(--color-os-glass-border)] p-os-6">
-      <p className="text-os-body font-semibold text-[color:var(--color-os-text-primary)]">
-        {project.title}
-      </p>
+  switch (project.runtime?.entry) {
+    case 'udhyog-saathi':
+      return <UdhyogSaathiRuntime project={project} />;
 
-      <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
-        This project is configured as an embedded runtime.
-      </p>
-
-      <RunnerLoadingSkeleton label="Embedded runtime adapter is being initialized…" />
-    </div>
-  );
+    default:
+      return <RunnerComingSoon project={project} />;
+  }
 }
 
 function SandboxProjectRuntime({ project }: ProjectRuntimeProps) {
