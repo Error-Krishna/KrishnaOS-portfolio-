@@ -29,6 +29,11 @@ export function UdhyogSaathiRuntime({
     refreshing,
     error,
     refreshError,
+    syncDashboard,
+    updateBill,
+    removeBill,
+    updateInventory,
+    removeInventory,
     syncRuntime,
   } = useUdhyogSaathiRuntime();
 
@@ -149,14 +154,17 @@ export function UdhyogSaathiRuntime({
           {view === 'billing' && (
             <BillingView
               bills={bills}
-              onBillCreated={() => {
-                void syncRuntime();
+              onBillCreated={(bill) => {
+                updateBill(bill);
+                void syncDashboard();
               }}
-              onBillUpdated={() => {
-                void syncRuntime();
+              onBillUpdated={(bill) => {
+                updateBill(bill);
+                void syncDashboard();
               }}
-              onBillDeleted={() => {
-                void syncRuntime();
+              onBillDeleted={(id) => {
+                removeBill(id);
+                void syncDashboard();
               }}
             />
           )}
@@ -164,14 +172,17 @@ export function UdhyogSaathiRuntime({
           {view === 'inventory' && (
             <InventoryView
               inventory={inventory}
-              onInventoryCreated={() => {
-                void syncRuntime();
+              onInventoryCreated={(item) => {
+                updateInventory(item);
+                void syncDashboard();
               }}
-              onInventoryUpdated={() => {
-                void syncRuntime();
+              onInventoryUpdated={(item) => {
+                updateInventory(item);
+                void syncDashboard();
               }}
-              onInventoryDeleted={() => {
-                void syncRuntime();
+              onInventoryDeleted={(id) => {
+                removeInventory(id);
+                void syncDashboard();
               }}
             />
           )}

@@ -77,6 +77,59 @@ export function useUdhyogSaathiRuntime() {
     [],
   );
 
+  const syncDashboard = useCallback(async () => {
+    try {
+      const response = await getUdhyogSaathiDashboard();
+
+      if (!response.success) {
+        setRefreshError(response.error.message);
+        return;
+      }
+
+      setDashboard(response.data);
+      setRefreshError(null);
+    } catch (syncError) {
+      setRefreshError(
+        syncError instanceof Error
+          ? syncError.message
+          : 'Unable to synchronize Udhyog Saathi dashboard.',
+      );
+    }
+  }, []);
+
+  const updateBill = useCallback((bill: UdhyogSaathiDemoBill) => {
+    setBills((current) => {
+      const exists = current.some((item) => item.id === bill.id);
+
+      return exists
+        ? current.map((item) => (item.id === bill.id ? bill : item))
+        : [bill, ...current];
+    });
+  }, []);
+
+  const removeBill = useCallback((id: string) => {
+    setBills((current) => current.filter((item) => item.id !== id));
+  }, []);
+
+  const updateInventory = useCallback(
+    (item: UdhyogSaathiDemoInventoryItem) => {
+      setInventory((current) => {
+        const exists = current.some((entry) => entry.id === item.id);
+
+        return exists
+          ? current.map((entry) => (entry.id === item.id ? item : entry))
+          : [item, ...current];
+      });
+    },
+    [],
+  );
+
+  const removeInventory = useCallback((id: string) => {
+    setInventory((current) =>
+      current.filter((item) => item.id !== id),
+    );
+  }, []);
+
   const syncRuntime = useCallback(async () => {
     setRefreshing(true);
     setRefreshError(null);
@@ -144,6 +197,11 @@ export function useUdhyogSaathiRuntime() {
     error,
     refreshError,
 
+    syncDashboard,
+    updateBill,
+    removeBill,
+    updateInventory,
+    removeInventory,
     syncRuntime,
   };
 }
