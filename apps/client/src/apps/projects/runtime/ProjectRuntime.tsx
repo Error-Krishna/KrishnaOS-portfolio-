@@ -1,23 +1,12 @@
+import { Suspense } from 'react';
 import type { Project } from '@krishnaos/shared-types';
 import { RunnerComingSoon } from '../ProjectRunnerShell';
-import { lazy, Suspense } from 'react';
-
-const UdhyogSaathiRuntime = lazy(
-  () => import('./embedded/UdhyogSaathiRuntime').then((module) => ({
-    default: module.UdhyogSaathiRuntime,
-  })),
-);
+import { EMBEDDED_RUNTIMES } from './embeddedRuntimeRegistry';
 
 interface ProjectRuntimeProps {
   project: Project;
 }
 
-/**
- * Generic project runtime entry point.
- *
- * Runtime behavior comes from the repository manifest rather than from
- * project-specific React components.
- */
 export function ProjectRuntime({ project }: ProjectRuntimeProps) {
   const runtime = project.runtime;
 
@@ -44,9 +33,10 @@ export function ProjectRuntime({ project }: ProjectRuntimeProps) {
 }
 
 function RemoteProjectRuntime({ project }: ProjectRuntimeProps) {
-  const url = project.runtime?.type === 'remote'
-    ? project.runtime.url
-    : undefined;
+  const url =
+    project.runtime?.type === 'remote'
+      ? project.runtime.url
+      : undefined;
 
   if (!url) {
     return <RunnerComingSoon project={project} />;
@@ -73,35 +63,32 @@ function RemoteProjectRuntime({ project }: ProjectRuntimeProps) {
 }
 
 function EmbeddedProjectRuntime({ project }: ProjectRuntimeProps) {
-  switch (project.runtime?.entry) {
-    case 'udhyog-saathi':
-      return (
-        <Suspense
-          fallback={
-            <div className="flex min-h-[320px] items-center justify-center rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-6">
-              <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-                Loading project runtime…
-              </p>
-            </div>
-          }
-        >
-          <UdhyogSaathiRuntime project={project} />
-        </Suspense>
-      );
+  const entry = project.runtime?.entry;
+  const Runtime = entry ? EMBEDDED_RUNTIMES[entry] : undefined;
 
-    default:
-      return <RunnerComingSoon project={project} />;
+  if (!Runtime) {
+    return <RunnerComingSoon project={project} />;
   }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[320px] items-center justify-center rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-6">
+          <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            Loading project runtime…
+          </p>
+        </div>
+      }
+    >
+      <Runtime project={project} />
+    </Suspense>
+  );
 }
 
 function SandboxProjectRuntime({ project }: ProjectRuntimeProps) {
-  return (
-    <RunnerComingSoon project={project} />
-  );
+  return <RunnerComingSoon project={project} />;
 }
 
 function StaticProjectRuntime({ project }: ProjectRuntimeProps) {
-  return (
-    <RunnerComingSoon project={project} />
-  );
+  return <RunnerComingSoon project={project} />;
 }
