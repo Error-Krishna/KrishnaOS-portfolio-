@@ -35,16 +35,48 @@ export function UdhyogSaathiRuntime({
     useState<UdhyogSaathiDemoInventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
-  async function refreshDashboard() {
-    const response = await getUdhyogSaathiDashboard();
+  async function syncRuntime() {
+    setRefreshing(true);
+    setRefreshError(null);
 
-    if (!response.success) {
-      setError(response.error.message);
-      return;
+    try {
+      const [
+        dashboardResponse,
+        billsResponse,
+        inventoryResponse,
+      ] = await Promise.all([
+        getUdhyogSaathiDashboard(),
+        getUdhyogSaathiBills(),
+        getUdhyogSaathiInventory(),
+      ]);
+
+      if (!dashboardResponse.success) {
+        throw new Error(dashboardResponse.error.message);
+      }
+
+      if (!billsResponse.success) {
+        throw new Error(billsResponse.error.message);
+      }
+
+      if (!inventoryResponse.success) {
+        throw new Error(inventoryResponse.error.message);
+      }
+
+      setDashboard(dashboardResponse.data);
+      setBills(billsResponse.data);
+      setInventory(inventoryResponse.data);
+    } catch (syncError) {
+      setRefreshError(
+        syncError instanceof Error
+          ? syncError.message
+          : 'Unable to synchronize Udhyog Saathi.',
+      );
+    } finally {
+      setRefreshing(false);
     }
-
-    setDashboard(response.data);
   }
 
   useEffect(() => {
@@ -138,10 +170,46 @@ export function UdhyogSaathiRuntime({
           </p>
         </div>
 
-        <span className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-2 py-1 text-os-caption text-[color:var(--color-os-text-tertiary)]">
-          {dashboard.source === 'demo' ? 'Demo data' : 'Live data'}
-        </span>
+        <div className="flex items-center gap-os-2">
+          {refreshing && (
+            <span className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+              Syncing…
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => void syncRuntime()}
+            disabled={refreshing}
+            className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-3 py-1.5 text-os-caption font-medium text-[color:var(--color-os-text-secondary)] hover:bg-[color:var(--color-os-surface-elevated)] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {refreshing ? 'Syncing…' : 'Refresh'}
+          </button>
+
+          <span className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-2 py-1 text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            {dashboard.source === 'demo' ? 'Demo data' : 'Live data'}
+          </span>
+        </div>
       </div>
+
+      {refreshError && (
+        <div className="border-b border-amber-500/20 bg-amber-500/5 px-os-4 py-os-2">
+          <div className="flex items-center justify-between gap-os-3">
+            <p className="text-os-caption text-amber-600">
+              {refreshError}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => void syncRuntime()}
+              disabled={refreshing}
+              className="text-os-caption font-medium text-amber-600 hover:underline disabled:opacity-50"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1">
         <aside className="w-44 shrink-0 border-r border-[color:var(--color-os-glass-border)] p-os-3">
@@ -177,23 +245,14 @@ export function UdhyogSaathiRuntime({
           {view === 'billing' && (
             <BillingView
               bills={bills}
-              onBillCreated={(bill) => {
-                setBills((current) => [bill, ...current]);
-                void refreshDashboard();
+              onBillCreated={() => {
+                void syncRuntime();
               }}
-              onBillUpdated={(bill) => {
-                setBills((current) =>
-                  current.map((item) =>
-                    item.id === bill.id ? bill : item,
-                  ),
-                );
-                void refreshDashboard();
+              onBillUpdated={() => {
+                void syncRuntime();
               }}
-              onBillDeleted={(id) => {
-                setBills((current) =>
-                  current.filter((item) => item.id !== id),
-                );
-                void refreshDashboard();
+              onBillDeleted={() => {
+                void syncRuntime();
               }}
             />
           )}
@@ -201,23 +260,14 @@ export function UdhyogSaathiRuntime({
           {view === 'inventory' && (
             <InventoryView
               inventory={inventory}
-              onInventoryCreated={(item) => {
-                setInventory((current) => [item, ...current]);
-                void refreshDashboard();
+              onInventoryCreated={() => {
+                void syncRuntime();
               }}
-              onInventoryUpdated={(item) => {
-                setInventory((current) =>
-                  current.map((entry) =>
-                    entry.id === item.id ? item : entry,
-                  ),
-                );
-                void refreshDashboard();
+              onInventoryUpdated={() => {
+                void syncRuntime();
               }}
-              onInventoryDeleted={(id) => {
-                setInventory((current) =>
-                  current.filter((entry) => entry.id !== id),
-                );
-                void refreshDashboard();
+              onInventoryDeleted={() => {
+                void syncRuntime();
               }}
             />
           )}
