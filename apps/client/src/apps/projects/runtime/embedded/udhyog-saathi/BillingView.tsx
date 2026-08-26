@@ -8,6 +8,7 @@ import {
 } from '@/lib/apiClient';
 import { useState } from 'react';
 import { MetricCard } from './MetricCard';
+import { SearchFilterBar } from './SearchFilterBar';
 
 function BillingView({
   bills,
@@ -274,36 +275,23 @@ function BillingView({
         </button>
       </form>
 
-      <div className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4">
-        <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-[1fr_auto]">
-          <input
-            value={billSearch}
-            onChange={(event) => setBillSearch(event.target.value)}
-            placeholder="Search by client name…"
-            aria-label="Search bills by client name"
-            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-transparent px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none focus:border-[color:var(--color-os-accent)]"
-          />
-
-          <select
-            value={billFilter}
-            onChange={(event) =>
-              setBillFilter(
-                event.target.value as 'all' | 'pakka' | 'kaccha',
-              )
-            }
-            aria-label="Filter bills by type"
-            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none"
-          >
-            <option value="all">All Types</option>
-            <option value="pakka">Pakka</option>
-            <option value="kaccha">Kaccha</option>
-          </select>
-        </div>
-
-        <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-          Showing {filteredBills.length} of {bills.length} bills
-        </p>
-      </div>
+      <SearchFilterBar
+        search={billSearch}
+        onSearchChange={setBillSearch}
+        searchPlaceholder="Search by client name…"
+        searchLabel="Search bills by client name"
+        filter={billFilter}
+        onFilterChange={(value) =>
+          setBillFilter(value as 'all' | 'pakka' | 'kaccha')
+        }
+        filterLabel="Filter bills by type"
+        filterOptions={[
+          { value: 'all', label: 'All Types' },
+          { value: 'pakka', label: 'Pakka' },
+          { value: 'kaccha', label: 'Kaccha' },
+        ]}
+        resultLabel={`Showing ${filteredBills.length} of ${bills.length} bills`}
+      />
 
       <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-2">
         <MetricCard

@@ -8,6 +8,7 @@ import {
 } from '@/lib/apiClient';
 import { useState } from 'react';
 import { MetricCard } from './MetricCard';
+import { SearchFilterBar } from './SearchFilterBar';
 
 function InventoryView({
   inventory,
@@ -178,36 +179,23 @@ function InventoryView({
         />
       </div>
 
-      <div className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4">
-        <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-[1fr_auto]">
-          <input
-            value={inventorySearch}
-            onChange={(event) => setInventorySearch(event.target.value)}
-            placeholder="Search inventory…"
-            aria-label="Search inventory by item name"
-            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-transparent px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none focus:border-[color:var(--color-os-accent)]"
-          />
-
-          <select
-            value={inventoryFilter}
-            onChange={(event) =>
-              setInventoryFilter(
-                event.target.value as 'all' | 'finished' | 'raw',
-              )
-            }
-            aria-label="Filter inventory by type"
-            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none"
-          >
-            <option value="all">All Types</option>
-            <option value="finished">Finished Products</option>
-            <option value="raw">Raw Materials</option>
-          </select>
-        </div>
-
-        <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-          Showing {filteredInventory.length} of {inventory.length} items
-        </p>
-      </div>
+      <SearchFilterBar
+        search={inventorySearch}
+        onSearchChange={setInventorySearch}
+        searchPlaceholder="Search inventory…"
+        searchLabel="Search inventory by item name"
+        filter={inventoryFilter}
+        onFilterChange={(value) =>
+          setInventoryFilter(value as 'all' | 'finished' | 'raw')
+        }
+        filterLabel="Filter inventory by type"
+        filterOptions={[
+          { value: 'all', label: 'All Types' },
+          { value: 'finished', label: 'Finished Products' },
+          { value: 'raw', label: 'Raw Materials' },
+        ]}
+        resultLabel={`Showing ${filteredInventory.length} of ${inventory.length} items`}
+      />
 
       <form
         onSubmit={handleSubmit}
