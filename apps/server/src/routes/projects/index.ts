@@ -4,6 +4,7 @@ import type {
   ProjectCatalog,
 } from '@krishnaos/shared-types';
 import { ProjectCatalogService } from '../../services/projects/project-catalog.service.js';
+import { udhyogSaathiRouter } from './udhyog-saathi.js';
 
 export const projectsRouter = Router();
 
@@ -32,3 +33,6 @@ projectsRouter.get(
     }
   },
 );
+
+
+projectsRouter.use('/udhyog-saathi', udhyogSaathiRouter);

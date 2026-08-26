@@ -3,6 +3,10 @@ import type {
   ContactPayload,
   ContactSubmission,
   ProjectCatalog,
+  UdhyogSaathiDemoDashboard,
+  UdhyogSaathiDemoBill,
+  UdhyogSaathiDemoInventoryItem,
+  UdhyogSaathiCreateDemoBillPayload,
 } from '@krishnaos/shared-types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000';
@@ -36,4 +40,35 @@ export function submitContactForm(payload: ContactPayload) {
 
 export function getProjectCatalog() {
   return request<ProjectCatalog>('/api/projects');
+}
+
+export function getUdhyogSaathiDashboard() {
+  return request<UdhyogSaathiDemoDashboard>(
+    '/api/projects/udhyog-saathi/dashboard',
+  );
+}
+
+export function getUdhyogSaathiBills() {
+  return request<UdhyogSaathiDemoBill[]>(
+    '/api/projects/udhyog-saathi/bills',
+  );
+}
+
+export function getUdhyogSaathiInventory() {
+  return request<UdhyogSaathiDemoInventoryItem[]>(
+    '/api/projects/udhyog-saathi/inventory',
+  );
+}
+
+
+export function createUdhyogSaathiDemoBill(
+  payload: UdhyogSaathiCreateDemoBillPayload,
+) {
+  return request<UdhyogSaathiDemoBill>(
+    '/api/projects/udhyog-saathi/bills',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  );
 }

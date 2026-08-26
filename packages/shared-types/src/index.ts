@@ -9,3 +9,5 @@ export * from './os-mode.js';
 export * from './projects/project-runtime.js';
 export * from './projects/project-manifest.js';
 export * from './projects/project-catalog.js';
+
+export * from './projects/project-demo.js';
