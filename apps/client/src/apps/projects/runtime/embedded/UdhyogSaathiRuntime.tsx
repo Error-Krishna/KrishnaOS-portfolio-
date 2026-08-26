@@ -211,9 +211,9 @@ export function UdhyogSaathiRuntime({
         </div>
       )}
 
-      <div className="flex flex-1">
-        <aside className="w-44 shrink-0 border-r border-[color:var(--color-os-glass-border)] p-os-3">
-          <nav className="flex flex-col gap-os-1">
+      <div className="flex flex-1 flex-col sm:flex-row">
+        <aside className="shrink-0 border-b border-[color:var(--color-os-glass-border)] p-os-2 sm:w-44 sm:border-b-0 sm:border-r sm:p-os-3">
+          <nav className="flex flex-row gap-os-1 overflow-x-auto sm:flex-col">
             {(
               [
                 ['dashboard', 'Dashboard'],
@@ -237,7 +237,7 @@ export function UdhyogSaathiRuntime({
           </nav>
         </aside>
 
-        <main className="flex-1 overflow-auto p-os-5">
+        <main className="min-w-0 flex-1 overflow-auto p-os-3 sm:p-os-5">
           {view === 'dashboard' && (
             <DashboardView dashboard={dashboard} project={project} />
           )}
@@ -627,8 +627,8 @@ function BillingView({
         />
       </div>
 
-      <div className="overflow-hidden rounded-os-lg border border-[color:var(--color-os-glass-border)]">
-        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 text-os-caption font-semibold text-[color:var(--color-os-text-tertiary)]">
+      <div className="overflow-x-auto rounded-os-lg border border-[color:var(--color-os-glass-border)]">
+        <div className="grid min-w-[620px] grid-cols-[1fr_auto_auto_auto] gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 text-os-caption font-semibold text-[color:var(--color-os-text-tertiary)]">
           <span>Client</span>
           <span>Type</span>
           <span>Total</span>
@@ -650,7 +650,7 @@ function BillingView({
         {filteredBills.map((bill) => (
           <div
             key={bill.id}
-            className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 last:border-b-0"
+            className="grid min-w-[620px] grid-cols-[1fr_auto_auto_auto] items-center gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 last:border-b-0"
           >
             <span className="min-w-0 truncate text-os-caption text-[color:var(--color-os-text-primary)]">
               {bill.clientName}
