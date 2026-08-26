@@ -36,6 +36,17 @@ export function UdhyogSaathiRuntime({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function refreshDashboard() {
+    const response = await getUdhyogSaathiDashboard();
+
+    if (!response.success) {
+      setError(response.error.message);
+      return;
+    }
+
+    setDashboard(response.data);
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -166,44 +177,51 @@ export function UdhyogSaathiRuntime({
           {view === 'billing' && (
             <BillingView
               bills={bills}
-              onBillCreated={(bill) =>
-                setBills((current) => [bill, ...current])
-              }
-              onBillUpdated={(bill) =>
+              onBillCreated={(bill) => {
+                setBills((current) => [bill, ...current]);
+                void refreshDashboard();
+              }}
+              onBillUpdated={(bill) => {
                 setBills((current) =>
                   current.map((item) =>
                     item.id === bill.id ? bill : item,
                   ),
-                )
-              }
-              onBillDeleted={(id) =>
+                );
+                void refreshDashboard();
+              }}
+              onBillDeleted={(id) => {
                 setBills((current) =>
                   current.filter((item) => item.id !== id),
-                )
-              }
+                );
+                void refreshDashboard();
+              }}
             />
           )}
 
           {view === 'inventory' && (
             <InventoryView
               inventory={inventory}
-              onInventoryCreated={(item) =>
-                setInventory((current) => [item, ...current])
-              }
-              onInventoryUpdated={(item) =>
+              onInventoryCreated={(item) => {
+                setInventory((current) => [item, ...current]);
+                void refreshDashboard();
+              }}
+              onInventoryUpdated={(item) => {
                 setInventory((current) =>
                   current.map((entry) =>
                     entry.id === item.id ? item : entry,
                   ),
-                )
-              }
-              onInventoryDeleted={(id) =>
+                );
+                void refreshDashboard();
+              }}
+              onInventoryDeleted={(id) => {
                 setInventory((current) =>
                   current.filter((entry) => entry.id !== id),
-                )
-              }
+                );
+                void refreshDashboard();
+              }}
             />
           )}
+
         </main>
       </div>
     </div>
@@ -265,6 +283,9 @@ function BillingView({
   const [clientName, setClientName] = useState('');
   const [type, setType] = useState<'pakka' | 'kaccha'>('pakka');
   const [total, setTotal] = useState('');
+  const [billSearch, setBillSearch] = useState('');
+  const [billFilter, setBillFilter] =
+    useState<'all' | 'pakka' | 'kaccha'>('all');
 
   const [editingBill, setEditingBill] =
     useState<UdhyogSaathiDemoBill | null>(null);
@@ -278,6 +299,19 @@ function BillingView({
 
   const pakkaBills = bills.filter((bill) => bill.type === 'pakka');
   const kacchaBills = bills.filter((bill) => bill.type === 'kaccha');
+
+  const normalizedBillSearch = billSearch.trim().toLowerCase();
+
+  const filteredBills = bills.filter((bill) => {
+    const matchesSearch =
+      !normalizedBillSearch ||
+      bill.clientName.toLowerCase().includes(normalizedBillSearch);
+
+    const matchesFilter =
+      billFilter === 'all' || bill.type === billFilter;
+
+    return matchesSearch && matchesFilter;
+  });
 
   async function handleCreateBill(
     event: React.FormEvent<HTMLFormElement>,
@@ -500,6 +534,37 @@ function BillingView({
         </button>
       </form>
 
+      <div className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4">
+        <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-[1fr_auto]">
+          <input
+            value={billSearch}
+            onChange={(event) => setBillSearch(event.target.value)}
+            placeholder="Search by client name…"
+            aria-label="Search bills by client name"
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-transparent px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none focus:border-[color:var(--color-os-accent)]"
+          />
+
+          <select
+            value={billFilter}
+            onChange={(event) =>
+              setBillFilter(
+                event.target.value as 'all' | 'pakka' | 'kaccha',
+              )
+            }
+            aria-label="Filter bills by type"
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none"
+          >
+            <option value="all">All Types</option>
+            <option value="pakka">Pakka</option>
+            <option value="kaccha">Kaccha</option>
+          </select>
+        </div>
+
+        <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+          Showing {filteredBills.length} of {bills.length} bills
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-2">
         <MetricCard
           label="Pakka Bills"
@@ -526,7 +591,13 @@ function BillingView({
           </div>
         )}
 
-        {bills.map((bill) => (
+        {bills.length > 0 && filteredBills.length === 0 && (
+          <div className="px-os-4 py-os-8 text-center text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            No bills match the current search or filter.
+          </div>
+        )}
+
+        {filteredBills.map((bill) => (
           <div
             key={bill.id}
             className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 last:border-b-0"
@@ -585,12 +656,29 @@ function InventoryView({
   const [type, setType] =
     useState<'finished' | 'raw'>('finished');
   const [quantity, setQuantity] = useState('');
+  const [inventorySearch, setInventorySearch] = useState('');
+  const [inventoryFilter, setInventoryFilter] =
+    useState<'all' | 'finished' | 'raw'>('all');
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const finished = inventory.filter((item) => item.type === 'finished');
   const raw = inventory.filter((item) => item.type === 'raw');
+
+  const normalizedInventorySearch =
+    inventorySearch.trim().toLowerCase();
+
+  const filteredInventory = inventory.filter((item) => {
+    const matchesSearch =
+      !normalizedInventorySearch ||
+      item.name.toLowerCase().includes(normalizedInventorySearch);
+
+    const matchesFilter =
+      inventoryFilter === 'all' || item.type === inventoryFilter;
+
+    return matchesSearch && matchesFilter;
+  });
 
   function resetForm() {
     setEditingId(null);
@@ -721,6 +809,37 @@ function InventoryView({
         />
       </div>
 
+      <div className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4">
+        <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-[1fr_auto]">
+          <input
+            value={inventorySearch}
+            onChange={(event) => setInventorySearch(event.target.value)}
+            placeholder="Search inventory…"
+            aria-label="Search inventory by item name"
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-transparent px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none focus:border-[color:var(--color-os-accent)]"
+          />
+
+          <select
+            value={inventoryFilter}
+            onChange={(event) =>
+              setInventoryFilter(
+                event.target.value as 'all' | 'finished' | 'raw',
+              )
+            }
+            aria-label="Filter inventory by type"
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none"
+          >
+            <option value="all">All Types</option>
+            <option value="finished">Finished Products</option>
+            <option value="raw">Raw Materials</option>
+          </select>
+        </div>
+
+        <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+          Showing {filteredInventory.length} of {inventory.length} items
+        </p>
+      </div>
+
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4"
@@ -791,7 +910,13 @@ function InventoryView({
       </form>
 
       <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-2">
-        {inventory.map((item) => (
+        {inventory.length > 0 && filteredInventory.length === 0 && (
+          <div className="col-span-full rounded-os-lg border border-[color:var(--color-os-glass-border)] px-os-4 py-os-8 text-center text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            No inventory items match the current search or filter.
+          </div>
+        )}
+
+        {filteredInventory.map((item) => (
           <div
             key={item.id}
             className="rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4"
