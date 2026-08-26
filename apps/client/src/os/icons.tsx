@@ -460,6 +460,83 @@ function ContactGlyph({ className }: IconProps) {
   );
 }
 
+/**
+ * Interaction icons for the Projects window's in-OS project runners
+ * (`apps/projects/runners/*`) — play/stop/reset controls, add/remove
+ * row actions, an external-link glyph for "visit the real site" links,
+ * and a back-navigation arrow for ProjectRunnerShell. Plain exports
+ * alongside the existing ones, same reasoning as the Skills/About
+ * glyphs added earlier: these are one-off content icons, not Dock/
+ * Spotlight/title-bar icons, so they don't join the AppId-keyed
+ * APP_GLYPHS registry below.
+ */
+export function ArrowLeftGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M19 12H5" />
+      <path {...iconStrokeProps()} d="m11 6-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function PlayGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M8 6.5 18 12l-10 5.5V6.5Z" />
+    </svg>
+  );
+}
+
+export function StopGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect {...iconStrokeProps()} x="7" y="7" width="10" height="10" rx="1.5" />
+    </svg>
+  );
+}
+
+export function RefreshGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M5 12a7 7 0 0 1 12-4.9L19 9" />
+      <path {...iconStrokeProps()} d="M19 5v4h-4" />
+      <path {...iconStrokeProps()} d="M19 12a7 7 0 0 1-12 4.9L5 15" />
+      <path {...iconStrokeProps()} d="M5 19v-4h4" />
+    </svg>
+  );
+}
+
+export function PlusGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M12 6v12" />
+      <path {...iconStrokeProps()} d="M6 12h12" />
+    </svg>
+  );
+}
+
+export function TrashGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M5.5 7.5h13" />
+      <path {...iconStrokeProps()} d="M9.5 7.5V5.5h5v2" />
+      <path {...iconStrokeProps()} d="M7 7.5 7.7 19a1.5 1.5 0 0 0 1.5 1.4h5.6a1.5 1.5 0 0 0 1.5-1.4l.7-11.5" />
+      <path {...iconStrokeProps()} d="M10.3 11v6" />
+      <path {...iconStrokeProps()} d="M13.7 11v6" />
+    </svg>
+  );
+}
+
+export function ExternalLinkGlyph({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path {...iconStrokeProps()} d="M9 6.5H6.5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V15" />
+      <path {...iconStrokeProps()} d="M13.5 4.5H19.5V10.5" />
+      <path {...iconStrokeProps()} d="M19.5 4.5 11 13" />
+    </svg>
+  );
+}
+
 const APP_GLYPHS: Record<AppId, (props: IconProps) => ReactElement> = {
   about: AboutGlyph,
   projects: ProjectsGlyph,

@@ -363,6 +363,43 @@ export const CONTACT_PAGE_CONTENT: ContactPageContent = {
 /* PROJECTS                                                                    */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Header/eyebrow copy, the "Explore. Interact. Experience." callout, and
+ * the closing CTA card for the Projects window — same content.ts-first
+ * rule as every other redesigned page (see SkillsPageContent /
+ * ExperiencePageContent). Per-project category and interactive-demo
+ * wiring live in `apps/projects/runnerRegistry.ts`, not here, since that
+ * mapping is about *how the window renders things* rather than public
+ * profile content.
+ */
+export interface ProjectsPageContent {
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  tagline: string;
+  calloutHeading: string;
+  calloutBody: string;
+  closing: {
+    heading: string;
+    body: string;
+    ctaLabel: string;
+  };
+}
+
+export const PROJECTS_PAGE_CONTENT: ProjectsPageContent = {
+  eyebrow: 'Explore. Interact. Experience.',
+  title: 'My',
+  titleAccent: 'Projects',
+  tagline: "A collection of things I've built, experiments I've shipped, and problems I've solved.",
+  calloutHeading: 'Explore. Interact. Experience.',
+  calloutBody: "Every project below runs a real, interactive demo right inside KrishnaOS — try it before you take my word for it.",
+  closing: {
+    heading: 'Every project is a story of curiosity, learning, and building.',
+    body: "Click around, try features, break things — that's how we grow.",
+    ctaLabel: "Let's Connect →",
+  },
+};
+
 export const PROJECTS_CONTENT: Project[] = [
   {
     id: 'project-udhyog-saathi',
