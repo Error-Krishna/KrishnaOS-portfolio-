@@ -1,3 +1,5 @@
+import type { ProjectRuntimeConfig } from './projects/project-runtime.js';
+
 export interface ProjectMedia {
   type: 'image' | 'video';
   url: string;
@@ -20,5 +22,6 @@ export interface Project {
   links: ProjectLinks;
   /** true = surfaced in Recruiter Mode's condensed "featured" list */
   featured: boolean;
+  runtime?: ProjectRuntimeConfig;
   media?: ProjectMedia[];
 }
