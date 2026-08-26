@@ -34,6 +34,8 @@ function BillingView({
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [createError, setCreateError] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
@@ -162,20 +164,13 @@ function BillingView({
       return;
     }
 
-    const confirmed = window.confirm(
-      `Delete the bill for ${bill.clientName}?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     setDeletingId(id);
+    setDeleteError(null);
 
     const response = await deleteUdhyogSaathiDemoBill(id);
 
     if (!response.success) {
-      window.alert(response.error.message);
+      setDeleteError(response.error.message);
       setDeletingId(null);
       return;
     }
@@ -184,6 +179,7 @@ function BillingView({
       cancelEditing();
     }
 
+    setConfirmDeleteId(null);
     onBillDeleted(id);
     setDeletingId(null);
   }
@@ -305,6 +301,22 @@ function BillingView({
         />
       </div>
 
+      {deleteError && (
+        <div className="flex items-center justify-between gap-os-3 rounded-os-md border border-red-500/20 bg-red-500/5 px-os-3 py-os-2">
+          <p className="text-os-caption text-red-500">
+            {deleteError}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setDeleteError(null)}
+            className="text-os-caption font-medium text-red-500 hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-os-lg border border-[color:var(--color-os-glass-border)]">
         <div className="grid min-w-[620px] grid-cols-[1fr_auto_auto_auto] gap-os-3 border-b border-[color:var(--color-os-glass-border)] px-os-4 py-os-3 text-os-caption font-semibold text-[color:var(--color-os-text-tertiary)]">
           <span>Client</span>
@@ -352,14 +364,39 @@ function BillingView({
                 Edit
               </button>
 
-              <button
-                type="button"
-                onClick={() => void handleDeleteBill(bill.id)}
-                disabled={deletingId === bill.id}
-                className="rounded-os-full border border-red-500/30 px-os-3 py-1 text-os-caption font-medium text-red-500 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {deletingId === bill.id ? 'Deleting…' : 'Delete'}
-              </button>
+              {confirmDeleteId === bill.id ? (
+                <div className="flex items-center gap-os-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteId(null)}
+                    disabled={deletingId === bill.id}
+                    className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-3 py-1 text-os-caption font-medium text-[color:var(--color-os-text-secondary)] hover:bg-[color:var(--color-os-surface-elevated)] disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleDeleteBill(bill.id)}
+                    disabled={deletingId === bill.id}
+                    className="rounded-os-full bg-red-500 px-os-3 py-1 text-os-caption font-medium text-white hover:opacity-90 disabled:opacity-50"
+                  >
+                    {deletingId === bill.id ? 'Deleting…' : 'Confirm'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteError(null);
+                    setConfirmDeleteId(bill.id);
+                  }}
+                  disabled={deletingId === bill.id}
+                  className="rounded-os-full border border-red-500/30 px-os-3 py-1 text-os-caption font-medium text-red-500 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         ))}

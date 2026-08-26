@@ -31,6 +31,8 @@ function InventoryView({
     useState<'all' | 'finished' | 'raw'>('all');
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const finished = inventory.filter((item) => item.type === 'finished');
@@ -131,17 +133,13 @@ function InventoryView({
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Delete this inventory item?')) {
-      return;
-    }
-
     setDeletingId(id);
-    setFormError(null);
+    setDeleteError(null);
 
     const response = await deleteUdhyogSaathiInventoryItem(id);
 
     if (!response.success) {
-      setFormError(response.error.message);
+      setDeleteError(response.error.message);
       setDeletingId(null);
       return;
     }
@@ -152,6 +150,7 @@ function InventoryView({
       resetForm();
     }
 
+    setConfirmDeleteId(null);
     setDeletingId(null);
   }
 
@@ -266,6 +265,22 @@ function InventoryView({
         </button>
       </form>
 
+      {deleteError && (
+        <div className="flex items-center justify-between gap-os-3 rounded-os-md border border-red-500/20 bg-red-500/5 px-os-3 py-os-2">
+          <p className="text-os-caption text-red-500">
+            {deleteError}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setDeleteError(null)}
+            className="text-os-caption font-medium text-red-500 hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-2">
         {inventory.length > 0 && filteredInventory.length === 0 && (
           <div className="col-span-full rounded-os-lg border border-[color:var(--color-os-glass-border)] px-os-4 py-os-8 text-center text-os-caption text-[color:var(--color-os-text-tertiary)]">
@@ -306,14 +321,39 @@ function InventoryView({
                 Edit
               </button>
 
-              <button
-                type="button"
-                onClick={() => void handleDelete(item.id)}
-                disabled={deletingId === item.id}
-                className="rounded-os-full border border-red-500/30 px-os-3 py-1.5 text-os-caption text-red-500 hover:bg-red-500/10 disabled:opacity-50"
-              >
-                {deletingId === item.id ? 'Deleting…' : 'Delete'}
-              </button>
+              {confirmDeleteId === item.id ? (
+                <div className="flex items-center gap-os-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteId(null)}
+                    disabled={deletingId === item.id}
+                    className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-3 py-1.5 text-os-caption text-[color:var(--color-os-text-secondary)] hover:bg-[color:var(--color-os-surface-elevated)] disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete(item.id)}
+                    disabled={deletingId === item.id}
+                    className="rounded-os-full bg-red-500 px-os-3 py-1.5 text-os-caption text-white hover:opacity-90 disabled:opacity-50"
+                  >
+                    {deletingId === item.id ? 'Deleting…' : 'Confirm'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteError(null);
+                    setConfirmDeleteId(item.id);
+                  }}
+                  disabled={deletingId === item.id}
+                  className="rounded-os-full border border-red-500/30 px-os-3 py-1.5 text-os-caption text-red-500 hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         ))}
