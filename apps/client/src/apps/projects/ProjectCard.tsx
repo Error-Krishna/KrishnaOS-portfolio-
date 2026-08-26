@@ -33,10 +33,12 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
         <span className="flex shrink-0 items-center gap-os-1 text-os-caption text-[color:var(--color-os-text-tertiary)]">
           <span
             className={`h-2 w-2 rounded-full ${
-              project.links.live ? 'bg-[#4ade80]' : 'bg-[color:var(--color-os-glass-border)]'
+              runnerEntry
+                ? 'bg-[#4ade80]'
+                : 'bg-[color:var(--color-os-accent)]'
             }`}
           />
-          {project.links.live ? 'Live' : 'Demo'}
+          {runnerEntry ? 'Live' : 'Live — Coming Soon'}
         </span>
       </div>
 

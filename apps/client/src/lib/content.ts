@@ -491,6 +491,56 @@ export const PROJECTS_CONTENT: Project[] = [
   },
 
   {
+    id: 'project-alpha-vault',
+
+    title: 'Alpha Vault',
+
+    summary:
+      'A modern full-stack application focused on secure financial and portfolio management workflows.',
+
+    description:
+      'Alpha Vault is a full-stack application built to explore financial workflows, portfolio visibility, and modern application architecture.',
+
+    role: 'Full-Stack Developer',
+
+    stack: [
+      'React',
+      'TypeScript',
+      'Node.js',
+      'REST APIs',
+    ],
+
+    links: {
+      github: 'https://github.com/Error-Krishna/Alpha-vault-frontend',
+    },
+
+    featured: false,
+  },
+
+  {
+    id: 'project-epet',
+
+    title: 'EPet',
+
+    summary:
+      'A digital platform project focused on building a modern pet-care experience.',
+
+    description:
+      'EPet is a project exploring digital workflows and user experiences for pet-related services and interactions.',
+
+    role: 'Developer',
+
+    stack: [
+      'Web',
+      'Frontend',
+    ],
+
+    links: {},
+
+    featured: false,
+  },
+
+  {
     id: 'project-personal-finance-tracker',
 
     title: 'Personal Finance Tracker',
