@@ -1,9 +1,11 @@
 import type {
   UdhyogSaathiCreateDemoBillPayload,
-  UdhyogSaathiUpdateDemoBillPayload,
+  UdhyogSaathiCreateDemoInventoryItemPayload,
   UdhyogSaathiDemoBill,
   UdhyogSaathiDemoDashboard,
   UdhyogSaathiDemoInventoryItem,
+  UdhyogSaathiUpdateDemoBillPayload,
+  UdhyogSaathiUpdateDemoInventoryItemPayload,
 } from '@krishnaos/shared-types';
 
 export class UdhyogSaathiService {
@@ -28,6 +30,33 @@ export class UdhyogSaathiService {
       clientName: 'Demo Retailer',
       total: 7600,
       createdAt: '2026-08-22T09:15:00.000Z',
+    },
+  ];
+
+  private readonly inventory: UdhyogSaathiDemoInventoryItem[] = [
+    {
+      id: 'demo-finished-001',
+      name: 'Steel Cabinet',
+      type: 'finished',
+      quantity: 42,
+    },
+    {
+      id: 'demo-finished-002',
+      name: 'Industrial Table',
+      type: 'finished',
+      quantity: 32,
+    },
+    {
+      id: 'demo-raw-001',
+      name: 'Steel Sheet',
+      type: 'raw',
+      quantity: 36,
+    },
+    {
+      id: 'demo-raw-002',
+      name: 'Aluminium Rod',
+      type: 'raw',
+      quantity: 18,
     },
   ];
 
@@ -97,31 +126,55 @@ export class UdhyogSaathiService {
   }
 
   getInventory(): UdhyogSaathiDemoInventoryItem[] {
-    return [
-      {
-        id: 'demo-finished-001',
-        name: 'Steel Cabinet',
-        type: 'finished',
-        quantity: 42,
-      },
-      {
-        id: 'demo-finished-002',
-        name: 'Industrial Table',
-        type: 'finished',
-        quantity: 32,
-      },
-      {
-        id: 'demo-raw-001',
-        name: 'Steel Sheet',
-        type: 'raw',
-        quantity: 36,
-      },
-      {
-        id: 'demo-raw-002',
-        name: 'Aluminium Rod',
-        type: 'raw',
-        quantity: 18,
-      },
-    ];
+    return [...this.inventory];
+  }
+
+  createInventoryItem(
+    payload: UdhyogSaathiCreateDemoInventoryItemPayload,
+  ): UdhyogSaathiDemoInventoryItem {
+    const item: UdhyogSaathiDemoInventoryItem = {
+      id: `demo-inventory-${Date.now()}`,
+      name: payload.name,
+      type: payload.type,
+      quantity: payload.quantity,
+    };
+
+    this.inventory.unshift(item);
+
+    return item;
+  }
+
+  updateInventoryItem(
+    id: string,
+    payload: UdhyogSaathiUpdateDemoInventoryItemPayload,
+  ): UdhyogSaathiDemoInventoryItem | null {
+    const index = this.inventory.findIndex((item) => item.id === id);
+
+    if (index === -1) {
+      return null;
+    }
+
+    const updatedItem: UdhyogSaathiDemoInventoryItem = {
+      ...this.inventory[index],
+      name: payload.name,
+      type: payload.type,
+      quantity: payload.quantity,
+    };
+
+    this.inventory[index] = updatedItem;
+
+    return updatedItem;
+  }
+
+  deleteInventoryItem(id: string): boolean {
+    const index = this.inventory.findIndex((item) => item.id === id);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.inventory.splice(index, 1);
+
+    return true;
   }
 }

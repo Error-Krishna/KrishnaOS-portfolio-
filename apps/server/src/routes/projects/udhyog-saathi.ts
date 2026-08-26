@@ -5,6 +5,8 @@ import type {
   UdhyogSaathiDemoBill,
   UdhyogSaathiDemoDashboard,
   UdhyogSaathiDemoInventoryItem,
+  UdhyogSaathiCreateDemoInventoryItemPayload,
+  UdhyogSaathiUpdateDemoInventoryItemPayload,
   UdhyogSaathiUpdateDemoBillPayload,
 } from '@krishnaos/shared-types';
 import { UdhyogSaathiService } from '../../services/projects/adapters/udhyog-saathi/udhyog-saathi.service.js';
@@ -101,6 +103,79 @@ udhyogSaathiRouter.delete(
       success: true,
       data: {
         id: req.params.id,
+      },
+    });
+  },
+);
+
+udhyogSaathiRouter.post(
+  '/inventory',
+  (
+    req: Request<unknown, unknown, UdhyogSaathiCreateDemoInventoryItemPayload>,
+    res: Response<ApiResponse<UdhyogSaathiDemoInventoryItem>>,
+  ) => {
+    const item = service.createInventoryItem(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: item,
+    });
+  },
+);
+
+udhyogSaathiRouter.put(
+  '/inventory/:id',
+  (
+    req: Request<
+      { id: string },
+      unknown,
+      UdhyogSaathiUpdateDemoInventoryItemPayload
+    >,
+    res: Response<ApiResponse<UdhyogSaathiDemoInventoryItem>>,
+  ) => {
+    const item = service.updateInventoryItem(req.params.id, req.body);
+
+    if (!item) {
+      res.status(404).json({
+        success: false,
+        error: {
+          message: 'Inventory item not found',
+          code: 'DEMO_INVENTORY_NOT_FOUND',
+        },
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: item,
+    });
+  },
+);
+
+udhyogSaathiRouter.delete(
+  '/inventory/:id',
+  (
+    req: Request<{ id: string }>,
+    res: Response<ApiResponse<{ deleted: true }>>,
+  ) => {
+    const deleted = service.deleteInventoryItem(req.params.id);
+
+    if (!deleted) {
+      res.status(404).json({
+        success: false,
+        error: {
+          message: 'Inventory item not found',
+          code: 'DEMO_INVENTORY_NOT_FOUND',
+        },
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        deleted: true,
       },
     });
   },

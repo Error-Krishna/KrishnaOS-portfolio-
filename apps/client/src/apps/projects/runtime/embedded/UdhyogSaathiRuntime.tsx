@@ -7,6 +7,9 @@ import type {
 } from '@krishnaos/shared-types';
 import {
   createUdhyogSaathiDemoBill,
+  createUdhyogSaathiInventoryItem,
+  updateUdhyogSaathiInventoryItem,
+  deleteUdhyogSaathiInventoryItem,
   deleteUdhyogSaathiDemoBill,
   getUdhyogSaathiBills,
   getUdhyogSaathiDashboard,
@@ -182,7 +185,24 @@ export function UdhyogSaathiRuntime({
           )}
 
           {view === 'inventory' && (
-            <InventoryView inventory={inventory} />
+            <InventoryView
+              inventory={inventory}
+              onInventoryCreated={(item) =>
+                setInventory((current) => [item, ...current])
+              }
+              onInventoryUpdated={(item) =>
+                setInventory((current) =>
+                  current.map((entry) =>
+                    entry.id === item.id ? item : entry,
+                  ),
+                )
+              }
+              onInventoryDeleted={(id) =>
+                setInventory((current) =>
+                  current.filter((entry) => entry.id !== id),
+                )
+              }
+            />
           )}
         </main>
       </div>
@@ -551,11 +571,131 @@ function BillingView({
 
 function InventoryView({
   inventory,
+  onInventoryCreated,
+  onInventoryUpdated,
+  onInventoryDeleted,
 }: {
   inventory: UdhyogSaathiDemoInventoryItem[];
+  onInventoryCreated: (item: UdhyogSaathiDemoInventoryItem) => void;
+  onInventoryUpdated: (item: UdhyogSaathiDemoInventoryItem) => void;
+  onInventoryDeleted: (id: string) => void;
 }) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [type, setType] =
+    useState<'finished' | 'raw'>('finished');
+  const [quantity, setQuantity] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+
   const finished = inventory.filter((item) => item.type === 'finished');
   const raw = inventory.filter((item) => item.type === 'raw');
+
+  function resetForm() {
+    setEditingId(null);
+    setName('');
+    setType('finished');
+    setQuantity('');
+    setFormError(null);
+  }
+
+  function startEditing(item: UdhyogSaathiDemoInventoryItem) {
+    setEditingId(item.id);
+    setName(item.name);
+    setType(item.type);
+    setQuantity(String(item.quantity));
+    setFormError(null);
+  }
+
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    const trimmedName = name.trim();
+    const numericQuantity = Number(quantity);
+
+    if (!trimmedName) {
+      setFormError('Item name is required.');
+      return;
+    }
+
+    if (
+      !Number.isFinite(numericQuantity) ||
+      numericQuantity < 0 ||
+      !Number.isInteger(numericQuantity)
+    ) {
+      setFormError('Enter a valid whole-number quantity.');
+      return;
+    }
+
+    setSaving(true);
+    setFormError(null);
+
+    if (editingId) {
+      const response = await updateUdhyogSaathiInventoryItem(
+        editingId,
+        {
+          name: trimmedName,
+          type,
+          quantity: numericQuantity,
+        },
+      );
+
+      if (!response.success) {
+        setFormError(response.error.message);
+        setSaving(false);
+        return;
+      }
+
+      onInventoryUpdated(response.data);
+      resetForm();
+      setSaving(false);
+      return;
+    }
+
+    const response = await createUdhyogSaathiInventoryItem({
+      name: trimmedName,
+      type,
+      quantity: numericQuantity,
+    });
+
+    if (!response.success) {
+      setFormError(response.error.message);
+      setSaving(false);
+      return;
+    }
+
+    onInventoryCreated(response.data);
+    resetForm();
+    setSaving(false);
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this inventory item?')) {
+      return;
+    }
+
+    setDeletingId(id);
+    setFormError(null);
+
+    const response = await deleteUdhyogSaathiInventoryItem(id);
+
+    if (!response.success) {
+      setFormError(response.error.message);
+      setDeletingId(null);
+      return;
+    }
+
+    onInventoryDeleted(id);
+
+    if (editingId === id) {
+      resetForm();
+    }
+
+    setDeletingId(null);
+  }
 
   return (
     <div className="flex flex-col gap-os-4">
@@ -565,7 +705,7 @@ function InventoryView({
         </p>
 
         <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
-          Demo stock from Udhyog Saathi.
+          Manage demo stock from Udhyog Saathi.
         </p>
       </div>
 
@@ -581,25 +721,118 @@ function InventoryView({
         />
       </div>
 
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4"
+      >
+        <div className="flex items-center justify-between gap-os-3">
+          <p className="text-os-caption font-semibold text-[color:var(--color-os-text-primary)]">
+            {editingId ? 'Edit Inventory Item' : 'Add Inventory Item'}
+          </p>
+
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-os-caption text-[color:var(--color-os-text-tertiary)] hover:text-[color:var(--color-os-text-primary)]"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-3">
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Item name"
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-transparent px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none focus:border-[color:var(--color-os-accent)]"
+          />
+
+          <select
+            value={type}
+            onChange={(event) =>
+              setType(event.target.value as 'finished' | 'raw')
+            }
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none"
+          >
+            <option value="finished">Finished Product</option>
+            <option value="raw">Raw Material</option>
+          </select>
+
+          <input
+            value={quantity}
+            onChange={(event) => setQuantity(event.target.value)}
+            type="number"
+            min="0"
+            step="1"
+            placeholder="Quantity"
+            className="rounded-os-md border border-[color:var(--color-os-glass-border)] bg-transparent px-os-3 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] outline-none focus:border-[color:var(--color-os-accent)]"
+          />
+        </div>
+
+        {formError && (
+          <p className="text-os-caption text-red-500">
+            {formError}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-fit rounded-os-full bg-[color:var(--color-os-accent)] px-os-4 py-os-2 text-os-caption font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {saving
+            ? 'Saving…'
+            : editingId
+              ? 'Update Item'
+              : 'Add Item'}
+        </button>
+      </form>
+
       <div className="grid grid-cols-1 gap-os-3 sm:grid-cols-2">
         {inventory.map((item) => (
           <div
             key={item.id}
             className="rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface-elevated)] p-os-4"
           >
-            <p className="text-os-caption font-semibold text-[color:var(--color-os-text-primary)]">
-              {item.name}
-            </p>
+            <div className="flex items-start justify-between gap-os-3">
+              <div>
+                <p className="text-os-caption font-semibold text-[color:var(--color-os-text-primary)]">
+                  {item.name}
+                </p>
 
-            <p className="mt-os-1 text-os-caption text-[color:var(--color-os-text-tertiary)]">
-              {item.type === 'finished'
-                ? 'Finished product'
-                : 'Raw material'}
-            </p>
+                <p className="mt-os-1 text-os-caption text-[color:var(--color-os-text-tertiary)]">
+                  {item.type === 'finished'
+                    ? 'Finished product'
+                    : 'Raw material'}
+                </p>
+              </div>
 
-            <p className="mt-os-3 text-os-headline font-bold text-[color:var(--color-os-text-primary)]">
-              {item.quantity}
-            </p>
+              <span className="text-os-caption font-semibold text-[color:var(--color-os-text-primary)]">
+                {item.quantity}
+              </span>
+            </div>
+
+            <div className="mt-os-4 flex gap-os-2">
+              <button
+                type="button"
+                onClick={() => startEditing(item)}
+                disabled={deletingId === item.id}
+                className="rounded-os-full border border-[color:var(--color-os-glass-border)] px-os-3 py-1.5 text-os-caption text-[color:var(--color-os-text-secondary)] hover:bg-[color:var(--color-os-surface-elevated)] disabled:opacity-50"
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleDelete(item.id)}
+                disabled={deletingId === item.id}
+                className="rounded-os-full border border-red-500/30 px-os-3 py-1.5 text-os-caption text-red-500 hover:bg-red-500/10 disabled:opacity-50"
+              >
+                {deletingId === item.id ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
           </div>
         ))}
       </div>

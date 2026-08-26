@@ -35,3 +35,15 @@ export interface UdhyogSaathiUpdateDemoBillPayload {
   type: 'pakka' | 'kaccha';
   total: number;
 }
+
+export interface UdhyogSaathiCreateDemoInventoryItemPayload {
+  name: string;
+  type: 'finished' | 'raw';
+  quantity: number;
+}
+
+export interface UdhyogSaathiUpdateDemoInventoryItemPayload {
+  name: string;
+  type: 'finished' | 'raw';
+  quantity: number;
+}

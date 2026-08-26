@@ -6,6 +6,8 @@ import type {
   UdhyogSaathiDemoDashboard,
   UdhyogSaathiDemoBill,
   UdhyogSaathiDemoInventoryItem,
+  UdhyogSaathiCreateDemoInventoryItemPayload,
+  UdhyogSaathiUpdateDemoInventoryItemPayload,
   UdhyogSaathiCreateDemoBillPayload,
   UdhyogSaathiUpdateDemoBillPayload,
 } from '@krishnaos/shared-types';
@@ -91,6 +93,40 @@ export function updateUdhyogSaathiDemoBill(
 export function deleteUdhyogSaathiDemoBill(id: string) {
   return request<{ id: string }>(
     `/api/projects/udhyog-saathi/bills/${id}`,
+    {
+      method: 'DELETE',
+    },
+  );
+}
+
+export function createUdhyogSaathiInventoryItem(
+  payload: UdhyogSaathiCreateDemoInventoryItemPayload,
+) {
+  return request<UdhyogSaathiDemoInventoryItem>(
+    '/api/projects/udhyog-saathi/inventory',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateUdhyogSaathiInventoryItem(
+  id: string,
+  payload: UdhyogSaathiUpdateDemoInventoryItemPayload,
+) {
+  return request<UdhyogSaathiDemoInventoryItem>(
+    `/api/projects/udhyog-saathi/inventory/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteUdhyogSaathiInventoryItem(id: string) {
+  return request<{ deleted: true }>(
+    `/api/projects/udhyog-saathi/inventory/${id}`,
     {
       method: 'DELETE',
     },
