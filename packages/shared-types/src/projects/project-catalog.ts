@@ -1,5 +1,5 @@
 import type { ProjectManifest } from './project-manifest.js';
-import type { ProjectRuntimeState } from './project-manifest.js';
+import type { ProjectRuntimeState } from './project-runtime.js';
 
 export interface GitHubRepositoryReference {
   owner: string;

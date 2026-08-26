@@ -1,7 +1,4 @@
-import type {
-  ProjectRuntimeConfig,
-  ProjectRuntimeStatus,
-} from './project-runtime.js';
+import type { ProjectRuntimeConfig } from './project-runtime.js';
 
 export interface ProjectManifestVisibility {
   /**
@@ -42,18 +39,4 @@ export interface ProjectManifest {
   visibility: ProjectManifestVisibility;
 
   runtime: ProjectRuntimeConfig;
-}
-
-export interface ProjectRuntimeState {
-  status: ProjectRuntimeStatus;
-
-  /**
-   * Human-readable diagnostic information.
-   */
-  message?: string;
-
-  /**
-   * Timestamp of the latest runtime health check.
-   */
-  checkedAt?: string;
 }

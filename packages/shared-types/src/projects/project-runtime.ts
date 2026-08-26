@@ -34,3 +34,17 @@ export interface ProjectRuntimeConfig {
    */
   port?: number;
 }
+
+export interface ProjectRuntimeState {
+  status: ProjectRuntimeStatus;
+
+  /**
+   * Human-readable diagnostic information.
+   */
+  message?: string;
+
+  /**
+   * Timestamp of the latest runtime health check.
+   */
+  checkedAt?: string;
+}
