@@ -4,7 +4,6 @@ import { Dock } from '@/os/dock/Dock';
 import { WindowManager } from '@/os/window-manager/WindowManager';
 import { Spotlight } from '@/os/spotlight/Spotlight';
 import { Wallpaper } from '@/os/theme/Wallpaper';
-import { StatusWidgets } from '@/os/widgets/StatusWidgets';
 import type { AppId } from '@/os/appRegistry';
 import { AboutApp } from '@/apps/about/AboutApp';
 import { ProjectsApp } from '@/apps/projects/ProjectsApp';
@@ -14,7 +13,7 @@ import { EducationApp } from '@/apps/education/EducationApp';
 import { AchievementsApp } from '@/apps/achievements/AchievementsApp';
 import { ContactApp } from '@/apps/contact/ContactApp';
 import { useWindowStore } from '@/store/useWindowStore';
-
+import { StatusWidgets } from '@/os/widgets/StatusWidgets';
 /**
  * The full interactive desktop environment, per coding prompt Phase 3:
  * menu bar + dock + window manager + Spotlight, composed together.
@@ -34,7 +33,7 @@ export function Desktop() {
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       <Wallpaper className="absolute inset-0" variant="shell" />
       {!hasFullscreenWindow && <MenuBar />}
-      {/* {!hasFullscreenWindow && <StatusWidgets />} temporary: hide status widgets */}
+      {!hasFullscreenWindow && <StatusWidgets />}
       <WindowManager renderAppContent={renderAppContent} />
       {!hasFullscreenWindow && <Dock />}
       {!hasFullscreenWindow && <Spotlight />}

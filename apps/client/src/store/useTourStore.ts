@@ -1,15 +1,15 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 /** The 8 tour steps, in order, per UX flow doc §4. */
 export const TOUR_STEPS = [
-  'about',
-  'work',
-  'projects',
-  'skills',
-  'experience',
-  'education',
-  'achievements',
-  'contact',
+  "about",
+  "work",
+  "projects",
+  "skills",
+  "experience",
+  "education",
+  "achievements",
+  "contact",
 ] as const;
 
 export type TourStepId = (typeof TOUR_STEPS)[number];

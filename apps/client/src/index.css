@@ -46,7 +46,9 @@
   --radius-os-full: 999px;
 
   /* --- Type scale --- */
-  --font-os-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  --font-os-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    system-ui, sans-serif;
   --text-os-caption: 12px;
   --text-os-body: 14px;
   --text-os-headline: 17px;
@@ -62,23 +64,24 @@
   color-scheme: dark;
 }
 
-[data-os-theme='light'] {
+[data-os-theme="light"] {
   --color-os-bg: #eef1f6;
   --color-os-surface: #ffffff;
   --color-os-surface-elevated: #f4f7fb;
   --color-os-glass: rgb(255 255 255 / 0.58);
-  --color-os-glass-border: rgb(17 24 39 / 0.1);
-  --color-os-glass-highlight: rgb(255 255 255 / 0.88);
+  --color-os-glass-border: rgb(17 24 39 / 0.16);
+  --color-os-glass-highlight: rgb(255 255 255 / 0.96);
 
   --color-os-text-primary: #0e1116;
-  --color-os-text-secondary: rgb(14 17 22 / 0.72);
-  --color-os-text-tertiary: rgb(14 17 22 / 0.5);
+  --color-os-text-secondary: rgb(14 17 22 / 0.78);
+  --color-os-text-tertiary: rgb(14 17 22 / 0.66);
 
   --color-os-accent: #0a84ff;
   --color-os-accent-hover: #2b93ff;
+  --color-os-danger: #d92d20;
 }
 
-[data-os-theme='dark'] {
+[data-os-theme="dark"] {
   --color-os-bg: #0a0a0c;
   --color-os-surface: #1c1c1e;
   --color-os-surface-elevated: #2c2c2e;
@@ -89,6 +92,26 @@
   --color-os-text-primary: #f5f5f7;
   --color-os-text-secondary: rgb(245 245 247 / 0.7);
   --color-os-text-tertiary: rgb(245 245 247 / 0.45);
+  --color-os-danger: #ff5f57;
+}
+
+/* ------------------------------------------------------------------ */
+/* Semantic aliases                                                   */
+/* Keep component utilities readable in both light and dark themes.  */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  --color-background: var(--color-os-bg);
+  --color-surface: var(--color-os-surface);
+  --color-surface-elevated: var(--color-os-surface-elevated);
+
+  --color-foreground: var(--color-os-text-primary);
+  --color-muted: var(--color-os-text-secondary);
+  --color-muted-foreground: var(--color-os-text-tertiary);
+
+  --color-border: var(--color-os-glass-border);
+  --color-accent: var(--color-os-accent);
+  --color-accent-hover: var(--color-os-accent-hover);
 }
 
 html,
@@ -139,5 +162,17 @@ body {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes tourEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

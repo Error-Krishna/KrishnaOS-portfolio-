@@ -6,48 +6,49 @@ import {
   type KeyboardEvent,
   type PointerEvent,
   type ReactNode,
-} from 'react';
-import { ClockGlyph, GithubGlyph, NoteGlyph, RocketGlyph, TimelineGlyph, WeatherGlyph } from '@/os/icons';
-import { useIsMobile } from '@/lib/useMediaQuery';
-import { FEATURED_PROJECTS } from '@/lib/content';
-import { useWidgetBoardStore, type WidgetId, type WidgetPosition } from '@/store/useWidgetBoardStore';
+} from "react";
+import {
+  ClockGlyph,
+  GithubGlyph,
+  NoteGlyph,
+  RocketGlyph,
+  WeatherGlyph,
+} from "@/os/icons";
+import { useIsMobile } from "@/lib/useMediaQuery";
+import {
+  useWidgetBoardStore,
+  type WidgetId,
+  type WidgetPosition,
+} from "@/store/useWidgetBoardStore";
+import { useProjectCatalog } from "@/apps/projects/useProjectCatalog";
+import { GitHubContributionGraph } from "./GitHubContributionGraph";
 
-const GITHUB_USERNAME = import.meta.env.VITE_GITHUB_USERNAME ?? 'Error-Krishna';
+const GITHUB_USERNAME = import.meta.env.VITE_GITHUB_USERNAME ?? "Error-Krishna";
 const MOVE_STEP = 24;
 const PROJECT_ROTATE_MS = 8000;
-const NOTE_STORAGE_KEY = 'krishnaos:quickNote';
+const NOTE_STORAGE_KEY = "krishnaos:quickNote";
 const NOTE_SAVE_DEBOUNCE_MS = 400;
 
-const DEVELOPMENT_MILESTONES = [
-  { label: 'Phase 1', value: 'Foundation' },
-  { label: 'Phase 2', value: 'Boot + Welcome' },
-  { label: 'Phase 3', value: 'OS Shell' },
-  { label: 'Phase 4', value: 'Content Apps' },
-  { label: 'Phase 5', value: 'Guided Tour' },
-  { label: 'Phase 6', value: 'Recruiter Mode' },
-  { label: 'Phase 7', value: 'Polish' },
-] as const;
-
 const WEATHER_CODES: Record<number, string> = {
-  0: 'Clear',
-  1: 'Mostly clear',
-  2: 'Partly cloudy',
-  3: 'Cloudy',
-  45: 'Fog',
-  48: 'Fog',
-  51: 'Drizzle',
-  53: 'Drizzle',
-  55: 'Drizzle',
-  61: 'Rain',
-  63: 'Rain',
-  65: 'Rain',
-  71: 'Snow',
-  73: 'Snow',
-  75: 'Snow',
-  80: 'Showers',
-  81: 'Showers',
-  82: 'Showers',
-  95: 'Thunderstorm',
+  0: "Clear",
+  1: "Mostly clear",
+  2: "Partly cloudy",
+  3: "Cloudy",
+  45: "Fog",
+  48: "Fog",
+  51: "Drizzle",
+  53: "Drizzle",
+  55: "Drizzle",
+  61: "Rain",
+  63: "Rain",
+  65: "Rain",
+  71: "Snow",
+  73: "Snow",
+  75: "Snow",
+  80: "Showers",
+  81: "Showers",
+  82: "Showers",
+  95: "Thunderstorm",
 };
 
 function useClock() {
@@ -66,11 +67,11 @@ function useWeather() {
     label: string;
     temperature?: number;
     summary?: string;
-  }>({ label: 'Location pending' });
+  }>({ label: "Location pending" });
 
   useEffect(() => {
-    if (!('geolocation' in navigator)) {
-      setState({ label: 'Weather unavailable' });
+    if (!("geolocation" in navigator)) {
+      setState({ label: "Weather unavailable" });
       return;
     }
 
@@ -87,15 +88,18 @@ function useWeather() {
 
           const weatherCode = json.current?.weather_code;
           setState({
-            label: weatherCode != null ? WEATHER_CODES[weatherCode] ?? 'Weather' : 'Weather',
+            label:
+              weatherCode != null
+                ? (WEATHER_CODES[weatherCode] ?? "Weather")
+                : "Weather",
             temperature: json.current?.temperature_2m,
-            summary: 'Local conditions',
+            summary: "Local conditions",
           });
         } catch {
-          setState({ label: 'Weather unavailable' });
+          setState({ label: "Weather unavailable" });
         }
       },
-      () => setState({ label: 'Location blocked' }),
+      () => setState({ label: "Location blocked" }),
       { enableHighAccuracy: false, timeout: 4000, maximumAge: 600000 },
     );
   }, []);
@@ -109,9 +113,9 @@ function useGithubAvatar() {
 
 function readStoredNote(): string {
   try {
-    return localStorage.getItem(NOTE_STORAGE_KEY) ?? '';
+    return localStorage.getItem(NOTE_STORAGE_KEY) ?? "";
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -124,18 +128,32 @@ function persistNote(value: string): void {
   }
 }
 
-function clampPosition(position: WidgetPosition, width: number, height: number): WidgetPosition {
-  if (typeof window === 'undefined') {
+function clampPosition(
+  position: WidgetPosition,
+  width: number,
+  height: number,
+): WidgetPosition {
+  if (typeof window === "undefined") {
     return position;
   }
 
-  const padding = 16;
-  const maxX = Math.max(padding, window.innerWidth - width - padding);
-  const maxY = Math.max(48, window.innerHeight - height - padding);
+  const horizontalPadding = 16;
+  const topBoundary = 52;
+  const bottomBoundary = 96;
+
+  const maxX = Math.max(
+    horizontalPadding,
+    window.innerWidth - width - horizontalPadding,
+  );
+
+  const maxY = Math.max(
+    topBoundary,
+    window.innerHeight - height - bottomBoundary,
+  );
 
   return {
-    x: Math.min(Math.max(position.x, padding), maxX),
-    y: Math.min(Math.max(position.y, 48), maxY),
+    x: Math.min(Math.max(position.x, horizontalPadding), maxX),
+    y: Math.min(Math.max(position.y, topBoundary), maxY),
   };
 }
 
@@ -170,10 +188,13 @@ function useElementSize<T extends HTMLElement>() {
  * a button) still counts as interactive, not just a click on the element
  * itself.
  */
-const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, [data-widget-interactive]';
+const INTERACTIVE_SELECTOR =
+  "button, a, input, textarea, select, [data-widget-interactive]";
 
 function isInteractiveTarget(target: EventTarget | null): boolean {
-  return target instanceof Element ? target.closest(INTERACTIVE_SELECTOR) !== null : false;
+  return target instanceof Element
+    ? target.closest(INTERACTIVE_SELECTOR) !== null
+    : false;
 }
 
 interface WidgetHeaderProps {
@@ -244,8 +265,8 @@ function DraggableWidget({ id, title, icon, children }: DraggableWidgetProps) {
       setPosition(id, clampPosition(current, size.width, size.height));
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [id, isMobile, setPosition, size.height, size.width]);
 
   const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
@@ -307,16 +328,16 @@ function DraggableWidget({ id, title, icon, children }: DraggableWidgetProps) {
     let nextPosition = position;
 
     switch (event.key) {
-      case 'ArrowLeft':
+      case "ArrowLeft":
         nextPosition = { ...position, x: position.x - delta };
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         nextPosition = { ...position, x: position.x + delta };
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         nextPosition = { ...position, y: position.y - delta };
         break;
-      case 'ArrowDown':
+      case "ArrowDown":
         nextPosition = { ...position, y: position.y + delta };
         break;
       default:
@@ -341,15 +362,15 @@ function DraggableWidget({ id, title, icon, children }: DraggableWidgetProps) {
       ref={ref}
       tabIndex={0}
       aria-label={`${title} widget. Draggable — click and drag anywhere on the card to move it, arrow keys to nudge, double-click to reset.`}
-      style={{ left: position.x, top: position.y, touchAction: 'none' }}
+      style={{ left: position.x, top: position.y, touchAction: "none" }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={finishDrag}
       onPointerCancel={finishDrag}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
-      className={`glass-panel pointer-events-auto absolute flex w-[260px] cursor-grab select-none flex-col gap-os-3 p-os-4 shadow-[0_20px_50px_rgb(0_0_0/0.3)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-os-accent)] active:cursor-grabbing ${
-        isDragging ? 'shadow-[0_28px_64px_rgb(0_0_0/0.45)]' : ''
+      className={`glass-panel pointer-events-auto absolute flex ${id === "github" ? "w-[620px]" : "w-[260px]"} cursor-grab select-none flex-col gap-os-3 p-os-4 shadow-[0_20px_50px_rgb(0_0_0/0.3)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-os-accent)] active:cursor-grabbing ${
+        isDragging ? "shadow-[0_28px_64px_rgb(0_0_0/0.45)]" : ""
       }`}
     >
       <WidgetHeader title={title} icon={icon} />
@@ -394,46 +415,73 @@ function QuickNoteWidget() {
         className="w-full resize-none rounded-os-sm border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] px-os-2 py-os-2 text-os-caption text-[color:var(--color-os-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[color:var(--color-os-accent)]"
       />
       <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-        {justSaved ? 'Saved locally' : 'Autosaves to this browser'}
+        {justSaved ? "Saved locally" : "Autosaves to this browser"}
       </p>
     </>
   );
 }
 
+/**
+ * Rotates through the live, GitHub-synced project catalog (same source
+ * as the Projects window and Recruiter Mode — see `useProjectCatalog`)
+ * rather than a separate hardcoded list, so this widget can never drift
+ * out of sync with what "Featured" actually means elsewhere in KrishnaOS.
+ */
 function FeaturedProjectWidget() {
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const projects = FEATURED_PROJECTS.length > 0 ? FEATURED_PROJECTS : [];
+  const { projects, loading, error } = useProjectCatalog();
+  const featuredProjects = useMemo(
+    () => projects.filter((project) => project.featured),
+    [projects],
+  );
 
   useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updatePreference = () => setPrefersReducedMotion(media.matches);
     updatePreference();
-    media.addEventListener('change', updatePreference);
-    return () => media.removeEventListener('change', updatePreference);
+    media.addEventListener("change", updatePreference);
+    return () => media.removeEventListener("change", updatePreference);
   }, []);
 
   useEffect(() => {
-    if (isPaused || prefersReducedMotion || projects.length <= 1) {
+    if (isPaused || prefersReducedMotion || featuredProjects.length <= 1) {
       return;
     }
     const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % projects.length);
+      setIndex((current) => (current + 1) % featuredProjects.length);
     }, PROJECT_ROTATE_MS);
     return () => window.clearInterval(timer);
-  }, [isPaused, prefersReducedMotion, projects.length]);
+  }, [isPaused, prefersReducedMotion, featuredProjects.length]);
 
-  if (projects.length === 0) {
+  if (loading) {
     return (
       <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-        No featured projects yet — mark a project `featured: true` in lib/content.ts.
+        Loading projects…
       </p>
     );
   }
 
-  const project = projects[index % projects.length];
-  const primaryLink = project.links.live ?? project.links.github ?? project.links.caseStudy;
+  if (error) {
+    return (
+      <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+        Projects unavailable right now.
+      </p>
+    );
+  }
+
+  if (featuredProjects.length === 0) {
+    return (
+      <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+        No featured projects yet.
+      </p>
+    );
+  }
+
+  const project = featuredProjects[index % featuredProjects.length];
+  const primaryLink =
+    project.links.live ?? project.links.github ?? project.links.caseStudy;
 
   return (
     <div
@@ -447,7 +495,9 @@ function FeaturedProjectWidget() {
         </span>
         <div className="min-w-0">
           <p className="truncate text-os-body font-semibold">{project.title}</p>
-          <p className="truncate text-os-caption text-[color:var(--color-os-text-secondary)]">{project.summary}</p>
+          <p className="truncate text-os-caption text-[color:var(--color-os-text-secondary)]">
+            {project.summary}
+          </p>
         </div>
       </div>
 
@@ -473,12 +523,14 @@ function FeaturedProjectWidget() {
             View Project →
           </a>
         ) : (
-          <span className="text-os-caption text-[color:var(--color-os-text-tertiary)]">No link set yet</span>
+          <span className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            No link set yet
+          </span>
         )}
 
-        {projects.length > 1 && (
+        {featuredProjects.length > 1 && (
           <div className="flex items-center gap-os-1" data-widget-interactive>
-            {projects.map((p, i) => (
+            {featuredProjects.map((p, i) => (
               <button
                 key={p.id}
                 type="button"
@@ -486,8 +538,8 @@ function FeaturedProjectWidget() {
                 onClick={() => setIndex(i)}
                 className={`h-1.5 w-1.5 rounded-full transition-colors ${
                   i === index
-                    ? 'bg-[color:var(--color-os-accent)]'
-                    : 'bg-[color:var(--color-os-glass-border)] hover:bg-[color:var(--color-os-text-tertiary)]'
+                    ? "bg-[color:var(--color-os-accent)]"
+                    : "bg-[color:var(--color-os-glass-border)] hover:bg-[color:var(--color-os-text-tertiary)]"
                 }`}
               />
             ))}
@@ -504,27 +556,52 @@ export function StatusWidgets() {
   const weather = useWeather();
   const avatar = useGithubAvatar();
 
-  const timeLabel = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  const dateLabel = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeLabel = now.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const dateLabel = now.toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 
   const widgets = (
     <>
-      <DraggableWidget id="clock" title="Time" icon={<ClockGlyph className="h-4 w-4" />}>
+      <DraggableWidget
+        id="clock"
+        title="Time"
+        icon={<ClockGlyph className="h-4 w-4" />}
+      >
         <p className="text-os-title font-semibold">{timeLabel}</p>
-        <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">{dateLabel}</p>
+        <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
+          {dateLabel}
+        </p>
       </DraggableWidget>
 
-      <DraggableWidget id="weather" title="Weather" icon={<WeatherGlyph className="h-4 w-4" />}>
+      <DraggableWidget
+        id="weather"
+        title="Weather"
+        icon={<WeatherGlyph className="h-4 w-4" />}
+      >
         <p className="text-os-body font-semibold">{weather.label}</p>
         <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
-          {weather.temperature != null ? `${Math.round(weather.temperature)}°F` : 'Live local conditions'}
+          {weather.temperature != null
+            ? `${Math.round(weather.temperature)}°F`
+            : "Live local conditions"}
         </p>
         {weather.summary && (
-          <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">{weather.summary}</p>
+          <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+            {weather.summary}
+          </p>
         )}
       </DraggableWidget>
 
-      <DraggableWidget id="github" title="GitHub" icon={<GithubGlyph className="h-4 w-4" />}>
+      <DraggableWidget
+        id="github"
+        title="GitHub"
+        icon={<GithubGlyph className="h-4 w-4" />}
+      >
         <div className="flex items-center gap-os-3">
           <img
             src={avatar}
@@ -532,52 +609,48 @@ export function StatusWidgets() {
             className="h-12 w-12 rounded-os-md border border-[color:var(--color-os-glass-border)]"
           />
           <div className="min-w-0">
-            <p className="truncate text-os-body font-semibold">{GITHUB_USERNAME}</p>
-            <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">Contribution timeline below</p>
+            <p className="truncate text-os-body font-semibold">
+              {GITHUB_USERNAME}
+            </p>
+            <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
+              Contribution timeline below
+            </p>
           </div>
         </div>
         <div className="overflow-hidden rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface)] p-os-2">
-          <img
-            // src={`https://github.com/users/${GITHUB_USERNAME}/contributions`}
-            src={`https://github-contributions-api.deno.dev/Error-Krishna`}
-            alt="GitHub contribution graph"
-            className="h-auto w-full"
-          />
+          <GitHubContributionGraph username={GITHUB_USERNAME} />
         </div>
       </DraggableWidget>
 
-      <DraggableWidget id="timeline" title="Timeline" icon={<TimelineGlyph className="h-4 w-4" />}>
-        <ol className="flex flex-col gap-os-2">
-          {DEVELOPMENT_MILESTONES.map((milestone, index) => (
-            <li key={milestone.label} className="flex items-center gap-os-2 text-os-caption">
-              <span
-                className={`flex h-2.5 w-2.5 rounded-full ${
-                  index < 6 ? 'bg-[color:var(--color-os-accent)]' : 'bg-[color:var(--color-os-glass-border)]'
-                }`}
-                aria-hidden
-              />
-              <span className="text-[color:var(--color-os-text-secondary)]">{milestone.label}</span>
-              <span className="text-[color:var(--color-os-text-tertiary)]">{milestone.value}</span>
-            </li>
-          ))}
-        </ol>
-      </DraggableWidget>
-
-      <DraggableWidget id="featuredProject" title="Featured Project" icon={<RocketGlyph className="h-4 w-4" />}>
+      <DraggableWidget
+        id="featuredProject"
+        title="Featured Project"
+        icon={<RocketGlyph className="h-4 w-4" />}
+      >
         <FeaturedProjectWidget />
       </DraggableWidget>
 
-      <DraggableWidget id="quickNote" title="Quick Note" icon={<NoteGlyph className="h-4 w-4" />}>
+      <DraggableWidget
+        id="quickNote"
+        title="Quick Note"
+        icon={<NoteGlyph className="h-4 w-4" />}
+      >
         <QuickNoteWidget />
       </DraggableWidget>
     </>
   );
 
   if (isMobile) {
-    return <div className="grid gap-os-3 px-os-4 pt-os-20 pb-os-4 md:hidden">{widgets}</div>;
+    return (
+      <div className="grid gap-os-3 px-os-4 pt-os-20 pb-os-4 md:hidden">
+        {widgets}
+      </div>
+    );
   }
 
   return (
-    <div className="pointer-events-none fixed left-0 top-0 z-30 hidden h-full w-full md:block">{widgets}</div>
+    <div className="pointer-events-none fixed inset-0 z-10 hidden h-full w-full md:block">
+      {widgets}
+    </div>
   );
 }

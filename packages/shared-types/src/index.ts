@@ -5,3 +5,9 @@ export * from './achievement.js';
 export * from './contact.js';
 export * from './api.js';
 export * from './os-mode.js';
+
+export * from './projects/project-runtime.js';
+export * from './projects/project-manifest.js';
+export * from './projects/project-catalog.js';
+
+export * from './projects/project-demo.js';

@@ -1,76 +1,140 @@
-import { useEffect } from 'react';
-import { TOUR_STEPS, useTourStore } from '@/store/useTourStore';
-import { useWindowStore } from '@/store/useWindowStore';
-import { useModeStore } from '@/store/useModeStore';
-import { TOUR_STEP_LABELS, TOUR_STEP_TO_APP } from './tourSteps';
-import { TourBar } from './TourBar';
+import { useEffect, useRef, useState } from "react";
+import type { AppId } from "@/os/appRegistry";
+import { TOUR_STEPS, useTourStore } from "@/store/useTourStore";
+import { useWindowStore } from "@/store/useWindowStore";
+import { useModeStore } from "@/store/useModeStore";
+import {
+  TOUR_STEP_LABELS,
+  TOUR_STEP_TO_APP,
+  TOUR_STEP_DETAILS,
+} from "./tourSteps";
+import { TourBar } from "./TourBar";
 
-/**
- * Drives the guided tour, per UX flow doc §4: "rather than a modal
- * carousel, the tour drives the OS itself." Rendered as a sibling of
- * `<Desktop />` (see `OsRoot.tsx`) when `mode === 'tour'` — it doesn't own
- * or duplicate the desktop, it just opens/focuses windows on the same
- * `useWindowStore` every other entry point (Dock, Spotlight) writes to,
- * and renders the persistent `TourBar` on top.
- *
- * Because it renders *alongside* the real, fully-interactive `Desktop`
- * (not a restricted view), a visitor can drag, close, or open unrelated
- * windows mid-tour — the UX doc's "a curious visitor can go off-script
- * mid-tour by just interacting with the desktop; the tour bar stays
- * present but doesn't force them back on track" is true here by
- * construction, not by any special-casing in this component.
- */
 export function TourController() {
   const isActive = useTourStore((s) => s.isActive);
   const stepIndex = useTourStore((s) => s.stepIndex);
   const nextStep = useTourStore((s) => s.nextStep);
   const previousStep = useTourStore((s) => s.previousStep);
   const skipTour = useTourStore((s) => s.skipTour);
+
   const openWindow = useWindowStore((s) => s.openWindow);
+  const closeWindow = useWindowStore((s) => s.closeWindow);
+
+  const tourAppRef = useRef<AppId | null>(null);
   const setMode = useModeStore((s) => s.setMode);
 
-  const currentStepId = TOUR_STEPS[stepIndex];
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [direction, setDirection] = useState<1 | -1>(1);
 
-  // Open/focus the window mapped to the current step. openWindow is
-  // idempotent (see docs/03-state-management.md) so re-running this on
-  // every step change is safe — it either opens a new window or just
-  // brings an already-open one to front. Steps mapped to `null` (see
-  // tourSteps.ts's note on "work") intentionally do nothing here, leaving
-  // whatever's already open untouched.
+  const currentStepId = TOUR_STEPS[stepIndex];
+  const currentStep = TOUR_STEP_DETAILS[currentStepId];
+
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || !currentStepId) return;
+
     const targetApp = TOUR_STEP_TO_APP[currentStepId];
+
+    if (tourAppRef.current && tourAppRef.current !== targetApp) {
+      closeWindow(tourAppRef.current);
+    }
+
     if (targetApp) {
       openWindow(targetApp);
+      tourAppRef.current = targetApp;
+    } else {
+      tourAppRef.current = null;
     }
-  }, [isActive, currentStepId, openWindow]);
+  }, [isActive, currentStepId, openWindow, closeWindow]);
+
+  useEffect(() => {
+    if (isActive) return;
+
+    tourAppRef.current = null;
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        skipTour();
+        setMode("free");
+        return;
+      }
+
+      if (event.key === "ArrowRight" || event.key === "Enter") {
+        event.preventDefault();
+        setDirection(1);
+        setIsTransitioning(true);
+
+        window.setTimeout(() => {
+          nextStep();
+          setIsTransitioning(false);
+        }, 140);
+
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+
+        if (stepIndex === 0) return;
+
+        setDirection(-1);
+        setIsTransitioning(true);
+
+        window.setTimeout(() => {
+          previousStep();
+          setIsTransitioning(false);
+        }, 140);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isActive, nextStep, previousStep, setMode, skipTour, stepIndex]);
+
+  const handleNext = () => {
+    setDirection(1);
+    setIsTransitioning(true);
+
+    window.setTimeout(() => {
+      nextStep();
+      setIsTransitioning(false);
+    }, 140);
+  };
+
+  const handleBack = () => {
+    if (stepIndex === 0) return;
+
+    setDirection(-1);
+    setIsTransitioning(true);
+
+    window.setTimeout(() => {
+      previousStep();
+      setIsTransitioning(false);
+    }, 140);
+  };
 
   const handleSkip = () => {
-    // Per UX doc §4: "drops the visitor into Free Exploration at their
-    // current point (the window that's open stays open — no jarring
-    // reset)." skipTour() only flips useTourStore.isActive; setMode('free')
-    // is what actually moves the visitor. Neither call touches
-    // useWindowStore, so nothing closes or resets — this is UX doc §7
-    // rule 2 in action.
     skipTour();
-    setMode('free');
+    setMode("free");
   };
 
   if (!isActive) {
-    // Reached only via natural completion (advancing Next past the last
-    // step, which useTourStore.nextStep() handles by setting isActive
-    // false without changing mode). Skip always calls setMode('free')
-    // itself above, which unmounts TourController before a render with
-    // isActive === false could happen here — so this branch is
-    // unambiguously "the tour finished," never "the tour was skipped."
-    // Per UX doc §4's completion state: "never a dead end."
     return (
       <TourBar
         completed
-        onExploreFreely={() => setMode('free')}
-        onBackToWelcome={() => setMode('welcome')}
+        onExploreFreely={() => setMode("free")}
+        onBackToWelcome={() => setMode("welcome")}
       />
     );
+  }
+
+  if (!currentStep) {
+    return null;
   }
 
   return (
@@ -78,9 +142,16 @@ export function TourController() {
       stepIndex={stepIndex}
       stepLabel={TOUR_STEP_LABELS[currentStepId]}
       totalSteps={TOUR_STEPS.length}
+      eyebrow={currentStep.eyebrow}
+      title={currentStep.title}
+      description={currentStep.description}
+      hint={currentStep.hint}
+      progress={((stepIndex + 1) / TOUR_STEPS.length) * 100}
+      direction={direction}
+      isTransitioning={isTransitioning}
       canGoBack={stepIndex > 0}
-      onBack={previousStep}
-      onNext={nextStep}
+      onBack={handleBack}
+      onNext={handleNext}
       onSkip={handleSkip}
     />
   );

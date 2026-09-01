@@ -196,7 +196,7 @@ export const ABOUT_CONTENT: AboutContent = {
       'Solving real problems'
     ]
   },
-  photoUrl: 'https://res.cloudinary.com/dt131godr/image/upload/v1787050172/motion_photo_2308644998421275287_kppqhx.jpg',
+  photoUrl: 'https://res.cloudinary.com/krishnagoyal/image/upload/v1787050172/motion_photo_2308644998421275287_kppqhx.jpg',
 
 };
 
@@ -363,6 +363,43 @@ export const CONTACT_PAGE_CONTENT: ContactPageContent = {
 /* PROJECTS                                                                    */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Header/eyebrow copy, the "Explore. Interact. Experience." callout, and
+ * the closing CTA card for the Projects window — same content.ts-first
+ * rule as every other redesigned page (see SkillsPageContent /
+ * ExperiencePageContent). Per-project category and interactive-demo
+ * wiring live in `apps/projects/runnerRegistry.ts`, not here, since that
+ * mapping is about *how the window renders things* rather than public
+ * profile content.
+ */
+export interface ProjectsPageContent {
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  tagline: string;
+  calloutHeading: string;
+  calloutBody: string;
+  closing: {
+    heading: string;
+    body: string;
+    ctaLabel: string;
+  };
+}
+
+export const PROJECTS_PAGE_CONTENT: ProjectsPageContent = {
+  eyebrow: 'Explore. Interact. Experience.',
+  title: 'My',
+  titleAccent: 'Projects',
+  tagline: "A collection of things I've built, experiments I've shipped, and problems I've solved.",
+  calloutHeading: 'Explore. Interact. Experience.',
+  calloutBody: "Every project below runs a real, interactive demo right inside KrishnaOS — try it before you take my word for it.",
+  closing: {
+    heading: 'Every project is a story of curiosity, learning, and building.',
+    body: "Click around, try features, break things — that's how we grow.",
+    ctaLabel: "Let's Connect →",
+  },
+};
+
 export const PROJECTS_CONTENT: Project[] = [
   {
     id: 'project-udhyog-saathi',
@@ -418,7 +455,6 @@ export const PROJECTS_CONTENT: Project[] = [
 
     links: {
       github: 'https://github.com/Error-Krishna/hotreload',
-      // demo: 'https://www.loom.com/share/773d4d8fdd1840128b92929643a08965',
     },
 
     featured: true,
@@ -451,6 +487,56 @@ export const PROJECTS_CONTENT: Project[] = [
     },
 
     featured: true,
+  },
+
+  {
+    id: 'project-alpha-vault',
+
+    title: 'Alpha Vault',
+
+    summary:
+      'A modern full-stack application focused on secure financial and portfolio management workflows.',
+
+    description:
+      'Alpha Vault is a full-stack application built to explore financial workflows, portfolio visibility, and modern application architecture.',
+
+    role: 'Full-Stack Developer',
+
+    stack: [
+      'React',
+      'TypeScript',
+      'Node.js',
+      'REST APIs',
+    ],
+
+    links: {
+      github: 'https://github.com/Error-Krishna/Alpha-vault-frontend',
+    },
+
+    featured: false,
+  },
+
+  {
+    id: 'project-epet',
+
+    title: 'EPet',
+
+    summary:
+      'A digital platform project focused on building a modern pet-care experience.',
+
+    description:
+      'EPet is a project exploring digital workflows and user experiences for pet-related services and interactions.',
+
+    role: 'Developer',
+
+    stack: [
+      'Web',
+      'Frontend',
+    ],
+
+    links: {},
+
+    featured: false,
   },
 
   {

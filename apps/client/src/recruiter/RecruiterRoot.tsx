@@ -6,7 +6,6 @@ import {
   ACHIEVEMENTS_CONTENT,
   EDUCATION_CONTENT,
   EXPERIENCE_CONTENT,
-  FEATURED_PROJECTS,
   PROFILE_LINKS,
   SKILLS_CONTENT,
 } from '@/lib/content';
@@ -14,6 +13,7 @@ import { Wallpaper } from '@/os/theme/Wallpaper';
 import { ThemeToggle } from '@/os/theme/ThemeToggle';
 import { useModeStore } from '@/store/useModeStore';
 import { useWindowStore } from '@/store/useWindowStore';
+import { useProjectCatalog } from '@/apps/projects/useProjectCatalog';
 
 const QUICK_TILES = [
   {
@@ -51,6 +51,18 @@ export function RecruiterRoot() {
   const setMode = useModeStore((s) => s.setMode);
   const openWindow = useWindowStore((s) => s.openWindow);
   const navigate = useNavigate();
+
+  // Featured projects now come from the same live project catalog the
+  // Projects window itself reads (`useProjectCatalog` → `/api/projects`,
+  // GitHub-synced when configured, otherwise the server's real fallback
+  // catalog — see docs/12-project-runtime-architecture.md). This used to
+  // read a separate hardcoded `FEATURED_PROJECTS` export from
+  // `lib/content.ts`, which had quietly drifted out of sync with what the
+  // real Projects window shows (two different project lists, one of them
+  // stale). There is now exactly one source of truth for "what projects
+  // exist," matching this file's own established rule for shared data.
+  const { projects, loading: projectsLoading } = useProjectCatalog();
+  const featuredProjects = projects.filter((project) => project.featured);
 
   useEffect(() => {
     setMode('recruiter');
@@ -241,7 +253,19 @@ export function RecruiterRoot() {
             <section className="glass-panel flex min-h-0 flex-1 flex-col p-os-4">
               <SectionHeading eyebrow="Projects" title="Featured case studies" />
               <div className="mt-os-3 flex flex-1 min-h-0 flex-col gap-os-3 overflow-hidden">
-                {FEATURED_PROJECTS.map((project) => {
+                {projectsLoading && (
+                  <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]" aria-live="polite">
+                    Loading featured projects…
+                  </p>
+                )}
+
+                {!projectsLoading && featuredProjects.length === 0 && (
+                  <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
+                    No featured projects yet.
+                  </p>
+                )}
+
+                {featuredProjects.map((project) => {
                   const hasLinks = project.links.live || project.links.github || project.links.caseStudy;
 
                   return (
