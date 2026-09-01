@@ -1,6 +1,8 @@
 import type { Project } from '@krishnaos/shared-types';
 import { GithubGlyph, ExternalLinkGlyph, PlayGlyph } from '@/os/icons';
 import { PROJECT_RUNNERS } from './runnerRegistry';
+import { EMBEDDED_RUNTIMES } from './runtime/embeddedRuntimeRegistry';
+import { SANDBOX_RUNTIMES } from './runtime/sandboxRuntimeRegistry';
 
 interface ProjectCardProps {
   project: Project;
@@ -18,19 +20,27 @@ interface ProjectCardProps {
  */
 function hasRealRuntime(project: Project): boolean {
   const runtime = project.runtime;
-  if (!runtime) return false;
-  if (runtime.type === 'remote') return Boolean(runtime.url);
-  if (runtime.type === 'static') return false;
-  // embedded/sandbox: real only if a runtime component is actually
-  // registered for this entry — ProjectCard doesn't import the registries
-  // itself (that would pull runtime code into the grid's bundle just to
-  // check a boolean), so this mirrors ProjectRuntime.tsx's own fallback
-  // behavior: an entry with no matching component still renders, just as
-  // RunnerComingSoon once opened. Since the card can't know that without
-  // importing the lazy component map, it treats embedded/sandbox as
-  // "likely real" and lets the runner shell itself be the final honest
-  // arbiter if a specific entry turns out to be unregistered.
-  return true;
+
+  if (!runtime) {
+    return false;
+  }
+
+  switch (runtime.type) {
+    case 'remote':
+      return Boolean(runtime.url);
+
+    case 'embedded':
+      return Boolean(runtime.entry && EMBEDDED_RUNTIMES[runtime.entry]);
+
+    case 'sandbox':
+      return Boolean(runtime.entry && SANDBOX_RUNTIMES[runtime.entry]);
+
+    case 'static':
+      return false;
+
+    default:
+      return false;
+  }
 }
 
 /**
