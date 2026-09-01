@@ -53,7 +53,7 @@ export function HeroSection() {
   </div>
 
   {/* STATUS CARD — sibling of the photo, not nested inside it, so it isn't clipped */}
-  <div className="glass-panel absolute bottom-os-4 right-[-1rem] z-10 min-w-[200px] bg-black/20 px-os-4 py-os-3">
+  <div className="glass-panel absolute bottom-os-4 right-[-1rem] z-10 min-w-[200px] bg-[color:var(--color-os-glass)] px-os-4 py-os-3">
     <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
       {ABOUT_CONTENT.status.label}
     </p>

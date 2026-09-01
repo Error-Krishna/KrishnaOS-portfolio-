@@ -1,11 +1,11 @@
-import { useState, type FormEvent } from 'react';
-import { submitContactForm } from '@/lib/apiClient';
-import { PROFILE_LINKS, CONTACT_PAGE_CONTENT } from '@/lib/content';
-import { LinkGlyph, MapPinGlyph, PhoneGlyph, RocketGlyph } from '@/os/icons';
+import { useState, type FormEvent } from "react";
+import { submitContactForm } from "@/lib/apiClient";
+import { PROFILE_LINKS, CONTACT_PAGE_CONTENT } from "@/lib/content";
+import { LinkGlyph, MapPinGlyph, PhoneGlyph, RocketGlyph } from "@/os/icons";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type Status = 'idle' | 'submitting' | 'success' | 'error';
+type Status = "idle" | "submitting" | "success" | "error";
 
 /**
  * Contact window content, wired to the real POST /api/contact → MongoDB
@@ -40,18 +40,19 @@ type Status = 'idle' | 'submitting' | 'success' | 'error';
  * of those URLs.
  */
 export function ContactApp() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [status, setStatus] = useState<Status>('idle');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const validate = (): string | null => {
-    if (name.trim().length < 1) return 'Name is required.';
-    if (!EMAIL_RE.test(email)) return 'A valid email is required.';
-    if (message.trim().length < 1) return 'Message is required.';
-    if (message.length > 5000) return 'Message is too long (max 5000 characters).';
+    if (name.trim().length < 1) return "Name is required.";
+    if (!EMAIL_RE.test(email)) return "A valid email is required.";
+    if (message.trim().length < 1) return "Message is required.";
+    if (message.length > 5000)
+      return "Message is too long (max 5000 characters).";
     return null;
   };
 
@@ -59,12 +60,12 @@ export function ContactApp() {
     e.preventDefault();
     const validationError = validate();
     if (validationError) {
-      setStatus('error');
+      setStatus("error");
       setErrorMessage(validationError);
       return;
     }
 
-    setStatus('submitting');
+    setStatus("submitting");
     setErrorMessage(null);
     const trimmedSubject = subject.trim();
     const res = await submitContactForm({
@@ -75,18 +76,18 @@ export function ContactApp() {
     });
 
     if (res.success) {
-      setStatus('success');
-      setName('');
-      setEmail('');
-      setSubject('');
-      setMessage('');
+      setStatus("success");
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
     } else {
-      setStatus('error');
+      setStatus("error");
       setErrorMessage(res.error.message);
     }
   };
 
-  if (status === 'success') {
+  if (status === "success") {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-os-2 text-center">
         <p className="text-os-body font-medium">Message sent.</p>
@@ -95,7 +96,7 @@ export function ContactApp() {
         </p>
         <button
           type="button"
-          onClick={() => setStatus('idle')}
+          onClick={() => setStatus("idle")}
           className="text-os-caption text-[color:var(--color-os-accent)] hover:underline"
         >
           Send another message
@@ -104,7 +105,8 @@ export function ContactApp() {
     );
   }
 
-  const { tagline, phone, location, opportunityLabel, opportunityTags } = CONTACT_PAGE_CONTENT;
+  const { tagline, phone, location, opportunityLabel, opportunityTags } =
+    CONTACT_PAGE_CONTENT;
 
   return (
     <div className="grid grid-cols-1 gap-os-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
@@ -116,9 +118,14 @@ export function ContactApp() {
             Let&rsquo;s Connect
           </span>
           <h2 className="text-os-title font-bold text-[color:var(--color-os-text-primary)]">
-            Get <span className="text-[color:var(--color-os-accent)]">In Touch</span>
+            Get{" "}
+            <span className="text-[color:var(--color-os-accent)]">
+              In Touch
+            </span>
           </h2>
-          <p className="max-w-sm text-os-body text-[color:var(--color-os-text-secondary)]">{tagline}</p>
+          <p className="max-w-sm text-os-body text-[color:var(--color-os-text-secondary)]">
+            {tagline}
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-os-3">
@@ -131,7 +138,7 @@ export function ContactApp() {
               Email
             </span>
             <span className="truncate text-os-caption text-[color:var(--color-os-text-secondary)]">
-              {PROFILE_LINKS.email.replace('mailto:', '')}
+              {PROFILE_LINKS.email.replace("mailto:", "")}
             </span>
           </a>
 
@@ -140,7 +147,9 @@ export function ContactApp() {
               <PhoneGlyph className="h-3.5 w-3.5" />
               Phone
             </span>
-            <span className="text-os-caption text-[color:var(--color-os-text-secondary)]">{phone}</span>
+            <span className="text-os-caption text-[color:var(--color-os-text-secondary)]">
+              {phone}
+            </span>
           </div>
 
           <div className="flex flex-col gap-os-1 rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface)] p-os-3">
@@ -148,7 +157,9 @@ export function ContactApp() {
               <MapPinGlyph className="h-3.5 w-3.5" />
               Location
             </span>
-            <span className="text-os-caption text-[color:var(--color-os-text-secondary)]">{location}</span>
+            <span className="text-os-caption text-[color:var(--color-os-text-secondary)]">
+              {location}
+            </span>
           </div>
 
           <a
@@ -162,13 +173,15 @@ export function ContactApp() {
               LinkedIn
             </span>
             <span className="truncate text-os-caption text-[color:var(--color-os-text-secondary)]">
-              {PROFILE_LINKS.linkedin.replace('https://', '')}
+              {PROFILE_LINKS.linkedin.replace("https://", "")}
             </span>
           </a>
         </div>
 
         <div className="flex flex-col gap-os-2 rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">{opportunityLabel}</p>
+          <p className="text-os-caption text-[color:var(--color-os-text-secondary)]">
+            {opportunityLabel}
+          </p>
           <div className="flex flex-wrap gap-os-2">
             {opportunityTags.map((tag) => (
               <span
@@ -183,8 +196,13 @@ export function ContactApp() {
       </div>
 
       {/* Right column: the real working form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-4">
-        <h3 className="text-os-body font-semibold text-[color:var(--color-os-text-primary)]">Send me a message</h3>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-os-3 rounded-os-lg border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-glass)] p-os-4"
+      >
+        <h3 className="text-os-body font-semibold text-[color:var(--color-os-text-primary)]">
+          Send me a message
+        </h3>
 
         <label className="flex flex-col gap-os-1 text-os-caption text-[color:var(--color-os-text-secondary)]">
           Name
@@ -207,7 +225,10 @@ export function ContactApp() {
         </label>
 
         <label className="flex flex-col gap-os-1 text-os-caption text-[color:var(--color-os-text-secondary)]">
-          Subject <span className="text-[color:var(--color-os-text-tertiary)]">(optional)</span>
+          Subject{" "}
+          <span className="text-[color:var(--color-os-text-tertiary)]">
+            (optional)
+          </span>
           <input
             type="text"
             value={subject}
@@ -227,18 +248,21 @@ export function ContactApp() {
           />
         </label>
 
-        {status === 'error' && errorMessage && (
-          <p role="alert" className="text-os-caption text-[#ff5f57]">
+        {status === "error" && errorMessage && (
+          <p
+            role="alert"
+            className="text-os-caption text-[color:var(--color-os-danger)]"
+          >
             {errorMessage}
           </p>
         )}
 
         <button
           type="submit"
-          disabled={status === 'submitting'}
+          disabled={status === "submitting"}
           className="rounded-os-sm bg-[color:var(--color-os-accent)] px-os-4 py-os-2 text-os-body font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {status === 'submitting' ? 'Sending…' : 'Send Message →'}
+          {status === "submitting" ? "Sending…" : "Send Message →"}
         </button>
       </form>
     </div>
