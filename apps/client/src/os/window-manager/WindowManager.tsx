@@ -92,7 +92,7 @@ function WindowFrame({ win, children }: WindowFrameProps) {
       dragHandleClassName="window-drag-handle"
       disableDragging={win.isFullscreen}
       enableResizing={!win.isFullscreen}
-      style={{ zIndex: win.zIndex }}
+      style={{ zIndex: win.zIndex, pointerEvents: 'auto' }}
       onDragStart={() => focusWindow(win.id)}
       onDragStop={(_e, d) => moveWindow(win.id, { x: d.x, y: d.y })}
       onResizeStart={() => focusWindow(win.id)}
@@ -182,7 +182,7 @@ export function WindowManager({ renderAppContent }: WindowManagerProps) {
       className={`${
         isMobile
           ? 'relative flex flex-1 min-h-0 flex-col gap-os-4 overflow-auto px-os-4 pb-os-28 pt-os-4'
-          : 'absolute inset-0 overflow-hidden'
+          : 'pointer-events-none absolute inset-0 z-20 overflow-hidden'
       }`}
     >
       <AnimatePresence>

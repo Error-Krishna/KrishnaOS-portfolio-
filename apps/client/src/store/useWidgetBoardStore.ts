@@ -14,52 +14,105 @@ interface WidgetBoardStore {
   resetAll: () => void;
 }
 
-const STORAGE_KEY = 'krishnaos:widgetPositions';
+const STORAGE_KEY = 'krishnaos:widgetPositions:v2';
 
-/**
- * Every widget is independently positioned and independently draggable —
- * per Krishna's explicit note that a real desktop OS's widgets "move
- * independently... not as a bundle." There is deliberately no shared
- * "board" position anymore; each id in `WIDGET_LAYOUT` gets its own entry
- * in `positions`, and dragging one never touches another's.
- *
- * `WIDGET_LAYOUT` exists only to lay widgets out in a non-overlapping
- * starting arrangement the *first* time a visitor loads the site (before
- * anything has a real measured size or a saved position) — it's a
- * starting-position heuristic, not a constraint enforced afterward. Once
- * mounted, each widget's real measured size (via StatusWidgets.tsx's
- * ResizeObserver-based clamping) is what matters for keeping it on-screen,
- * and it can be freely dragged anywhere from there, including across
- * columns — `column` below only decides where it starts.
- */
-const WIDGET_LAYOUT: Array<{ id: WidgetId; column: number; height: number }> = [
-  { id: 'clock', column: 0, height: 96 },
-  { id: 'weather', column: 0, height: 132 },
-  { id: 'github', column: 0, height: 208 },
-  { id: 'timeline', column: 0, height: 200 },
-  { id: 'featuredProject', column: 1, height: 224 },
-  { id: 'quickNote', column: 1, height: 208 },
+const WIDGET_IDS: WidgetId[] = [
+  'clock',
+  'weather',
+  'github',
+  'timeline',
+  'featuredProject',
+  'quickNote',
 ];
 
-const WIDGET_GAP = 12;
 const WIDGET_WIDTH = 260;
-const RIGHT_MARGIN = 16;
-const TOP_MARGIN = 48; // clears MenuBar's 36px height with a little breathing room
+const WIDGET_GAP = 16;
+const SCREEN_PADDING = 24;
+const MENU_BAR_HEIGHT = 36;
+
+/*
+ * Conservative initial heights. These are only used for the first
+ * layout before the widgets have been measured by ResizeObserver.
+ */
+const WIDGET_HEIGHTS: Record<WidgetId, number> = {
+  clock: 112,
+  weather: 148,
+  github: 224,
+  timeline: 216,
+  featuredProject: 240,
+  quickNote: 224,
+};
 
 function computeDefaultPositions(): Record<WidgetId, WidgetPosition> {
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
-  const columnY: Record<number, number> = {};
+  const viewportWidth =
+    typeof window !== 'undefined' ? window.innerWidth : 1280;
+
+  const top = MENU_BAR_HEIGHT + SCREEN_PADDING;
+
+  const availableWidth =
+    viewportWidth - SCREEN_PADDING * 2;
+
+  const maxColumns = Math.max(
+    1,
+    Math.floor(
+      (availableWidth + WIDGET_GAP) /
+        (WIDGET_WIDTH + WIDGET_GAP),
+    ),
+  );
+
+  const columns = Math.min(WIDGET_IDS.length, maxColumns, 3);
+
+  const totalWidth =
+    columns * WIDGET_WIDTH +
+    (columns - 1) * WIDGET_GAP;
+
+  const boardLeft = Math.max(
+    SCREEN_PADDING,
+    viewportWidth - totalWidth - SCREEN_PADDING,
+  );
+
   const positions = {} as Record<WidgetId, WidgetPosition>;
 
-  for (const { id, column, height } of WIDGET_LAYOUT) {
-    const x = Math.max(
-      RIGHT_MARGIN,
-      viewportWidth - (column + 1) * (WIDGET_WIDTH + WIDGET_GAP) - RIGHT_MARGIN + WIDGET_GAP,
-    );
-    const y = columnY[column] ?? TOP_MARGIN;
-    positions[id] = { x, y };
-    columnY[column] = y + height + WIDGET_GAP;
-  }
+  /*
+   * All widgets in a row share the same Y position.
+   * Additional rows are only used when the screen is too narrow.
+   */
+  WIDGET_IDS.forEach((id, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+
+    let rowHeight = 0;
+
+    for (let i = row * columns; i < Math.min((row + 1) * columns, WIDGET_IDS.length); i += 1) {
+      rowHeight = Math.max(rowHeight, WIDGET_HEIGHTS[WIDGET_IDS[i]]);
+    }
+
+    let y = top;
+
+    for (let previousRow = 0; previousRow < row; previousRow += 1) {
+      let previousRowHeight = 0;
+
+      for (
+        let i = previousRow * columns;
+        i < Math.min((previousRow + 1) * columns, WIDGET_IDS.length);
+        i += 1
+      ) {
+        previousRowHeight = Math.max(
+          previousRowHeight,
+          WIDGET_HEIGHTS[WIDGET_IDS[i]],
+        );
+      }
+
+      y += previousRowHeight + WIDGET_GAP;
+    }
+
+    positions[id] = {
+      x: boardLeft + column * (WIDGET_WIDTH + WIDGET_GAP),
+      y,
+    };
+
+    void rowHeight;
+  });
 
   return positions;
 }
@@ -84,54 +137,69 @@ function readStoredPositions(): Partial<Record<WidgetId, WidgetPosition>> {
     if (typeof parsed !== 'object' || parsed === null) return {};
 
     const result: Partial<Record<WidgetId, WidgetPosition>> = {};
-    for (const { id } of WIDGET_LAYOUT) {
+
+    for (const id of WIDGET_IDS) {
       const value = (parsed as Record<string, unknown>)[id];
+
       if (isWidgetPosition(value)) {
         result[id] = value;
       }
     }
+
     return result;
   } catch {
     return {};
   }
 }
 
-function persistPositions(positions: Record<WidgetId, WidgetPosition>): void {
+function persistPositions(
+  positions: Record<WidgetId, WidgetPosition>,
+): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(positions),
+    );
   } catch {
-    // Ignore storage failures — widgets stay movable for this session,
-    // they just won't remember it on the next visit.
+    // Ignore storage failures.
   }
 }
 
 function getInitialPositions(): Record<WidgetId, WidgetPosition> {
-  // Defaults first, then overlay whatever was actually saved — this way a
-  // visitor who's only ever moved the Clock widget still gets sensible
-  // defaults for every other widget rather than `undefined`, and a newly
-  // added widget (e.g. Quick Note, added after someone already had saved
-  // positions) gets a sane default instead of crashing on a missing key.
-  return { ...computeDefaultPositions(), ...readStoredPositions() };
+  return {
+    ...computeDefaultPositions(),
+    ...readStoredPositions(),
+  };
 }
 
 export const useWidgetBoardStore = create<WidgetBoardStore>((set, get) => ({
   positions: getInitialPositions(),
 
   setPosition: (id, position) => {
-    const next = { ...get().positions, [id]: position };
+    const next = {
+      ...get().positions,
+      [id]: position,
+    };
+
     persistPositions(next);
     set({ positions: next });
   },
 
   resetPosition: (id) => {
-    const next = { ...get().positions, [id]: computeDefaultPositions()[id] };
+    const next = {
+      ...get().positions,
+      [id]: computeDefaultPositions()[id],
+    };
+
     persistPositions(next);
     set({ positions: next });
   },
 
   resetAll: () => {
     const defaults = computeDefaultPositions();
+
     persistPositions(defaults);
     set({ positions: defaults });
   },
 }));
+

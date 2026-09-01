@@ -196,7 +196,7 @@ export const ABOUT_CONTENT: AboutContent = {
       'Solving real problems'
     ]
   },
-  photoUrl: 'https://res.cloudinary.com/dt131godr/image/upload/v1787050172/motion_photo_2308644998421275287_kppqhx.jpg',
+  photoUrl: 'https://res.cloudinary.com/krishnagoyal/image/upload/v1787050172/motion_photo_2308644998421275287_kppqhx.jpg',
 
 };
 
