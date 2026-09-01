@@ -10,9 +10,9 @@ import type {
   UdhyogSaathiUpdateDemoInventoryItemPayload,
   UdhyogSaathiCreateDemoBillPayload,
   UdhyogSaathiUpdateDemoBillPayload,
-} from '@krishnaos/shared-types';
+} from "@krishnaos/shared-types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
 // Every request made through this client races against this timeout so a
 // slow/unreachable backend (e.g. a cold Render/Railway instance, or a
@@ -22,28 +22,31 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000
 // they just never previously had a bounded failure to catch.
 const REQUEST_TIMEOUT_MS = 10_000;
 
-async function request<T>(path: string, init?: RequestInit): Promise<ApiResponse<T>> {
+async function request<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<ApiResponse<T>> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
     const res = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
       ...init,
       signal: controller.signal,
     });
     const json = (await res.json()) as ApiResponse<T>;
     return json;
   } catch (err) {
-    const isTimeout = err instanceof Error && err.name === 'AbortError';
+    const isTimeout = err instanceof Error && err.name === "AbortError";
     return {
       success: false,
       error: {
         message: isTimeout
-          ? 'Request timed out. Please check your connection and try again.'
+          ? "Request timed out. Please check your connection and try again."
           : err instanceof Error
             ? err.message
-            : 'Network request failed',
+            : "Network request failed",
       },
     };
   } finally {
@@ -52,51 +55,44 @@ async function request<T>(path: string, init?: RequestInit): Promise<ApiResponse
 }
 
 export function getHealth() {
-  return request<{ status: 'ok' }>('/api/health');
+  return request<{ status: "ok" }>("/api/health");
 }
 
 export function submitContactForm(payload: ContactPayload) {
-  return request<ContactSubmission>('/api/contact', {
-    method: 'POST',
+  return request<ContactSubmission>("/api/contact", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export function getProjectCatalog() {
-  return request<ProjectCatalog>('/api/projects');
+  return request<ProjectCatalog>("/api/projects");
 }
 
 export function getUdhyogSaathiDashboard() {
   return request<UdhyogSaathiDemoDashboard>(
-    '/api/projects/udhyog-saathi/dashboard',
+    "/api/projects/udhyog-saathi/dashboard",
   );
 }
 
 export function getUdhyogSaathiBills() {
-  return request<UdhyogSaathiDemoBill[]>(
-    '/api/projects/udhyog-saathi/bills',
-  );
+  return request<UdhyogSaathiDemoBill[]>("/api/projects/udhyog-saathi/bills");
 }
 
 export function getUdhyogSaathiInventory() {
   return request<UdhyogSaathiDemoInventoryItem[]>(
-    '/api/projects/udhyog-saathi/inventory',
+    "/api/projects/udhyog-saathi/inventory",
   );
 }
-
 
 export function createUdhyogSaathiDemoBill(
   payload: UdhyogSaathiCreateDemoBillPayload,
 ) {
-  return request<UdhyogSaathiDemoBill>(
-    '/api/projects/udhyog-saathi/bills',
-    {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    },
-  );
+  return request<UdhyogSaathiDemoBill>("/api/projects/udhyog-saathi/bills", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
-
 
 export function updateUdhyogSaathiDemoBill(
   id: string,
@@ -105,28 +101,25 @@ export function updateUdhyogSaathiDemoBill(
   return request<UdhyogSaathiDemoBill>(
     `/api/projects/udhyog-saathi/bills/${id}`,
     {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(payload),
     },
   );
 }
 
 export function deleteUdhyogSaathiDemoBill(id: string) {
-  return request<{ id: string }>(
-    `/api/projects/udhyog-saathi/bills/${id}`,
-    {
-      method: 'DELETE',
-    },
-  );
+  return request<{ id: string }>(`/api/projects/udhyog-saathi/bills/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export function createUdhyogSaathiInventoryItem(
   payload: UdhyogSaathiCreateDemoInventoryItemPayload,
 ) {
   return request<UdhyogSaathiDemoInventoryItem>(
-    '/api/projects/udhyog-saathi/inventory',
+    "/api/projects/udhyog-saathi/inventory",
     {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     },
   );
@@ -139,7 +132,7 @@ export function updateUdhyogSaathiInventoryItem(
   return request<UdhyogSaathiDemoInventoryItem>(
     `/api/projects/udhyog-saathi/inventory/${id}`,
     {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(payload),
     },
   );
@@ -149,7 +142,7 @@ export function deleteUdhyogSaathiInventoryItem(id: string) {
   return request<{ deleted: true }>(
     `/api/projects/udhyog-saathi/inventory/${id}`,
     {
-      method: 'DELETE',
+      method: "DELETE",
     },
   );
 }
