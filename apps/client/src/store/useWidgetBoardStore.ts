@@ -1,6 +1,7 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-export type WidgetId = 'clock' | 'weather' | 'github' | 'timeline' | 'featuredProject' | 'quickNote';
+export type WidgetId =
+  "clock" | "weather" | "github" | "featuredProject" | "quickNote";
 
 export interface WidgetPosition {
   x: number;
@@ -14,117 +15,75 @@ interface WidgetBoardStore {
   resetAll: () => void;
 }
 
-const STORAGE_KEY = 'krishnaos:widgetPositions:v2';
+const STORAGE_KEY = "krishnaos:widgetPositions:v3";
 
 const WIDGET_IDS: WidgetId[] = [
-  'clock',
-  'weather',
-  'github',
-  'timeline',
-  'featuredProject',
-  'quickNote',
+  "clock",
+  "weather",
+  "github",
+  "featuredProject",
+  "quickNote",
 ];
 
-const WIDGET_WIDTH = 260;
 const WIDGET_GAP = 16;
 const SCREEN_PADDING = 24;
 const MENU_BAR_HEIGHT = 36;
 
-/*
- * Conservative initial heights. These are only used for the first
- * layout before the widgets have been measured by ResizeObserver.
- */
-const WIDGET_HEIGHTS: Record<WidgetId, number> = {
-  clock: 112,
-  weather: 148,
-  github: 224,
-  timeline: 216,
-  featuredProject: 240,
-  quickNote: 224,
-};
-
 function computeDefaultPositions(): Record<WidgetId, WidgetPosition> {
   const viewportWidth =
-    typeof window !== 'undefined' ? window.innerWidth : 1280;
+    typeof window !== "undefined" ? window.innerWidth : 1440;
 
   const top = MENU_BAR_HEIGHT + SCREEN_PADDING;
 
-  const availableWidth =
-    viewportWidth - SCREEN_PADDING * 2;
+  const SMALL_WIDTH = 260;
+  const GITHUB_WIDTH = 620;
 
-  const maxColumns = Math.max(
-    1,
-    Math.floor(
-      (availableWidth + WIDGET_GAP) /
-        (WIDGET_WIDTH + WIDGET_GAP),
+  const left = SCREEN_PADDING;
+
+  const githubLeft = Math.max(
+    SCREEN_PADDING,
+    Math.min(
+      Math.round((viewportWidth - GITHUB_WIDTH) / 2),
+      viewportWidth - GITHUB_WIDTH - SCREEN_PADDING,
     ),
   );
 
-  const columns = Math.min(WIDGET_IDS.length, maxColumns, 3);
+  return {
+    clock: {
+      x: left,
+      y: top,
+    },
 
-  const totalWidth =
-    columns * WIDGET_WIDTH +
-    (columns - 1) * WIDGET_GAP;
+    weather: {
+      x: left + SMALL_WIDTH + WIDGET_GAP,
+      y: top,
+    },
 
-  const boardLeft = Math.max(
-    SCREEN_PADDING,
-    viewportWidth - totalWidth - SCREEN_PADDING,
-  );
+    github: {
+      x: githubLeft,
+      y: top + 112 + WIDGET_GAP,
+    },
 
-  const positions = {} as Record<WidgetId, WidgetPosition>;
+    featuredProject: {
+      x: left,
+      y: top + 112 + WIDGET_GAP + 240 + WIDGET_GAP,
+    },
 
-  /*
-   * All widgets in a row share the same Y position.
-   * Additional rows are only used when the screen is too narrow.
-   */
-  WIDGET_IDS.forEach((id, index) => {
-    const column = index % columns;
-    const row = Math.floor(index / columns);
-
-    let rowHeight = 0;
-
-    for (let i = row * columns; i < Math.min((row + 1) * columns, WIDGET_IDS.length); i += 1) {
-      rowHeight = Math.max(rowHeight, WIDGET_HEIGHTS[WIDGET_IDS[i]]);
-    }
-
-    let y = top;
-
-    for (let previousRow = 0; previousRow < row; previousRow += 1) {
-      let previousRowHeight = 0;
-
-      for (
-        let i = previousRow * columns;
-        i < Math.min((previousRow + 1) * columns, WIDGET_IDS.length);
-        i += 1
-      ) {
-        previousRowHeight = Math.max(
-          previousRowHeight,
-          WIDGET_HEIGHTS[WIDGET_IDS[i]],
-        );
-      }
-
-      y += previousRowHeight + WIDGET_GAP;
-    }
-
-    positions[id] = {
-      x: boardLeft + column * (WIDGET_WIDTH + WIDGET_GAP),
-      y,
-    };
-
-    void rowHeight;
-  });
-
-  return positions;
+    quickNote: {
+      x: left + SMALL_WIDTH + WIDGET_GAP,
+      y: top + 112 + WIDGET_GAP + 240 + WIDGET_GAP,
+    },
+  };
 }
 
 function isWidgetPosition(value: unknown): value is WidgetPosition {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    'x' in value &&
-    'y' in value &&
-    typeof (value as { x: unknown }).x === 'number' &&
-    typeof (value as { y: unknown }).y === 'number'
+    "x" in value &&
+    "y" in value &&
+    typeof (value as { x: unknown }).x === "number" &&
+    typeof (value as { y: unknown }).y === "number"
   );
 }
 
@@ -134,7 +93,7 @@ function readStoredPositions(): Partial<Record<WidgetId, WidgetPosition>> {
     if (!stored) return {};
 
     const parsed: unknown = JSON.parse(stored);
-    if (typeof parsed !== 'object' || parsed === null) return {};
+    if (typeof parsed !== "object" || parsed === null) return {};
 
     const result: Partial<Record<WidgetId, WidgetPosition>> = {};
 
@@ -152,14 +111,9 @@ function readStoredPositions(): Partial<Record<WidgetId, WidgetPosition>> {
   }
 }
 
-function persistPositions(
-  positions: Record<WidgetId, WidgetPosition>,
-): void {
+function persistPositions(positions: Record<WidgetId, WidgetPosition>): void {
   try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(positions),
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
   } catch {
     // Ignore storage failures.
   }
@@ -202,4 +156,3 @@ export const useWidgetBoardStore = create<WidgetBoardStore>((set, get) => ({
     set({ positions: defaults });
   },
 }));
-

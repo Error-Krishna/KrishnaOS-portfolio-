@@ -1,10 +1,10 @@
 import type {
   ProjectCatalog,
   ProjectCatalogEntry,
-} from '@krishnaos/shared-types';
-import { GitHubProjectDiscoveryService } from '../github/github-project-discovery.service.js';
-import { ProjectManifestService } from './project-manifest.service.js';
-import { FALLBACK_CATALOG_ENTRIES } from './fallback-catalog.data.js';
+} from "@krishnaos/shared-types";
+import { GitHubProjectDiscoveryService } from "../github/github-project-discovery.service.js";
+import { ProjectManifestService } from "./project-manifest.service.js";
+import { FALLBACK_CATALOG_ENTRIES } from "./fallback-catalog.data.js";
 
 interface ProjectCatalogOverride {
   enabled: boolean;
@@ -47,7 +47,23 @@ export class ProjectCatalogService {
    * Repository manifests describe the project itself.
    * Portfolio presentation metadata remains controlled here.
    */
-  private readonly overrides: Record<string, ProjectCatalogOverride> = {};
+  private readonly overrides: Record<string, ProjectCatalogOverride> = {
+    "project-udhyog-saathi": {
+      enabled: true,
+      featured: true,
+      order: 0,
+    },
+    "project-hotreload": {
+      enabled: true,
+      featured: true,
+      order: 1,
+    },
+    "project-insightloop": {
+      enabled: true,
+      featured: true,
+      order: 2,
+    },
+  };
 
   constructor(
     discoveryService = new GitHubProjectDiscoveryService(),
@@ -63,7 +79,7 @@ export class ProjectCatalogService {
 
       if (entries.length === 0) {
         console.warn(
-          '[projects] GitHub sync returned zero visible projects — falling back to the static catalog.',
+          "[projects] GitHub sync returned zero visible projects — falling back to the static catalog.",
         );
         return this.buildFallbackCatalog();
       }
@@ -75,7 +91,7 @@ export class ProjectCatalogService {
       };
     } catch (error) {
       console.error(
-        '[projects] Live GitHub catalog sync failed, falling back to the static catalog:',
+        "[projects] Live GitHub catalog sync failed, falling back to the static catalog:",
         error instanceof Error ? error.message : error,
       );
       return this.buildFallbackCatalog();

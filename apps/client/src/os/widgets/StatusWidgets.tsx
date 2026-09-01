@@ -12,7 +12,6 @@ import {
   GithubGlyph,
   NoteGlyph,
   RocketGlyph,
-  TimelineGlyph,
   WeatherGlyph,
 } from "@/os/icons";
 import { useIsMobile } from "@/lib/useMediaQuery";
@@ -29,16 +28,6 @@ const MOVE_STEP = 24;
 const PROJECT_ROTATE_MS = 8000;
 const NOTE_STORAGE_KEY = "krishnaos:quickNote";
 const NOTE_SAVE_DEBOUNCE_MS = 400;
-
-const DEVELOPMENT_MILESTONES = [
-  { label: "Phase 1", value: "Foundation" },
-  { label: "Phase 2", value: "Boot + Welcome" },
-  { label: "Phase 3", value: "OS Shell" },
-  { label: "Phase 4", value: "Content Apps" },
-  { label: "Phase 5", value: "Guided Tour" },
-  { label: "Phase 6", value: "Recruiter Mode" },
-  { label: "Phase 7", value: "Polish" },
-] as const;
 
 const WEATHER_CODES: Record<number, string> = {
   0: "Clear",
@@ -380,7 +369,7 @@ function DraggableWidget({ id, title, icon, children }: DraggableWidgetProps) {
       onPointerCancel={finishDrag}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
-      className={`glass-panel pointer-events-auto absolute flex w-[260px] cursor-grab select-none flex-col gap-os-3 p-os-4 shadow-[0_20px_50px_rgb(0_0_0/0.3)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-os-accent)] active:cursor-grabbing ${
+      className={`glass-panel pointer-events-auto absolute flex ${id === "github" ? "w-[620px]" : "w-[260px]"} cursor-grab select-none flex-col gap-os-3 p-os-4 shadow-[0_20px_50px_rgb(0_0_0/0.3)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-os-accent)] active:cursor-grabbing ${
         isDragging ? "shadow-[0_28px_64px_rgb(0_0_0/0.45)]" : ""
       }`}
     >
@@ -631,36 +620,6 @@ export function StatusWidgets() {
         <div className="overflow-hidden rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface)] p-os-2">
           <GitHubContributionGraph username={GITHUB_USERNAME} />
         </div>
-      </DraggableWidget>
-
-      <DraggableWidget
-        id="timeline"
-        title="Timeline"
-        icon={<TimelineGlyph className="h-4 w-4" />}
-      >
-        <ol className="flex flex-col gap-os-2">
-          {DEVELOPMENT_MILESTONES.map((milestone, index) => (
-            <li
-              key={milestone.label}
-              className="flex items-center gap-os-2 text-os-caption"
-            >
-              <span
-                className={`flex h-2.5 w-2.5 rounded-full ${
-                  index < 6
-                    ? "bg-[color:var(--color-os-accent)]"
-                    : "bg-[color:var(--color-os-glass-border)]"
-                }`}
-                aria-hidden
-              />
-              <span className="text-[color:var(--color-os-text-secondary)]">
-                {milestone.label}
-              </span>
-              <span className="text-[color:var(--color-os-text-tertiary)]">
-                {milestone.value}
-              </span>
-            </li>
-          ))}
-        </ol>
       </DraggableWidget>
 
       <DraggableWidget
