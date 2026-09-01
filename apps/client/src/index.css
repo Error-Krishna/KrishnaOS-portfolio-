@@ -11,8 +11,8 @@
   --color-os-bg: #0a0a0c;
   --color-os-surface: #1c1c1e;
   --color-os-surface-elevated: #2c2c2e;
-  --color-os-glass: rgb(255 255 255 / 0.08);
-  --color-os-glass-border: rgb(255 255 255 / 0.12);
+  --color-os-glass: rgb(255 255 255 / 0.14);
+  --color-os-glass-border: rgb(255 255 255 / 0.16);
   --color-os-glass-highlight: rgb(255 255 255 / 0.24);
 
   /* --- Color: text --- */
@@ -68,8 +68,8 @@
   --color-os-bg: #eef1f6;
   --color-os-surface: #ffffff;
   --color-os-surface-elevated: #f4f7fb;
-  --color-os-glass: rgb(255 255 255 / 0.58);
-  --color-os-glass-border: rgb(17 24 39 / 0.16);
+  --color-os-glass: rgb(255 255 255 / 0.82);
+  --color-os-glass-border: rgb(17 24 39 / 0.18);
   --color-os-glass-highlight: rgb(255 255 255 / 0.96);
 
   --color-os-text-primary: #0e1116;
@@ -85,8 +85,8 @@
   --color-os-bg: #0a0a0c;
   --color-os-surface: #1c1c1e;
   --color-os-surface-elevated: #2c2c2e;
-  --color-os-glass: rgb(255 255 255 / 0.08);
-  --color-os-glass-border: rgb(255 255 255 / 0.12);
+  --color-os-glass: rgb(255 255 255 / 0.14);
+  --color-os-glass-border: rgb(255 255 255 / 0.16);
   --color-os-glass-highlight: rgb(255 255 255 / 0.24);
 
   --color-os-text-primary: #f5f5f7;
