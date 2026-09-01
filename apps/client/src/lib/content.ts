@@ -455,7 +455,6 @@ export const PROJECTS_CONTENT: Project[] = [
 
     links: {
       github: 'https://github.com/Error-Krishna/hotreload',
-      // demo: 'https://www.loom.com/share/773d4d8fdd1840128b92929643a08965',
     },
 
     featured: true,

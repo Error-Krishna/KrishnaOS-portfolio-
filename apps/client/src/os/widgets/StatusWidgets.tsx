@@ -9,8 +9,8 @@ import {
 } from 'react';
 import { ClockGlyph, GithubGlyph, NoteGlyph, RocketGlyph, TimelineGlyph, WeatherGlyph } from '@/os/icons';
 import { useIsMobile } from '@/lib/useMediaQuery';
-import { FEATURED_PROJECTS } from '@/lib/content';
 import { useWidgetBoardStore, type WidgetId, type WidgetPosition } from '@/store/useWidgetBoardStore';
+import { useProjectCatalog } from '@/apps/projects/useProjectCatalog';
 
 const GITHUB_USERNAME = import.meta.env.VITE_GITHUB_USERNAME ?? 'Error-Krishna';
 const MOVE_STEP = 24;
@@ -400,11 +400,18 @@ function QuickNoteWidget() {
   );
 }
 
+/**
+ * Rotates through the live, GitHub-synced project catalog (same source
+ * as the Projects window and Recruiter Mode — see `useProjectCatalog`)
+ * rather than a separate hardcoded list, so this widget can never drift
+ * out of sync with what "Featured" actually means elsewhere in KrishnaOS.
+ */
 function FeaturedProjectWidget() {
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const projects = FEATURED_PROJECTS.length > 0 ? FEATURED_PROJECTS : [];
+  const { projects, loading, error } = useProjectCatalog();
+  const featuredProjects = useMemo(() => projects.filter((project) => project.featured), [projects]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -415,24 +422,32 @@ function FeaturedProjectWidget() {
   }, []);
 
   useEffect(() => {
-    if (isPaused || prefersReducedMotion || projects.length <= 1) {
+    if (isPaused || prefersReducedMotion || featuredProjects.length <= 1) {
       return;
     }
     const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % projects.length);
+      setIndex((current) => (current + 1) % featuredProjects.length);
     }, PROJECT_ROTATE_MS);
     return () => window.clearInterval(timer);
-  }, [isPaused, prefersReducedMotion, projects.length]);
+  }, [isPaused, prefersReducedMotion, featuredProjects.length]);
 
-  if (projects.length === 0) {
+  if (loading) {
+    return <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">Loading projects…</p>;
+  }
+
+  if (error) {
+    return <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">Projects unavailable right now.</p>;
+  }
+
+  if (featuredProjects.length === 0) {
     return (
       <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]">
-        No featured projects yet — mark a project `featured: true` in lib/content.ts.
+        No featured projects yet.
       </p>
     );
   }
 
-  const project = projects[index % projects.length];
+  const project = featuredProjects[index % featuredProjects.length];
   const primaryLink = project.links.live ?? project.links.github ?? project.links.caseStudy;
 
   return (
@@ -476,9 +491,9 @@ function FeaturedProjectWidget() {
           <span className="text-os-caption text-[color:var(--color-os-text-tertiary)]">No link set yet</span>
         )}
 
-        {projects.length > 1 && (
+        {featuredProjects.length > 1 && (
           <div className="flex items-center gap-os-1" data-widget-interactive>
-            {projects.map((p, i) => (
+            {featuredProjects.map((p, i) => (
               <button
                 key={p.id}
                 type="button"
@@ -538,8 +553,7 @@ export function StatusWidgets() {
         </div>
         <div className="overflow-hidden rounded-os-md border border-[color:var(--color-os-glass-border)] bg-[color:var(--color-os-surface)] p-os-2">
           <img
-            // src={`https://github.com/users/${GITHUB_USERNAME}/contributions`}
-            src={`https://github-contributions-api.deno.dev/Error-Krishna`}
+            src={`https://github-contributions-api.deno.dev/${GITHUB_USERNAME}`}
             alt="GitHub contribution graph"
             className="h-auto w-full"
           />

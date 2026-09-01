@@ -14,19 +14,40 @@ import type {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000';
 
+// Every request made through this client races against this timeout so a
+// slow/unreachable backend (e.g. a cold Render/Railway instance, or a
+// misconfigured VITE_API_BASE_URL after deploy) can never leave a window
+// stuck on its loading state indefinitely — callers' existing try/catch
+// and `finally { setLoading(false) }` patterns already handle this,
+// they just never previously had a bounded failure to catch.
+const REQUEST_TIMEOUT_MS = 10_000;
+
 async function request<T>(path: string, init?: RequestInit): Promise<ApiResponse<T>> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   try {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       headers: { 'Content-Type': 'application/json' },
       ...init,
+      signal: controller.signal,
     });
     const json = (await res.json()) as ApiResponse<T>;
     return json;
   } catch (err) {
+    const isTimeout = err instanceof Error && err.name === 'AbortError';
     return {
       success: false,
-      error: { message: err instanceof Error ? err.message : 'Network request failed' },
+      error: {
+        message: isTimeout
+          ? 'Request timed out. Please check your connection and try again.'
+          : err instanceof Error
+            ? err.message
+            : 'Network request failed',
+      },
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 

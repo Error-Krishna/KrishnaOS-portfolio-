@@ -18,7 +18,8 @@ import { useProjectCatalog } from './useProjectCatalog';
  * read about.
  *
  * Pressing "Try Live" on a card swaps the grid for that project's real,
- * stateful interactive demo (see `runnerRegistry.ts` / `runners/*`),
+ * stateful interactive runtime (see `runtime/ProjectRuntime.tsx` and its
+ * embedded/sandbox runtime registries),
  * rendered inside this same window rather than navigating away. Each demo
  * genuinely runs client-side — real filtering, a real form with
  * validation, a real simulated async pipeline with progress state — not

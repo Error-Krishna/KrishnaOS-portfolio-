@@ -10,6 +10,11 @@ export class ProjectManifestService {
   private readonly apiBaseUrl = 'https://api.github.com';
   private readonly manifestPath = '.krishnaos/project.json';
 
+  // Called once per discovered repository (see project-catalog.service.ts's
+  // sequential buildFromGitHub loop) — an unbounded hang here blocks every
+  // repository after it, not just the one being fetched.
+  private readonly requestTimeoutMs = 8_000;
+
   constructor(
     private readonly token = process.env.GITHUB_TOKEN,
   ) {}
@@ -17,18 +22,35 @@ export class ProjectManifestService {
   async loadManifest(
     repository: GitHubRepositoryReference,
   ): Promise<ProjectManifest | undefined> {
-    const response = await fetch(
-      `${this.apiBaseUrl}/repos/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.name)}/contents/${this.manifestPath}?ref=${encodeURIComponent(repository.defaultBranch)}`,
-      {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          ...(this.token
-            ? { Authorization: `Bearer ${this.token}` }
-            : {}),
-          'X-GitHub-Api-Version': '2022-11-28',
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.requestTimeoutMs);
+
+    let response: Response;
+
+    try {
+      response = await fetch(
+        `${this.apiBaseUrl}/repos/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.name)}/contents/${this.manifestPath}?ref=${encodeURIComponent(repository.defaultBranch)}`,
+        {
+          signal: controller.signal,
+          headers: {
+            Accept: 'application/vnd.github+json',
+            ...(this.token
+              ? { Authorization: `Bearer ${this.token}` }
+              : {}),
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
         },
-      },
-    );
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(
+          `GitHub manifest fetch timed out for ${repository.fullName}`,
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (response.status === 404) {
       return undefined;

@@ -12,6 +12,14 @@ interface GitHubRepositoryResponse {
 export class GitHubProjectDiscoveryService {
   private readonly apiBaseUrl = 'https://api.github.com';
 
+  // GitHub's API is generally fast, but a hung request here has an outsized
+  // blast radius: it blocks buildCatalog() from ever reaching its own
+  // try/catch fallback to the static catalog, which in turn hangs the
+  // /api/projects route and the client's loading state. Bounding it means
+  // a slow/unreachable GitHub always resolves into the fallback path
+  // instead of hanging indefinitely.
+  private readonly requestTimeoutMs = 8_000;
+
   constructor(
     private readonly owner = process.env.GITHUB_OWNER,
     private readonly token = process.env.GITHUB_TOKEN,
@@ -22,18 +30,33 @@ export class GitHubProjectDiscoveryService {
       throw new Error('GITHUB_OWNER is not configured');
     }
 
-    const response = await fetch(
-      `${this.apiBaseUrl}/users/${encodeURIComponent(this.owner)}/repos?per_page=100&sort=updated`,
-      {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          ...(this.token
-            ? { Authorization: `Bearer ${this.token}` }
-            : {}),
-          'X-GitHub-Api-Version': '2022-11-28',
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.requestTimeoutMs);
+
+    let response: Response;
+
+    try {
+      response = await fetch(
+        `${this.apiBaseUrl}/users/${encodeURIComponent(this.owner)}/repos?per_page=100&sort=updated`,
+        {
+          signal: controller.signal,
+          headers: {
+            Accept: 'application/vnd.github+json',
+            ...(this.token
+              ? { Authorization: `Bearer ${this.token}` }
+              : {}),
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
         },
-      },
-    );
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('GitHub repository discovery timed out');
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       throw new Error(

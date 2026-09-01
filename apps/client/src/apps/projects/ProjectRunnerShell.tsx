@@ -12,9 +12,7 @@ interface ProjectRunnerShellProps {
  * Shared chrome for every project's live interactive demo: a back
  * button to the grid, the project's real title/summary, and quick
  * external links to the real live site / GitHub repo when they exist.
- * Every component in `runners/` renders inside this shell, so a new
- * project's demo only ever needs to build its own body — not its own
- * header or back-navigation.
+
  */
 export function ProjectRunnerShell({ project, onBack, children }: ProjectRunnerShellProps) {
   return (
