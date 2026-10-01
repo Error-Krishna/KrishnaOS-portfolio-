@@ -1,11 +1,18 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BootSequence } from '@/boot/BootSequence';
 import { WelcomeScreen } from '@/welcome/WelcomeScreen';
 import { Wallpaper } from '@/os/theme/Wallpaper';
 import { TourController } from '@/tour/TourController';
+import { APP_REGISTRY, type AppId } from '@/os/appRegistry';
 import { useBootStore } from '@/store/useBootStore';
 import { useModeStore } from '@/store/useModeStore';
+import { useWindowStore } from '@/store/useWindowStore';
+
+function isAppId(value: string): value is AppId {
+  return Object.prototype.hasOwnProperty.call(APP_REGISTRY, value);
+}
 
 /**
  * Orchestrates the top-level "/" experience per UX flow doc §1:
@@ -42,6 +49,28 @@ export function OsRoot() {
   const isBootComplete = useBootStore((s) => s.isBootComplete);
   const completeBoot = useBootStore((s) => s.completeBoot);
   const mode = useModeStore((s) => s.mode);
+  const setMode = useModeStore((s) => s.setMode);
+  const openWindow = useWindowStore((s) => s.openWindow);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const handledDeepLink = useRef(false);
+
+  // Deep links: `/?app=projects` (any AppId) skips the Welcome gate and lands
+  // in Free Exploration with that window already open, so a specific app can
+  // be shared directly. Boot still plays first, per the UX doc ("non-skippable
+  // threshold"); the param is consumed once and then removed from the URL.
+  useEffect(() => {
+    if (!isBootComplete || handledDeepLink.current) return;
+
+    const requestedApp = searchParams.get('app');
+    if (!requestedApp) return;
+
+    handledDeepLink.current = true;
+    if (isAppId(requestedApp)) {
+      setMode('free');
+      openWindow(requestedApp);
+    }
+    setSearchParams({}, { replace: true });
+  }, [isBootComplete, searchParams, setSearchParams, setMode, openWindow]);
 
   return (
     <div className="relative h-full w-full">

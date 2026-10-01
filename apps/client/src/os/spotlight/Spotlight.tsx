@@ -4,6 +4,8 @@ import { createSearchIndex, type SearchableEntry } from "@/lib/searchIndex";
 import { AppGlyph, SearchGlyph } from "@/os/icons";
 import { useWindowStore } from "@/store/useWindowStore";
 
+const LISTBOX_ID = "spotlight-results";
+
 /**
  * Spotlight search overlay, per coding prompt Phase 3 item 9: "Fuse.js
  * fuzzy search across all content, keyboard-triggered."
@@ -13,12 +15,18 @@ import { useWindowStore } from "@/store/useWindowStore";
  * whether a visitor understands the desktop-OS metaphor at all, so it's
  * mounted at the OS shell level (always available in Free Exploration and
  * the Tour), not nested inside any one screen.
+ *
+ * Accessibility: exposed as a modal dialog containing an ARIA combobox +
+ * listbox (the input keeps DOM focus while arrow keys move the "active"
+ * option, announced via aria-activedescendant). Tab is trapped on the input
+ * while open, and focus returns to whatever had it before Spotlight opened.
  */
 export function Spotlight() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
   const openWindow = useWindowStore((s) => s.openWindow);
 
   const fuse = useMemo(() => createSearchIndex(), []);
@@ -49,11 +57,20 @@ export function Spotlight() {
 
   useEffect(() => {
     if (isOpen) {
+      previouslyFocused.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
       setQuery("");
       setSelectedIndex(0);
       // Focus on next tick so the entrance animation doesn't fight the
       // input's autofocus/scroll-into-view behavior.
       requestAnimationFrame(() => inputRef.current?.focus());
+    } else if (previouslyFocused.current) {
+      // Hand focus back to wherever the visitor was before opening Spotlight.
+      const target = previouslyFocused.current;
+      previouslyFocused.current = null;
+      if (document.contains(target)) target.focus();
     }
   }, [isOpen]);
 
@@ -75,8 +92,15 @@ export function Spotlight() {
       setSelectedIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter" && results[selectedIndex]) {
       selectResult(results[selectedIndex]);
+    } else if (e.key === "Tab") {
+      // Focus trap: the input is the only tab stop inside the dialog, so Tab
+      // must not escape into the (visually dimmed) desktop behind it.
+      e.preventDefault();
     }
   };
+
+  const hasResults = results.length > 0;
+  const activeOptionId = hasResults ? `spotlight-option-${selectedIndex}` : undefined;
 
   return (
     <AnimatePresence>
@@ -90,6 +114,9 @@ export function Spotlight() {
           onClick={() => setIsOpen(false)}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Spotlight search"
             className="glass-panel w-[min(560px,90vw)] overflow-hidden"
             initial={{ opacity: 0, scale: 0.96, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -102,6 +129,13 @@ export function Spotlight() {
               <input
                 ref={inputRef}
                 type="text"
+                role="combobox"
+                aria-label="Search KrishnaOS"
+                aria-expanded={hasResults}
+                aria-controls={LISTBOX_ID}
+                aria-activedescendant={activeOptionId}
+                aria-autocomplete="list"
+                autoComplete="off"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleInputKeyDown}
@@ -110,12 +144,30 @@ export function Spotlight() {
               />
             </div>
 
-            {results.length > 0 && (
-              <div className="border-t border-[color:var(--color-os-glass-border)] py-os-2">
+            {/* Screen-reader announcement of how many matches there are */}
+            <p className="sr-only" role="status" aria-live="polite">
+              {query.trim()
+                ? hasResults
+                  ? `${results.length} result${results.length === 1 ? "" : "s"}`
+                  : "No results"
+                : ""}
+            </p>
+
+            {hasResults && (
+              <div
+                id={LISTBOX_ID}
+                role="listbox"
+                aria-label="Search results"
+                className="border-t border-[color:var(--color-os-glass-border)] py-os-2"
+              >
                 {results.map((entry, i) => (
                   <button
                     key={entry.id}
+                    id={`spotlight-option-${i}`}
                     type="button"
+                    role="option"
+                    aria-selected={i === selectedIndex}
+                    tabIndex={-1}
                     onClick={() => selectResult(entry)}
                     onMouseEnter={() => setSelectedIndex(i)}
                     className={`flex w-full items-center gap-os-2 px-os-4 py-os-2 text-left text-os-body transition-colors ${
@@ -140,7 +192,7 @@ export function Spotlight() {
               </div>
             )}
 
-            {query.trim() && results.length === 0 && (
+            {query.trim() && !hasResults && (
               <div className="border-t border-[color:var(--color-os-glass-border)] px-os-4 py-os-4 text-os-body text-[color:var(--color-os-text-tertiary)]">
                 No results for "{query}"
               </div>

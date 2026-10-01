@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { useWindowStore, type OsWindow } from '@/store/useWindowStore';
 import { AppGlyph } from '@/os/icons';
+import { focusDockIcon } from '@/os/dock/dockFocus';
 import { useIsMobile } from '@/lib/useMediaQuery';
 
 const MIN_WIDTH = 320;
@@ -34,9 +36,18 @@ function WindowFrame({ win, children }: WindowFrameProps) {
 
   if (win.isMinimized) return null;
 
+  // Closing hands keyboard focus back to the app's Dock icon so keyboard
+  // users don't get dropped onto <body>.
+  const handleClose = () => {
+    closeWindow(win.id);
+    focusDockIcon(win.id);
+  };
+
   if (isMobile) {
     return (
       <motion.section
+        role="dialog"
+        aria-label={win.title}
         className="glass-window flex min-h-0 w-full flex-col overflow-hidden"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -70,7 +81,7 @@ function WindowFrame({ win, children }: WindowFrameProps) {
               aria-label={`Close ${win.title}`}
               onClick={(e) => {
                 e.stopPropagation();
-                closeWindow(win.id);
+                handleClose();
               }}
               className="h-3 w-3 rounded-full bg-[#ff5f57] transition-opacity hover:opacity-80"
             />
@@ -102,6 +113,8 @@ function WindowFrame({ win, children }: WindowFrameProps) {
       }}
     >
       <motion.div
+        role="dialog"
+        aria-label={win.title}
         className="glass-window flex h-full w-full flex-col overflow-hidden"
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -120,7 +133,7 @@ function WindowFrame({ win, children }: WindowFrameProps) {
               aria-label={`Close ${win.title}`}
               onClick={(e) => {
                 e.stopPropagation();
-                closeWindow(win.id);
+                handleClose();
               }}
               className="h-3 w-3 rounded-full bg-[#ff5f57] transition-opacity hover:opacity-80"
             />
@@ -175,7 +188,20 @@ interface WindowManagerProps {
 
 export function WindowManager({ renderAppContent }: WindowManagerProps) {
   const openWindows = useWindowStore((s) => s.openWindows);
+  const clampWindows = useWindowStore((s) => s.clampWindows);
   const isMobile = useIsMobile();
+
+  // Keep windows reachable: if the browser shrinks (or a window was opened
+  // while the viewport was larger), pull windows back inside the visible
+  // area so a title bar can never end up off-screen and un-draggable.
+  useEffect(() => {
+    if (isMobile) return;
+
+    const clamp = () => clampWindows({ width: window.innerWidth, height: window.innerHeight });
+    clamp();
+    window.addEventListener('resize', clamp);
+    return () => window.removeEventListener('resize', clamp);
+  }, [isMobile, clampWindows]);
 
   return (
     <div

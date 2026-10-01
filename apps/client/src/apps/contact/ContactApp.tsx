@@ -44,6 +44,8 @@ export function ContactApp() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  // Honeypot — rendered off-screen below; real visitors never touch it.
+  const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -73,6 +75,7 @@ export function ContactApp() {
       email: email.trim(),
       ...(trimmedSubject.length > 0 ? { subject: trimmedSubject } : {}),
       message: message.trim(),
+      ...(website.length > 0 ? { website } : {}),
     });
 
     if (res.success) {
@@ -203,6 +206,24 @@ export function ContactApp() {
         <h3 className="text-os-body font-semibold text-[color:var(--color-os-text-primary)]">
           Send me a message
         </h3>
+
+        {/* Honeypot: invisible to people and assistive tech, tempting to bots. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
+        >
+          <label>
+            Website
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+          </label>
+        </div>
 
         <label className="flex flex-col gap-os-1 text-os-caption text-[color:var(--color-os-text-secondary)]">
           Name

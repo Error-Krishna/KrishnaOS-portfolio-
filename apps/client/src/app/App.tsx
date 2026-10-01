@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { getHealth } from '@/lib/apiClient';
 import { OsRoot } from './OsRoot';
 
 const RecruiterRoot = lazy(
@@ -20,6 +21,15 @@ function RouteLoading() {
 }
 
 export function App() {
+  // Warm-up ping: free-tier backends sleep when idle and take a while to
+  // wake. Poking /api/health the moment the page loads means the server is
+  // already waking while the visitor watches the boot sequence, so it's
+  // usually ready by the time any window or Recruiter Mode needs it.
+  // Fire-and-forget — the result is intentionally ignored.
+  useEffect(() => {
+    void getHealth();
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<OsRoot />} />

@@ -43,6 +43,23 @@ function validateContactPayload(body: unknown): { valid: true; payload: ContactP
 }
 
 export async function submitContact(req: Request, res: Response<ApiResponse<ContactSubmission>>) {
+  // Honeypot: the client renders an invisible `website` field that humans never
+  // fill in. If it has a value, this is a bot — respond with a convincing
+  // success (so it doesn't retry or adapt) but store nothing.
+  const honeypot = (req.body as Record<string, unknown> | undefined)?.website;
+  if (typeof honeypot === 'string' && honeypot.trim().length > 0) {
+    return res.status(201).json({
+      success: true,
+      data: {
+        id: 'ignored',
+        name: '',
+        email: '',
+        message: '',
+        createdAt: new Date().toISOString(),
+      },
+    });
+  }
+
   const validation = validateContactPayload(req.body);
 
   if (!validation.valid) {

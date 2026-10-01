@@ -61,7 +61,7 @@ export function RecruiterRoot() {
   // real Projects window shows (two different project lists, one of them
   // stale). There is now exactly one source of truth for "what projects
   // exist," matching this file's own established rule for shared data.
-  const { projects, loading: projectsLoading } = useProjectCatalog();
+  const { projects, loading: projectsLoading, slow: projectsSlow } = useProjectCatalog();
   const featuredProjects = projects.filter((project) => project.featured);
 
   useEffect(() => {
@@ -257,6 +257,7 @@ export function RecruiterRoot() {
                 {projectsLoading && (
                   <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]" aria-live="polite">
                     Loading featured projects…
+                    {projectsSlow && ' The server is waking up, so the first load can take a little longer.'}
                   </p>
                 )}
 

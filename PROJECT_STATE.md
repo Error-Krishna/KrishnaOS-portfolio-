@@ -4,6 +4,17 @@ Last updated: 2026-08-22
 
 ## Current Work
 
+- Deployed-site fixes and optimization pass (not yet verified with a local typecheck/build/lint — all edits were made via filesystem tools):
+  - Windows use a new, more opaque `.glass-window` material (`--color-os-window-glass`) so overlapping windows stay readable; dock/menu bar/welcome keep `.glass-panel`.
+  - Recruiter Mode: wallpaper moved to a non-scrolling wrapper at `z-0` with the scrolling `<main>` at `z-10` (the old absolutely-positioned wallpaper painted over non-positioned sections).
+  - Performance: every app window is now `React.lazy` code-split in `Desktop.tsx`; `Wallpaper` is promoted to its own compositor layer and tracks the OS color scheme reactively.
+  - Cold starts: `App.tsx` pings `/api/health` on load; `useProjectCatalog` caches the last catalog in localStorage (`krishnaos:projectCatalog:v1`, stale-while-revalidate) and exposes `slow`; catalog request timeout raised to 45s.
+  - Window system: `clampWindows` store action keeps windows on-screen when the viewport resizes; Dock shows a dimmed dot for minimized windows (click restores); Alt+W closes / Alt+M minimizes the focused window; closing returns focus to the Dock icon; `/?app=<appId>` deep-links into Free Exploration with that window open.
+  - Accessibility: windows are `role="dialog"` with labels; Spotlight is a modal dialog with combobox/listbox semantics, a Tab trap, and focus restoration; dock is a labelled `<nav>` with visible focus rings; dark-mode tertiary text raised from 45% to 62% opacity; `prefers-reduced-transparency` renders glass as solid surfaces.
+  - Server: dependency-free in-memory rate limiter on `POST /api/contact` (5 per 15 min per IP), honeypot `website` field, `trust proxy`, 20kb JSON body cap.
+  - `index.html` has Open Graph/Twitter tags and `theme-color` (no `og:image`/`og:url` yet — needs a preview image and final domain).
+  - `.github/workflows/ci.yml` runs typecheck, lint, and build on push/PR.
+
 - Experience (Phase F) was rebuilt as a dashboard-style page (header card, real company link, badge row, tech-stack grid, vertical "My Journey" timeline, closing quote + traits) at Krishna's explicit request, again ahead of its documented roadmap position. The timeline is built generically over `EXPERIENCE_CONTENT` — it renders correctly with the current single real entry and will render any future entries Krishna adds himself with zero component changes. The reference's fabricated career history (3 additional roles) and unverifiable stats/percentage panels were explicitly declined rather than invented.
 - Skills (Phase E) was rebuilt as a dashboard-style page (header, stat cards, eight grouped skill cards, closing quote) at Krishna's explicit request, ahead of its documented roadmap position (`KRISHNAOS_HANDS_ON_CONTEXT.md` lists it after Projects/Achievements). This is a deliberate, flagged reordering, not a silent scope change — Phase B (About) below is still genuinely mid-build underneath it.
 - Phase B (About Me) is in an expanded scope, approved by Krishna: full visual redesign modeled on a reference screenshot (hero, icon-grid traits, journey pipeline, real command-driven terminal, richer closing section), built incrementally. Hero section and the terminal's command-table data layer are done; remaining pieces are queued.
