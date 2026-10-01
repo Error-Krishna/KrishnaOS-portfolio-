@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/lib/useMediaQuery";
 
@@ -6,9 +7,31 @@ const WALLPAPERS = {
   dark: "/wallpapers/krishnaos-dark.svg",
 } as const;
 
+const DARK_QUERY = "(prefers-color-scheme: dark)";
+
 interface WallpaperProps {
   className?: string;
   variant?: "shell" | "boot" | "recruiter";
+}
+
+/**
+ * Tracks the OS-level color scheme and updates when it changes while the
+ * page is open (the old inline `matchMedia(...).matches` read only ran at
+ * render time, so "System" theme went stale until something re-rendered).
+ */
+function useSystemPrefersDark(): boolean {
+  const [prefersDark, setPrefersDark] = useState(
+    () => window.matchMedia(DARK_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia(DARK_QUERY);
+    const onChange = (e: MediaQueryListEvent) => setPrefersDark(e.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  return prefersDark;
 }
 
 /**
@@ -20,9 +43,10 @@ interface WallpaperProps {
 export function Wallpaper({ className, variant = "shell" }: WallpaperProps) {
   const themeMode = useThemeStore((s) => s.themeMode);
   const isMobile = useIsMobile();
+  const systemPrefersDark = useSystemPrefersDark();
   const resolvedTheme =
     themeMode === "system"
-      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? systemPrefersDark
         ? "dark"
         : "light"
       : themeMode;
@@ -45,6 +69,10 @@ export function Wallpaper({ className, variant = "shell" }: WallpaperProps) {
         backgroundSize: "cover",
         filter: `blur(${blurStrength}px) saturate(1.08)`,
         transform: "scale(1.08)",
+        // The wallpaper is static, so promote it to its own compositor layer:
+        // the blur is rasterized once instead of being re-filtered whenever
+        // windows above it move, resize, or animate.
+        willChange: "transform",
       }}
     />
   );

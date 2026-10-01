@@ -14,11 +14,12 @@
   --color-os-glass: rgb(255 255 255 / 0.14);
   --color-os-glass-border: rgb(255 255 255 / 0.16);
   --color-os-glass-highlight: rgb(255 255 255 / 0.24);
+  --color-os-window-glass: rgb(34 34 38 / 0.86);
 
   /* --- Color: text --- */
   --color-os-text-primary: #f5f5f7;
   --color-os-text-secondary: rgb(245 245 247 / 0.7);
-  --color-os-text-tertiary: rgb(245 245 247 / 0.45);
+  --color-os-text-tertiary: rgb(245 245 247 / 0.62);
 
   /* --- Color: accent --- */
   --color-os-accent: #0a84ff;
@@ -71,6 +72,7 @@
   --color-os-glass: rgb(255 255 255 / 0.82);
   --color-os-glass-border: rgb(17 24 39 / 0.18);
   --color-os-glass-highlight: rgb(255 255 255 / 0.96);
+  --color-os-window-glass: rgb(250 251 254 / 0.9);
 
   --color-os-text-primary: #0e1116;
   --color-os-text-secondary: rgb(14 17 22 / 0.78);
@@ -88,10 +90,11 @@
   --color-os-glass: rgb(255 255 255 / 0.14);
   --color-os-glass-border: rgb(255 255 255 / 0.16);
   --color-os-glass-highlight: rgb(255 255 255 / 0.24);
+  --color-os-window-glass: rgb(34 34 38 / 0.86);
 
   --color-os-text-primary: #f5f5f7;
   --color-os-text-secondary: rgb(245 245 247 / 0.7);
-  --color-os-text-tertiary: rgb(245 245 247 / 0.45);
+  --color-os-text-tertiary: rgb(245 245 247 / 0.62);
   --color-os-danger: #ff5f57;
 }
 
@@ -142,6 +145,21 @@ body {
     inset 0 1px 0 var(--color-os-glass-highlight);
 }
 
+/* Window material — same glass language as .glass-panel, but much more
+   opaque with a stronger blur, so content inside a window stays readable
+   when windows overlap each other. Light glass is reserved for chrome
+   (dock, menu bar, welcome); windows hold content and need a solid-ish base. */
+.glass-window {
+  background: var(--color-os-window-glass);
+  border: 1px solid var(--color-os-glass-border);
+  border-radius: var(--radius-os-lg);
+  backdrop-filter: blur(40px) saturate(160%);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  box-shadow:
+    0 12px 40px rgb(0 0 0 / 0.4),
+    inset 0 1px 0 var(--color-os-glass-highlight);
+}
+
 /* Glass variant for full-width system chrome (menu bar) — same material,
    but no rounding and only a bottom border, since it spans edge-to-edge
    rather than floating as a panel. Kept distinct from .glass-panel rather
@@ -162,6 +180,19 @@ body {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Users who ask the OS for reduced transparency get solid surfaces and no
+   backdrop blur — better legibility and a lot cheaper on weak GPUs. Placed
+   after the glass classes so it wins at equal specificity. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel,
+  .glass-bar,
+  .glass-window {
+    background: var(--color-os-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 

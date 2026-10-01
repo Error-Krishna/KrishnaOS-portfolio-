@@ -80,13 +80,14 @@ export function RecruiterRoot() {
   };
 
   return (
+    <div className="relative h-full w-full overflow-hidden">
+      <Wallpaper className="absolute inset-0 z-0" variant="recruiter" />
     <motion.main
-      className="relative h-full w-full overflow-auto px-os-4 py-os-4 sm:px-os-6 sm:py-os-6"
+      className="relative z-10 h-full w-full overflow-auto px-os-4 py-os-4 sm:px-os-6 sm:py-os-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.34, 1.1, 0.64, 1] }}
     >
-      <Wallpaper className="absolute inset-0" variant="recruiter" />
       <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-os-4">
         <section className="glass-panel relative flex shrink-0 flex-col gap-os-4 p-os-6">
           <div className="absolute right-os-4 top-os-4">
@@ -252,7 +253,7 @@ export function RecruiterRoot() {
           <div className="flex min-h-0 flex-col gap-os-4">
             <section className="glass-panel flex min-h-0 flex-1 flex-col p-os-4">
               <SectionHeading eyebrow="Projects" title="Featured case studies" />
-              <div className="mt-os-3 flex flex-1 min-h-0 flex-col gap-os-3 overflow-hidden">
+              <div className="mt-os-3 flex flex-1 min-h-0 flex-col gap-os-3">
                 {projectsLoading && (
                   <p className="text-os-caption text-[color:var(--color-os-text-tertiary)]" aria-live="polite">
                     Loading featured projects…
@@ -383,6 +384,7 @@ export function RecruiterRoot() {
         </div>
       </div>
     </motion.main>
+    </div>
   );
 }
 

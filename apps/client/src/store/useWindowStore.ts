@@ -34,6 +34,8 @@ interface WindowStore {
   toggleFullscreen: (id: AppId) => void;
   moveWindow: (id: AppId, position: WindowPosition) => void;
   resizeWindow: (id: AppId, size: WindowSize) => void;
+  /** Pulls every non-fullscreen window back inside the given viewport bounds. */
+  clampWindows: (bounds: WindowSize) => void;
 }
 
 const DEFAULT_SIZE: WindowSize = { width: 720, height: 480 };
@@ -135,5 +137,31 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     set((state) => ({
       openWindows: state.openWindows.map((w) => (w.id === id ? { ...w, size } : w)),
     }));
+  },
+
+  clampWindows: (bounds) => {
+    set((state) => {
+      let changed = false;
+      const openWindows = state.openWindows.map((w) => {
+        if (w.isFullscreen) return w;
+        const width = Math.min(w.size.width, bounds.width);
+        const height = Math.min(w.size.height, bounds.height);
+        const x = Math.max(0, Math.min(w.position.x, bounds.width - width));
+        const y = Math.max(0, Math.min(w.position.y, bounds.height - height));
+        if (
+          width === w.size.width &&
+          height === w.size.height &&
+          x === w.position.x &&
+          y === w.position.y
+        ) {
+          return w;
+        }
+        changed = true;
+        return { ...w, size: { width, height }, position: { x, y } };
+      });
+      // Returning the same state object avoids a pointless re-render when
+      // nothing actually needed clamping.
+      return changed ? { openWindows } : state;
+    });
   },
 }));

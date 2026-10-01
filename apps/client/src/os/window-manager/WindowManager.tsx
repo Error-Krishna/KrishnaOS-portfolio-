@@ -37,7 +37,7 @@ function WindowFrame({ win, children }: WindowFrameProps) {
   if (isMobile) {
     return (
       <motion.section
-        className="glass-panel flex min-h-0 w-full flex-col overflow-hidden"
+        className="glass-window flex min-h-0 w-full flex-col overflow-hidden"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 12 }}
@@ -102,7 +102,7 @@ function WindowFrame({ win, children }: WindowFrameProps) {
       }}
     >
       <motion.div
-        className="glass-panel flex h-full w-full flex-col overflow-hidden"
+        className="glass-window flex h-full w-full flex-col overflow-hidden"
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.97 }}

@@ -12,6 +12,11 @@ import { useWindowStore } from '@/store/useWindowStore';
  * than hardcoding a list here — Spotlight and the guided tour read from the
  * same registry, so adding a new app anywhere means updating exactly one
  * file, not three.
+ *
+ * Window state is reflected on each icon: a solid dot means open, a dimmed
+ * dot means minimized (clicking restores it — `openWindow` on an existing
+ * window routes through `focusWindow`, which un-minimizes). Each button
+ * carries `data-dock-app` so focus can be returned here after a window closes.
  */
 export function Dock() {
   const openWindows = useWindowStore((s) => s.openWindows);
@@ -19,22 +24,31 @@ export function Dock() {
   const focusedWindowId = useWindowStore((s) => s.focusedWindowId);
   const isMobile = useIsMobile();
 
+  const focusRing =
+    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-os-accent)]';
+
   if (isMobile) {
     return (
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-40 px-os-3 pb-os-3">
+      <nav
+        aria-label="Applications"
+        className="pointer-events-none absolute bottom-0 left-0 right-0 z-40 px-os-3 pb-os-3"
+      >
         <div className="glass-bar pointer-events-auto flex gap-os-2 overflow-x-auto rounded-os-xl px-os-3 py-os-2">
           {APP_ORDER.map((appId) => {
             const app = APP_REGISTRY[appId];
-            const isOpen = openWindows.some((w) => w.id === appId);
+            const win = openWindows.find((w) => w.id === appId);
+            const isOpen = Boolean(win);
+            const isMinimized = Boolean(win?.isMinimized);
             const isFocused = focusedWindowId === appId;
 
             return (
               <button
                 key={appId}
                 type="button"
+                data-dock-app={appId}
                 onClick={() => openWindow(appId)}
-                aria-label={`Open ${app.title}`}
-                className="flex min-w-16 flex-col items-center gap-os-1 rounded-os-md px-os-2 py-os-2 text-center transition-colors hover:bg-[color:var(--color-os-glass-highlight)]"
+                aria-label={isMinimized ? `Restore ${app.title}` : `Open ${app.title}`}
+                className={`flex min-w-16 flex-col items-center gap-os-1 rounded-os-md px-os-2 py-os-2 text-center transition-colors hover:bg-[color:var(--color-os-glass-highlight)] ${focusRing}`}
               >
                 <span
                   className={`flex h-10 w-10 items-center justify-center rounded-os-md ${
@@ -47,8 +61,8 @@ export function Dock() {
                 </span>
                 <span className="text-[10px] text-[color:var(--color-os-text-secondary)]">{app.title}</span>
                 <span
-                  className={`h-1 w-1 rounded-full transition-opacity ${
-                    isOpen ? 'bg-[color:var(--color-os-text-secondary)] opacity-100' : 'opacity-0'
+                  className={`h-1 w-1 rounded-full bg-[color:var(--color-os-text-secondary)] transition-opacity ${
+                    !isOpen ? 'opacity-0' : isMinimized ? 'opacity-40' : 'opacity-100'
                   }`}
                   aria-hidden
                 />
@@ -56,32 +70,38 @@ export function Dock() {
             );
           })}
         </div>
-      </div>
+      </nav>
     );
   }
 
   return (
-    <div className="pointer-events-none absolute bottom-os-4 left-1/2 z-40 -translate-x-1/2">
+    <nav
+      aria-label="Applications"
+      className="pointer-events-none absolute bottom-os-4 left-1/2 z-40 -translate-x-1/2"
+    >
       <div className="glass-panel pointer-events-auto flex items-end gap-os-2 px-os-3 py-os-2">
         {APP_ORDER.map((appId) => {
           const app = APP_REGISTRY[appId];
-          const isOpen = openWindows.some((w) => w.id === appId);
+          const win = openWindows.find((w) => w.id === appId);
+          const isOpen = Boolean(win);
+          const isMinimized = Boolean(win?.isMinimized);
           const isFocused = focusedWindowId === appId;
 
           return (
             <motion.button
               key={appId}
               type="button"
+              data-dock-app={appId}
               onClick={() => openWindow(appId)}
-              aria-label={`Open ${app.title}`}
-              className="group relative flex flex-col items-center"
+              aria-label={isMinimized ? `Restore ${app.title}` : `Open ${app.title}`}
+              className={`group relative flex flex-col items-center rounded-os-md ${focusRing}`}
               whileHover={{ y: -8, scale: 1.15 }}
               whileTap={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              {/* Tooltip — appears on hover, matches macOS Dock label behavior */}
-              <span className="pointer-events-none absolute -top-9 rounded-os-sm bg-[color:var(--color-os-surface-elevated)] px-os-2 py-os-1 text-os-caption opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-                {app.title}
+              {/* Tooltip — appears on hover or keyboard focus, matches macOS Dock label behavior */}
+              <span className="pointer-events-none absolute -top-9 whitespace-nowrap rounded-os-sm bg-[color:var(--color-os-surface-elevated)] px-os-2 py-os-1 text-os-caption opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                {isMinimized ? `${app.title} (minimized)` : app.title}
               </span>
 
               <div
@@ -94,10 +114,11 @@ export function Dock() {
                 <AppGlyph appId={appId} className="h-6 w-6" />
               </div>
 
-              {/* Open indicator dot, matches macOS's "app is running" dock dot */}
+              {/* Indicator dot, matches macOS's "app is running" dock dot —
+                  dimmed while the window is minimized so it reads as "tucked away". */}
               <span
-                className={`mt-os-1 h-1 w-1 rounded-full transition-opacity ${
-                  isOpen ? 'bg-[color:var(--color-os-text-secondary)] opacity-100' : 'opacity-0'
+                className={`mt-os-1 h-1 w-1 rounded-full bg-[color:var(--color-os-text-secondary)] transition-opacity ${
+                  !isOpen ? 'opacity-0' : isMinimized ? 'opacity-40' : 'opacity-100'
                 }`}
                 aria-hidden
               />
@@ -105,6 +126,6 @@ export function Dock() {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
